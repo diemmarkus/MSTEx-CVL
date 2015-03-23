@@ -21,7 +21,7 @@
 
 
 //#include "opencv/cv.h"
-#include "DkBaseBerlinger.h"
+#include "DkBaseMS.h"
 #include "DkBase.h"
 #include "DkUtils.h"
 #include "opencv2/nonfree/nonfree.hpp"
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 	QCoreApplication::setApplicationName("DkSnippet");
 
 	try {
-		DkBaseBerlinger* b = new DkBaseBerlinger();
+		DkBaseMS* b = new DkBaseMS();
 
 		b->init();
 		b->preLoad();

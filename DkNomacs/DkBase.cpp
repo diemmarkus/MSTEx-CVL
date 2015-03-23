@@ -48,7 +48,7 @@ int DkBase::rectoVerso = BOTH; //BOTH ONLY_BACK
 int DkBase::mode = DK_NO_TRAIN;
 int DkBase::svmMode = DK_NO_SVM;
 int DkBase::rotMode = DK_COMBINED;
-int DkBase::classifierMode = DkClassifier::DK_UNKNOWN_CLASSIFIER;
+//int DkBase::classifierMode = DkClassifier::DK_UNKNOWN_CLASSIFIER;
 
 int DkBase::readMask = 1;
 
@@ -323,13 +323,6 @@ void DkBase::script(QFileInfo fileInfo) {
 		debugPath = cPath.toStdString();
 	}
 
-	DkLabelManager manager(filePath.toStdString(), DkLabelManager::gt_path);
-
-	if (manager.getGtLabelIdx() != -1 && (mode == DK_TRAIN_ML || mode == DK_TRAIN_ML_OBJ || mode == DK_TRAIN_ML_SEG || mode == DK_TRAIN_ALL) && DkBase::classifierMode == DkClassifier::DK_RANDOM_TREES_ONE_VS_ONE) {
-		mout << "SKIPPING: " << filePath.toStdString() << " reason: class known" << dkendl;
-	}
-	else {
-
 		int idx = loader->findFileIdx(QFileInfo(filePath, QString::fromStdString(userFilename)), files);
 		if (idx == -1) idx = 0;
 
@@ -409,7 +402,6 @@ void DkBase::script(QFileInfo fileInfo) {
 			//// we need to do this a bit complicated, because we do not want to load in a thread
 			//loader->loadFile(loader->getChangedFileInfo(1, true));
 		}
-	}
 	
 	delete loader;
 	delete maskLoader;
@@ -923,16 +915,6 @@ void DkBase::readConfigFile(std::string filename) {
 			else if (param == "DK_TRAIN_NEW_TWO_CLASSES") DkBase::svmMode = DK_TRAIN_NEW_TWO_CLASSES;
 			else if (param == "DK_TRAIN_NEW_THREE_CLASSES") DkBase::svmMode = DK_TRAIN_NEW_THREE_CLASSES;
 			else if (param == "DK_TRAIN_LIBSVM_TEXT") DkBase::svmMode = DK_TRAIN_LIBSVM_TEXT;
-			else DkUtils::printDebug(DK_WARNING, "[readConfigFile] I don't know: '%s'\n", param.c_str());
-		}
-		else if (cmd == "DkBase::classifierMode") {
-
-			printf(">> classifierMode = %s\n", param.c_str());
-
-			if (param == "DK_UNKNOWN_CLASSIFIER") DkBase::classifierMode = DkClassifier::DK_UNKNOWN_CLASSIFIER;
-			else if (param == "DK_RANDOM_TREES") DkBase::classifierMode = DkClassifier::DK_RANDOM_TREES;
-			else if (param == "DK_RANDOM_TREES_ONE_VS_ALL") DkBase::classifierMode = DkClassifier::DK_RANDOM_TREES_ONE_VS_ALL;
-			else if (param == "DK_RANDOM_TREES_ONE_VS_ONE") DkBase::classifierMode = DkClassifier::DK_RANDOM_TREES_ONE_VS_ONE;
 			else DkUtils::printDebug(DK_WARNING, "[readConfigFile] I don't know: '%s'\n", param.c_str());
 		}
 		else if (cmd == "DkBase::rotMode") {

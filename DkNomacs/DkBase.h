@@ -148,7 +148,7 @@ public:
 	static int svmMode;
 	static int rotMode;
 	static int readMask;
-	static int classifierMode;
+	//static int classifierMode;
 
 	static int compMode;
 	static bool show;

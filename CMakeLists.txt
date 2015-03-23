@@ -8,7 +8,7 @@
 # make install
 #
 #
-PROJECT(DkBerlinger)
+PROJECT(ViennaMS)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 if(COMMAND cmake_policy)
