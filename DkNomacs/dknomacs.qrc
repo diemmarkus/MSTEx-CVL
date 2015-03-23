@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/DkNomacs">
+        <file>dir.ico</file>
+        <file>dir-logo.png</file>
+    </qresource>
+</RCC>
