@@ -390,6 +390,16 @@ public:
 		return fName.substr(0, fName.find_last_of("."));
 	}
 
+	static std::string wstringToString(const std::wstring& wstr) {
+
+		return std::string(wstr.begin(), wstr.end());
+	}
+
+	static std::wstring stringToWstring(const std::string& str) {
+
+		return std::wstring(str.begin(), str.end());
+	}
+
 	/**
 	* Converts a number to a string.
 	* @throws an exception if number is not a number.

@@ -327,7 +327,8 @@ void DkBase::script(QFileInfo fileInfo) {
 		if (idx == -1) idx = 0;
 
 		// processing loop
-		for (; idx < files.size(); idx+=numSkipFiles) {
+		// uncomment files.size() if you want to process all files
+		for (; idx < 1/*files.size()*/; idx+=numSkipFiles) {
 
 			// current file
 			currentFile = files[idx];

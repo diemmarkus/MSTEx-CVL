@@ -4355,7 +4355,7 @@ public:
 
 
 #ifdef DK_SAVE_DEBUG
-	static void imwrite(std::string path, Mat img, bool norm = false) {
+	static bool imwrite(std::string path, Mat img, bool norm = false) {
 
 		
 		Mat img1C = (img.channels() > 1) ? img.reshape(1) : img;
@@ -4373,11 +4373,11 @@ public:
 			imgW *= 255.0f;
 		}
 
-		cv::imwrite(path, imgW);
+		return cv::imwrite(path, imgW);
 	}
 #else
 #pragma warning(disable: 4100)
-	static void imwrite(std::string path, Mat img, bool norm = false) {};
+	static void imwrite(std::string path, Mat img, bool norm = false) { return false; };
 #pragma warning(default: 4100)
 #endif
 

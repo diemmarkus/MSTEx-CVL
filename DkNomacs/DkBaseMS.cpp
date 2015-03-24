@@ -9,9 +9,15 @@
  ***************************************************/
 
 #include "DkBaseMS.h"
+
+#include "DkSegmentation.h"
+#include "DkMSModule.h"
+
 #include <iostream>
 #include <fstream>
+
 #include "DkCentralWidget.h"
+
 
 static int filecount = 1;
 
@@ -61,6 +67,47 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 	if (!getCvImages(imgFile, maskFile, img, mask)) {
 		wout << "Sorry, I cannot process empty images, skipping..." << dkendl;
 		return;
+	}
+
+	if (mask.empty()) {
+		mask = Mat(img.size(), CV_8UC1);
+		mask = 255;
+		mout << "empty mask" << dkendl;
+	}
+
+	std::string fname = "binar_r_" + imgFile->file().absoluteDir().dirName().toStdString() + ".png";
+
+	DkMSModule module(imgFile->file().absoluteDir().absolutePath().toStdWString());
+	module.load();
+	module.compute();
+
+	Mat segImg = module.getSegImg();
+	Mat mixedImg;
+
+	// mix with GT --------------------------------------------------------------------
+	if (!module.getGT().empty()) {
+		mixedImg = segImg;
+		mixedImg.convertTo(mixedImg, CV_32F, 0.2f/255.0f);
+
+		Mat gtImgF = module.getGT();
+		gtImgF.convertTo(gtImgF, CV_32F, 1.0f/255.0f);
+		DkIP::invertImg(gtImgF);
+		gtImgF *= 0.4f;
+
+		mixedImg += gtImgF;
+		DkUtils::getMatInfo(gtImgF, "gtImgF");
+		DkUtils::getMatInfo(mixedImg, "mixedImg");
+		mixedImg.convertTo(mixedImg, CV_8UC1, 255.0f);
+	}
+	// mix with GT --------------------------------------------------------------------
+
+	if (DkIP::imwrite(DkBase::debugPath + fname, segImg))
+		mout << fname << " written..." << dkendl;
+	if (!mixedImg.empty() && DkIP::imwrite(DkBase::debugPath + DkUtils::createFileName(fname, "-res"), mixedImg))
+		mout << DkUtils::createFileName(fname, "-res") << " written..."  << dkendl;
+
+	if (show) {
+		plot(img, segImg);
 	}
 
 }
