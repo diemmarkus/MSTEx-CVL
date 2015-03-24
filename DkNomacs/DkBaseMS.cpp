@@ -95,8 +95,6 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 		gtImgF *= 0.4f;
 
 		mixedImg += gtImgF;
-		DkUtils::getMatInfo(gtImgF, "gtImgF");
-		DkUtils::getMatInfo(mixedImg, "mixedImg");
 		mixedImg.convertTo(mixedImg, CV_8UC1, 255.0f);
 	}
 	// mix with GT --------------------------------------------------------------------
@@ -107,7 +105,7 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 		mout << DkUtils::createFileName(fname, "-res") << " written..."  << dkendl;
 
 	if (show) {
-		plot(img, segImg);
+		plot(img, module.getPredictedImage());
 	}
 
 }
