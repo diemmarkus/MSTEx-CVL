@@ -118,11 +118,11 @@ void DkMSModule::compute() {
 	segImg = segSuImg;
 
 	// grab cut
-	//DkGrabCut gb(imgs, pImg, segSuImg);
-	//gb.setReleaseDebug(DK_SAVE_IMGS);
-	//gb.compute();
+	DkGrabCut gb(imgs, pImg, segSuImg);
+	gb.setReleaseDebug(DK_SAVE_IMGS);
+	gb.compute();
 
-	//segImg = gb.getSegImg();
+	segImg = gb.getSegImg();
 
 
 	mout << "image predicted in: " << dt.getIvl() << dkendl;
