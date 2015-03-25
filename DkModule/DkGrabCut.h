@@ -16,7 +16,7 @@
 class DK_MODULE_API DkGrabCut : public DkModule {
 
 public:
-	DkGrabCut(const DkMSData& data, const cv::Mat& mask);
+	DkGrabCut(const DkMSData& data, const cv::Mat& pImg, const cv::Mat& segSuImg);
 
 	void compute();
 	cv::Mat getSegImg() const;
@@ -27,6 +27,7 @@ protected:
 	DkMSData data;
 	cv::Mat pImg;	// probability image
 	cv::Mat segImg;
+	cv::Mat segSuImg;
 
 	void checkInput() const {};		// dummy
 	cv::Mat createColImg(const DkMSData& data) const;

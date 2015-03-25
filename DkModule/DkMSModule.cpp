@@ -119,11 +119,15 @@ void DkMSModule::compute() {
 
 	// grab cut
 
-	DkGrabCut gb(imgs, pImg);
+	DkGrabCut gb(imgs, pImg, segSuImg);
 	gb.setReleaseDebug(DK_SAVE_IMGS);
 	gb.compute();
 
 	segImg = gb.getSegImg();
+
+	//DkSegmentationSu segF(segImg, mask);
+	//segF.compute();
+
 
 	mout << "image predicted in: " << dt.getIvl() << dkendl;
 	//DkUtils::getMatInfo(pImg, "pImg");

@@ -9,10 +9,11 @@
 
 #include "DkGrabCut.h"
 
-DkGrabCut::DkGrabCut(const DkMSData& data, const cv::Mat& mask) {
+DkGrabCut::DkGrabCut(const DkMSData& data, const cv::Mat& pImg, const cv::Mat& segSuImg) {
 
 	this->data = data;
-	this->pImg = mask;
+	this->pImg = pImg;
+	this->segSuImg = segSuImg;
 	className = "DkGrabCut";
 }
 
@@ -44,11 +45,10 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 	// create color image
 	std::vector<cv::Mat> cImgs;
 	cv::Mat pImg8U;
-	//cImgs.push_back(data.getVisChannel());
-	//cImgs.push_back(data.getBgChannel());
-	cImgs.push_back(data.getImages()[0]);
-	cImgs.push_back(data.getImages()[1]);
-	cImgs.push_back(data.getImages()[2]);
+	pImg.convertTo(pImg8U, CV_8UC1, 255.0f);
+	cImgs.push_back(pImg8U);
+	cImgs.push_back(data.getVisChannel());
+	cImgs.push_back(segSuImg);
 
 	cv::Mat cImg(cImgs[0].size(), CV_8UC3);
 	cv::merge(cImgs, cImg);
@@ -64,15 +64,16 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 	for (int rIdx = 0; rIdx < mask.rows; rIdx++) {
 
 		unsigned char* mPtr = mask.ptr<unsigned char>(rIdx);
+		const unsigned char* sPtr = segSuImg.ptr<unsigned char>(rIdx);
 		const float* pPtr = pImg.ptr<float>(rIdx);
 
 		for (int cIdx = 0; cIdx < mask.cols; cIdx++) {
 
-			if (pPtr[cIdx] > 0.95f)
+			if (pPtr[cIdx] > 0.95f && sPtr[cIdx] == 255)
 				mPtr[cIdx] = GC_FGD;
 			else if (pPtr[cIdx] > 0.5f)
 				mPtr[cIdx] = GC_PR_FGD;
-			else if (pPtr[cIdx] < 0.1f)
+			else if (pPtr[cIdx] < 0.1f && sPtr[cIdx] == 0)
 				mPtr[cIdx] = GC_BGD;
 			else
 				mPtr[cIdx] = GC_PR_BGD;
