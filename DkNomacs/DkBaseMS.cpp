@@ -107,12 +107,15 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 	if (!mixedImg.empty() && DkIP::imwrite(DkBase::debugPath + DkUtils::createFileName(fname, "-res"), mixedImg))
 		mout << DkUtils::createFileName(fname, "-res") << " written..."  << dkendl;
 
+	if (DkIP::imwrite(DkBase::debugPath + DkUtils::createFileName(fname, "-gray"), module.getPredictedImage(), true))
+		mout << DkUtils::createFileName(fname, "-gray") << " written..."  << dkendl;
+
 	if (show) {
 
 		cv::Mat vImg = module.getMSImages().getVisChannel();
 		cv::Mat vImgL = module.getMSImages().getBgChannel();
 
-		plot(vImg, segImg, true);
+		plot(module.getPredictedImage(), segImg, true);
 		//plot(img, module.getPredictedImage());
 	}
 

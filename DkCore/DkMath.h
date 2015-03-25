@@ -47,6 +47,12 @@ public:
 		return (val >> 1);
 	}
 
+	static unsigned char cropToUChar(float x) {
+
+		return (x < 0) ? 0 : (x > 255) ? 255 : (unsigned char)x;
+	}
+
+
 	/**
 	 * Computes a fast square root.
 	 * @param val the value for which the root will be computed.

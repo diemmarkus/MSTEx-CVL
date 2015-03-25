@@ -9,6 +9,7 @@
 #include "DkMSData.h"
 
 #include "DkTimer.h"
+#include "DkIP.h"
 
 DkMSData::DkMSData(const std::vector<cv::Mat>& data) {
 
@@ -141,6 +142,67 @@ cv::Mat DkMSData::removeBackground(const cv::Mat& img, const cv::Mat& bgImg) con
 
 	cv::normalize(rImg, rImg, 255.0f, 0.0f, NORM_MINMAX);
 	rImg.convertTo(rImg, CV_8UC1);
+
+	return rImg;
+}
+
+cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
+
+	cv::Mat signal = convertToSignal();
+	cv::Mat bwVec = imageToColumnVector(bwImg);
+
+	cv::Mat fgdSignal(cvRound(cv::sum(bwImg)[0]/255.0f), signal.cols, signal.depth());
+
+	const unsigned char* bwPtr = bwVec.ptr<unsigned char>();
+
+	int fIdx = 0;
+	for (int rIdx = 0; rIdx < signal.rows; rIdx++) {
+
+		if (bwPtr[rIdx] > 0) {
+			signal.row(rIdx).copyTo(fgdSignal.row(fIdx));
+			fIdx++;
+		}
+	}
+
+	fgdSignal.convertTo(fgdSignal, CV_32F);
+	cv::Mat lowerBound(1, signal.cols, signal.depth());
+	cv::Mat upperBound(1, signal.cols, signal.depth());
+	unsigned char* lPtr = lowerBound.ptr<unsigned char>();
+	unsigned char* uPtr = upperBound.ptr<unsigned char>();
+
+	float w = 1.5f;
+
+	for (int cIdx = 0; cIdx < fgdSignal.cols; cIdx++) {
+
+		float q25 = DkIP::statMomentMat(fgdSignal.col(cIdx), cv::Mat(), 0.25);
+		float q75 = DkIP::statMomentMat(fgdSignal.col(cIdx), cv::Mat(), 0.75);
+		
+		lPtr[cIdx] = DkMath::cropToUChar(q25 - w*(q75-q25));
+		uPtr[cIdx] = DkMath::cropToUChar(q75 + w*(q75-q25));
+	
+		mout << "lower bound: " << (int)lPtr[cIdx] << " upper bound: " << (int)uPtr[cIdx] << dkendl;
+	}
+
+	cv::Mat rImg = bwVec.clone();
+
+	for (int rIdx = 0; rIdx < signal.rows; rIdx++) {
+
+		if (bwPtr[rIdx] > 0) {
+
+			const unsigned char* sPtr = signal.ptr<unsigned char>(rIdx);
+			unsigned char* rPtr = rImg.ptr<unsigned char>(rIdx);
+			for (int cIdx = 0; cIdx < signal.cols; cIdx++) {
+
+				if (sPtr[cIdx] < lPtr[cIdx] || sPtr[cIdx] > uPtr[cIdx]) {
+					*rPtr = 100;
+					//mout << "sPtr is an outlier: " << (int)sPtr[cIdx] << dkendl;
+					break;
+				}
+			}
+		}
+	}
+
+	rImg = columnVectorToImage(rImg);
 
 	return rImg;
 }
