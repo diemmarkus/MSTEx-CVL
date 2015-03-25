@@ -97,6 +97,8 @@ void DkMSModule::compute() {
 
 	cv::Mat bImg = imgs.removeBackground(img, imgs.getBgChannel());
 
+	DkIP::imwrite("cleanedFgdImage.png", bImg);
+
 	// initial su segmentation
 	DkSegmentationSu segM(bImg, mask);
 	segM.compute();

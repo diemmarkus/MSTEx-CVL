@@ -210,7 +210,9 @@ cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 
 	rImg = columnVectorToImage(rImg);
 
-	cv::Mat rImgD = DkIP::dilateImage(rImg == 100, 5, DkIP::DK_DISK);
+	cv::Mat rImgD;
+	Mat se = DkIP::createStructuringElement(1, DkIP::DK_DISK);
+	dilate(rImg == 100, rImgD, se, Point(-1,-1), 1, BORDER_CONSTANT, 0);
 	//cv::Mat rImgE = DkIP::erodeImage(rImg == 255, 3, DkIP::DK_SQUARE);
 	cv::Mat rImgC = DkSegmentationSu::filterSegImgAuto(rImg > 0);
 	
@@ -227,6 +229,8 @@ cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 				rPtr[cIdx] = ignoreVal;
 		}
 	}
+
+	DkIP::imwrite("fgdImg.png", rImg);
 
 	mout << "foreground estimation takes " << dt << dkendl;
 

@@ -43,7 +43,7 @@ void DkSegmentationSu::init() {
 
 	className = "DkSegmentationSu";
 	medianFilter = true;
-	strokeW = 11;	// we take a fixed stroke width for the MSTEx challenge
+	strokeW = 7;	// we take a fixed stroke width for the MSTEx challenge
 }
 
 DkSegmentationSu::DkSegmentationSu() : DkSegmentationBase() {
