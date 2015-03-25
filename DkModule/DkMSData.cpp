@@ -62,13 +62,11 @@ cv::Mat DkMSData::convertToSignal() const {
 		return cv::Mat();
 
 	DkTimer dt;
-	cv::Mat signal;
+	cv::Mat signal(msImgs[0].rows * msImgs[0].cols, msImgs.size(), msImgs[0].depth(), cv::Scalar(42));
 
 	for (int rIdx = 0; rIdx < msImgs.size(); rIdx++) {
-		signal.push_back(imageToColumnVector(msImgs.at(rIdx)));
+		imageToColumnVector(msImgs.at(rIdx)).copyTo(signal.col(rIdx));
 	}
-
-	signal = signal.reshape(0, msImgs[0].rows * msImgs[0].cols);
 
 	mout << "signal converted in " << dt << dkendl;
 

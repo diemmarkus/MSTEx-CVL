@@ -9,6 +9,15 @@
 
 #include "DkRandomTrees.h"
 
+// DkRandomTrees --------------------------------------------------------------------
+std::string DkRTrees::toString() const {
+
+	std::string msg;
+	msg += "training error: " + DkUtils::stringify(oob_error, 10) + 
+		" trees/classes: [" + DkUtils::stringify(ntrees) + "|" + DkUtils::stringify(nclasses) + "]";
+
+	return msg;
+}
 
 DkRandomTrees::DkRandomTrees(const DkMSData& data, const cv::Mat&  suImg) {
 
@@ -33,19 +42,17 @@ void DkRandomTrees::compute() {
 
 cv::Mat DkRandomTrees::predictImage(const cv::Mat& data, const cv::Ptr<cv::StatModel>& classifier) const {
 
-	cv::Ptr<cv::RandomTrees> rt = classifier;
+	cv::Ptr<DkRTrees> rt = classifier;
 	cv::Mat probabilities(1, data.rows, CV_32FC1);
 	float* pPtr = probabilities.ptr<float>();
-
 
 	for (int rIdx = 0; rIdx < data.rows; rIdx++) {
 		cv::Mat feature = data.row(rIdx);
 		pPtr[rIdx] = rt->predict_prob(feature);
+		//moutc << feature << " p: " << pPtr[rIdx] << dkendl;
 	}
 
 	probabilities = imgs.columnVectorToImage(probabilities);
-
-	DkUtils::getMatInfo(probabilities, "probabilities");
 
 	return probabilities;
 }
@@ -57,11 +64,16 @@ cv::Ptr<cv::StatModel> DkRandomTrees::trainOnline(const cv::Mat& data, const cv:
 	cv::Mat tData = data.clone();
 	converData(tData, labels, nSamples);
 	
-	cv::Ptr<cv::RandomTrees> classifier = new cv::RandomTrees();
+	cv::Ptr<DkRTrees> classifier = new DkRTrees();
+
+	//for (int rIdx = 0; rIdx < tData.rows; rIdx++)
+	//	moutc << tData.row(rIdx) << " p: " << labels.row(rIdx) << dkendl;
 
 	CvRTParams p(7, 50, 0, false, 10, 0, false, 0, 80, 0.001f, CV_TERMCRIT_ITER+CV_TERMCRIT_EPS);
 	if (!classifier->train(tData, CV_ROW_SAMPLE, labels, cv::Mat(), cv::Mat(), cv::Mat(), cv::Mat(), p))
 		moutc << "[" << className << "] sorry, I could not train the random trees model..." << dkendl;
+	else
+		moutc << "[" << className << "] " << classifier->toString() << dkendl;
 
 	return classifier;
 }
@@ -89,7 +101,7 @@ void DkRandomTrees::converData(cv::Mat& trainData, cv::Mat& labels, int numPos) 
 	trainData = posSamples;
 	trainData.push_back(negSamples);
 
-	trainData.convertTo(trainData, CV_32FC1, 1.0f/255.0f);
+	//trainData.convertTo(trainData, CV_32FC1, 1.0f/255.0f);
 	
 	// generate GT
 	Mat posLabels(posSamples.rows, 1, CV_32SC1, Scalar(1));

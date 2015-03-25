@@ -18,6 +18,19 @@
 
 #include "ml.h"
 
+
+// ok: this is a bit frustrating
+// opencv has a bug so that we cannot query the training error
+// and all interesting params are protected
+// so this class is just designed to get a good statistics of the training
+class DkRTrees : public cv::RandomTrees {
+
+public:
+	virtual std::string toString() const;
+};
+
+
+
 class DK_MODULE_API DkRandomTrees : public DkModule {
 
 public:

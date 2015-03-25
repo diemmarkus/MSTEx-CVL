@@ -100,18 +100,20 @@ void DkMSModule::compute() {
 	segM.filterSegImg(20);
 
 	segSuImg = segM.getSegmented();
-	segImg = segSuImg;
+	//segImg = segSuImg;
 
 	mout << "image segmented in: " << dt << dkendl;
 
 	DkRandomTrees rt(imgs, segSuImg);
 	rt.compute();
-
 	pImg = rt.getPredictedImage();
 
-	mout << "image predicted in: " << dt.getIvl() << dkendl;
+	//DkIP::imwrite("pImg.png", pImg, true);
+	
+	segImg = pImg > 0.9;
 
-	DkUtils::getMatInfo(pImg, "pImg");
+	mout << "image predicted in: " << dt.getIvl() << dkendl;
+	//DkUtils::getMatInfo(pImg, "pImg");
 }
 
 DkMSData DkMSModule::getMSImages() const {
