@@ -93,6 +93,11 @@ void DkRandomTrees::converData(cv::Mat& trainData, cv::Mat& labels, int numPos) 
 			negSamples.push_back(trainData.row(lIdx));
 	}
 
+	if (posSamples.empty() || negSamples.empty()) {
+		woutc << "warning: too few data for training..." << dkendl;
+		return;
+	}
+
 	// downsample
 	cv::Size s(trainData.cols, cv::min(cv::min(numPos, posSamples.rows), negSamples.rows));
 	resize(posSamples, posSamples, s, 0, 0, CV_INTER_NN);

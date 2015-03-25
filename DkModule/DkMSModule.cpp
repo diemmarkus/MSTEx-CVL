@@ -96,25 +96,25 @@ void DkMSModule::compute() {
 
 	cv::Mat bImg = imgs.removeBackground(img, imgs.getBgChannel());
 
-	DkIP::imwrite("bImg.png", bImg);
-
 	// initial su segmentation
 	DkSegmentationSu segM(bImg, mask);
 	segM.compute();
 	segM.filterSegImg(20);
 
 	segSuImg = segM.getSegmented();
-	segSuImg = imgs.estimateFgd(segSuImg);
+	segImg = imgs.estimateFgd(segSuImg);
+
+	DkIP::imwrite("fgdImg.png", segImg);
 
 	mout << "image segmented in: " << dt << dkendl;
 
-	DkRandomTrees rt(imgs, segSuImg);
+	DkRandomTrees rt(imgs, segImg);
 	rt.compute();
 	pImg = rt.getPredictedImage();
 
-	DkIP::imwrite("pImg.png", pImg, true);
-	
-	segImg = pImg > 0.95;
+	segSuImg = segSuImg & pImg > 0.1;
+	segSuImg = segSuImg | pImg > 0.95;
+	segImg = segSuImg;
 
 	mout << "image predicted in: " << dt.getIvl() << dkendl;
 	//DkUtils::getMatInfo(pImg, "pImg");

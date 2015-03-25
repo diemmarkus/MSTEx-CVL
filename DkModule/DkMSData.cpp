@@ -148,6 +148,9 @@ cv::Mat DkMSData::removeBackground(const cv::Mat& img, const cv::Mat& bgImg) con
 
 cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 
+	DkTimer dt;
+
+	unsigned char ignoreVal = 100;
 	cv::Mat signal = convertToSignal();
 	cv::Mat bwVec = imageToColumnVector(bwImg);
 
@@ -172,6 +175,7 @@ cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 
 	float w = 1.5f;
 
+	// define outlier bound
 	for (int cIdx = 0; cIdx < fgdSignal.cols; cIdx++) {
 
 		float q25 = DkIP::statMomentMat(fgdSignal.col(cIdx), cv::Mat(), 0.25);
@@ -180,11 +184,12 @@ cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 		lPtr[cIdx] = DkMath::cropToUChar(q25 - w*(q75-q25));
 		uPtr[cIdx] = DkMath::cropToUChar(q75 + w*(q75-q25));
 	
-		mout << "lower bound: " << (int)lPtr[cIdx] << " upper bound: " << (int)uPtr[cIdx] << dkendl;
+		//mout << "lower bound: " << (int)lPtr[cIdx] << " upper bound: " << (int)uPtr[cIdx] << dkendl;
 	}
 
 	cv::Mat rImg = bwVec.clone();
 
+	// set outliers to ignoreVal
 	for (int rIdx = 0; rIdx < signal.rows; rIdx++) {
 
 		if (bwPtr[rIdx] > 0) {
@@ -194,7 +199,7 @@ cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 			for (int cIdx = 0; cIdx < signal.cols; cIdx++) {
 
 				if (sPtr[cIdx] < lPtr[cIdx] || sPtr[cIdx] > uPtr[cIdx]) {
-					*rPtr = 100;
+					*rPtr = ignoreVal;
 					//mout << "sPtr is an outlier: " << (int)sPtr[cIdx] << dkendl;
 					break;
 				}
@@ -203,6 +208,25 @@ cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 	}
 
 	rImg = columnVectorToImage(rImg);
+
+	cv::Mat rImgD = DkIP::dilateImage(rImg == 100, 5, DkIP::DK_DISK);
+	cv::Mat rImgE = DkIP::erodeImage(rImg == 255, 3, DkIP::DK_SQUARE);
+	
+	for (int rIdx = 0; rIdx < rImg.rows; rIdx++) {
+
+		unsigned char* rPtr = rImg.ptr<unsigned char>(rIdx);
+		const unsigned char* dPtr = rImgD.ptr<unsigned char>(rIdx);
+		const unsigned char* ePtr = rImgE.ptr<unsigned char>(rIdx);
+
+		for (int cIdx = 0; cIdx < rImg.cols; cIdx++) {
+
+			if (dPtr[cIdx] > 0 || rPtr[cIdx] == 255 && ePtr[cIdx] == 0)
+				rPtr[cIdx] = ignoreVal;
+		}
+
+	}
+
+	mout << "foreground estimation takes " << dt << dkendl;
 
 	return rImg;
 }
