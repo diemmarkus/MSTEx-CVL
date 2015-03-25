@@ -10,6 +10,7 @@
 
 #include "DkTimer.h"
 #include "DkIP.h"
+#include "DkSegmentation.h"
 
 DkMSData::DkMSData(const std::vector<cv::Mat>& data) {
 
@@ -210,20 +211,21 @@ cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 	rImg = columnVectorToImage(rImg);
 
 	cv::Mat rImgD = DkIP::dilateImage(rImg == 100, 5, DkIP::DK_DISK);
-	cv::Mat rImgE = DkIP::erodeImage(rImg == 255, 3, DkIP::DK_SQUARE);
+	//cv::Mat rImgE = DkIP::erodeImage(rImg == 255, 3, DkIP::DK_SQUARE);
+	cv::Mat rImgC = DkSegmentationSu::filterSegImgAuto(rImg > 0);
 	
 	for (int rIdx = 0; rIdx < rImg.rows; rIdx++) {
 
 		unsigned char* rPtr = rImg.ptr<unsigned char>(rIdx);
 		const unsigned char* dPtr = rImgD.ptr<unsigned char>(rIdx);
-		const unsigned char* ePtr = rImgE.ptr<unsigned char>(rIdx);
+		//const unsigned char* ePtr = rImgE.ptr<unsigned char>(rIdx);
+		const unsigned char* cPtr = rImgC.ptr<unsigned char>(rIdx);
 
 		for (int cIdx = 0; cIdx < rImg.cols; cIdx++) {
 
-			if (dPtr[cIdx] > 0 || rPtr[cIdx] == 255 && ePtr[cIdx] == 0)
+			if (dPtr[cIdx] > 0 || cPtr[cIdx] == 0 && rPtr[cIdx] == 255 /*|| rPtr[cIdx] == 255 && ePtr[cIdx] == 0*/)
 				rPtr[cIdx] = ignoreVal;
 		}
-
 	}
 
 	mout << "foreground estimation takes " << dt << dkendl;

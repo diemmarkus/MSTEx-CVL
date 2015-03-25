@@ -105,28 +105,22 @@ void DkMSModule::compute() {
 	segSuImg = segM.getSegmented();
 	segImg = imgs.estimateFgd(segSuImg);
 
-	DkIP::imwrite("fgdImg.png", segImg);
-
 	mout << "image segmented in: " << dt << dkendl;
 
 	DkRandomTrees rt(imgs, segImg);
 	rt.compute();
 	pImg = rt.getPredictedImage();
 
-	//segSuImg = segSuImg & pImg > 0.1;
-	//segSuImg = segSuImg | pImg > 0.95;
-	//segImg = segSuImg;
+	segSuImg = segSuImg & pImg > 0.1;
+	segSuImg = segSuImg | pImg > 0.95;
+	segImg = segSuImg;
 
 	// grab cut
+	//DkGrabCut gb(imgs, pImg, segSuImg);
+	//gb.setReleaseDebug(DK_SAVE_IMGS);
+	//gb.compute();
 
-	DkGrabCut gb(imgs, pImg, segSuImg);
-	gb.setReleaseDebug(DK_SAVE_IMGS);
-	gb.compute();
-
-	segImg = gb.getSegImg();
-
-	//DkSegmentationSu segF(segImg, mask);
-	//segF.compute();
+	//segImg = gb.getSegImg();
 
 
 	mout << "image predicted in: " << dt.getIvl() << dkendl;

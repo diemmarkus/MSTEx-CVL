@@ -134,7 +134,28 @@ void DkSegmentationSu::filterSegImg(int size) {
 
 	DkBlobs<DkAttr> segFilter(segImg);
 	segFilter.imgFilterArea(size);
+}
 
+cv::Mat DkSegmentationSu::filterSegImgAuto(const cv::Mat& segImg) {
+
+	cv::Mat segImgCleaned = segImg.clone();
+	DkBlobs<DkAttr> segFilter(segImgCleaned);
+	segFilter.calcArea();
+
+	DkIP::imwrite("sImg.png", segImg);
+
+	float sumArea = 0;
+
+	for (int idx = 0; idx < segFilter.getSize(); idx++) {
+		sumArea += abs(segFilter.getBlob(idx).getArea());
+	}
+
+	moutc << sumArea/segFilter.getSize()*0.5 << " fgd filter size" << dkendl;
+	moutc << sumArea << " sumArea" << dkendl;
+
+	segFilter.imgFilterArea(cvRound(sumArea/segFilter.getSize()*0.5));
+
+	return segImgCleaned;
 }
 
 void DkSegmentationSu::computeSu(Mat &resultSegImg) {

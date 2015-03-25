@@ -48,7 +48,7 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 	pImg.convertTo(pImg8U, CV_8UC1, 255.0f);
 	cImgs.push_back(pImg8U);
 	cImgs.push_back(data.getVisChannel());
-	cImgs.push_back(segSuImg);
+	cImgs.push_back(pImg8U);
 
 	cv::Mat cImg(cImgs[0].size(), CV_8UC3);
 	cv::merge(cImgs, cImg);

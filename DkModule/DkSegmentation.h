@@ -211,6 +211,7 @@ public:
 	 * @param size The maximal Size of a blob in pixel.
 	**/
 	void filterSegImg(int size);
+	static cv::Mat filterSegImgAuto(const cv::Mat& segImg);
 		/**
 	 * Converts all parameters and results to a string.
 	 * @return a string containing the values of the module's
