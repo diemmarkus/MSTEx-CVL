@@ -94,13 +94,17 @@ void DkMSModule::compute() {
 
 	DkTimer dt;
 
+	cv::Mat bImg = imgs.removeBackground(img, imgs.getBgChannel());
+
+	DkIP::imwrite("bImg.png", bImg);
+
 	// initial su segmentation
-	DkSegmentationSu segM(img, mask);
+	DkSegmentationSu segM(bImg, mask);
 	segM.compute();
 	segM.filterSegImg(20);
 
 	segSuImg = segM.getSegmented();
-	//segImg = segSuImg;
+	segImg = segSuImg;
 
 	mout << "image segmented in: " << dt << dkendl;
 

@@ -29,6 +29,7 @@ public:
 	cv::Mat columnVectorToImage(const cv::Mat& vec) const;
 
 	cv::Mat removeSensorNoise(const cv::Mat& img) const;
+	cv::Mat removeBackground(const cv::Mat& img, const cv::Mat& bgImg) const;
 
 protected:
 	std::vector<cv::Mat> msImgs;

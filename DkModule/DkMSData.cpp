@@ -78,7 +78,7 @@ cv::Mat DkMSData::convertToSignal() const {
 cv::Mat DkMSData::removeSensorNoise(const cv::Mat& img) const {
 
 	cv::Mat mImg;
-	cv::medianBlur(img, mImg, 5);
+	cv::medianBlur(img, mImg, 5);	// remove small speckles
 
 	double minV, maxV;
 	cv::minMaxLoc(mImg, &minV, &maxV);
@@ -86,8 +86,15 @@ cv::Mat DkMSData::removeSensorNoise(const cv::Mat& img) const {
 	unsigned char minVC = (unsigned char)minV;
 	unsigned char maxVC = (unsigned char)maxV;
 
+	// nothing to do?
+	if (minVC == 0 && maxVC == 255)
+		return img.clone();
+
 	cv::Mat resImg = img.clone();
 
+	unsigned char mVal = (unsigned char)cv::mean(img)[0];
+
+	// crop image values (outside the bounds)
 	for (int rIdx = 0; rIdx < resImg.rows; rIdx++) {
 
 		unsigned char* rPtr = resImg.ptr<unsigned char>(rIdx);
@@ -98,6 +105,7 @@ cv::Mat DkMSData::removeSensorNoise(const cv::Mat& img) const {
 				rPtr[cIdx] = maxVC;
 			else if (rPtr[cIdx] < minVC)
 				rPtr[cIdx] = minVC;
+
 		}
 	}
 	
@@ -106,7 +114,38 @@ cv::Mat DkMSData::removeSensorNoise(const cv::Mat& img) const {
 	return resImg;
 }
 
-Mat DkMSData::imageToColumnVector(const cv::Mat& img) const {
+cv::Mat DkMSData::removeBackground(const cv::Mat& img, const cv::Mat& bgImg) const {
+
+	if (img.size() != bgImg.size()) {
+		woutc << "[WARNING] in removeBackground - image size does not correspond..." << dkendl;
+		return img.clone();
+	}
+
+	cv::Mat rImg(img.size(), CV_16SC1);
+	//cv::absdiff(img, bgImg, rImg);
+	//rImg = 255-rImg;
+
+	// crop image values (outside the bounds)
+	for (int rIdx = 0; rIdx < rImg.rows; rIdx++) {
+
+		short* rPtr = rImg.ptr<short>(rIdx);
+		const unsigned char* iPtr = img.ptr<unsigned char>(rIdx);
+		const unsigned char* bPtr = bgImg.ptr<unsigned char>(rIdx);
+
+		for (int cIdx = 0; cIdx < rImg.cols; cIdx++) {
+
+			//rPtr[cIdx] = (iPtr[cIdx] > bPtr[cIdx]) ? iPtr[cIdx]-bPtr[cIdx] : iPtr[cIdx];
+			rPtr[cIdx] = iPtr[cIdx]-bPtr[cIdx];
+		}
+	}
+
+	cv::normalize(rImg, rImg, 255.0f, 0.0f, NORM_MINMAX);
+	rImg.convertTo(rImg, CV_8UC1);
+
+	return rImg;
+}
+
+cv::Mat DkMSData::imageToColumnVector(const cv::Mat& img) const {
 
 	if (img.empty())
 		return cv::Mat();

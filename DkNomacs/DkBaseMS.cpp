@@ -99,6 +99,9 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 	}
 	// mix with GT --------------------------------------------------------------------
 
+	//DkMSData m = module.getMSImages();
+	//cv::Mat cImg = m.removeBackground(m.getVisChannel(), m.getBgChannel());
+
 	if (DkIP::imwrite(DkBase::debugPath + fname, segImg))
 		mout << fname << " written..." << dkendl;
 	if (!mixedImg.empty() && DkIP::imwrite(DkBase::debugPath + DkUtils::createFileName(fname, "-res"), mixedImg))
@@ -107,9 +110,9 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 	if (show) {
 
 		cv::Mat vImg = module.getMSImages().getVisChannel();
-		cv::Mat vImgL = module.getMSImages().removeSensorNoise(vImg.clone());
+		cv::Mat vImgL = module.getMSImages().getBgChannel();
 
-		plot(vImg, vImgL, true);
+		plot(vImg, segImg, true);
 		//plot(img, module.getPredictedImage());
 	}
 
