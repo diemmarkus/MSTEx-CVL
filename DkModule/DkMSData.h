@@ -25,8 +25,10 @@ public:
 	cv::Mat getVisChannel() const;
 	cv::Mat getBgChannel() const;
 
-	Mat imageToColumnVector(const cv::Mat& img) const;
-	Mat columnVectorToImage(const cv::Mat& vec) const;
+	cv::Mat imageToColumnVector(const cv::Mat& img) const;
+	cv::Mat columnVectorToImage(const cv::Mat& vec) const;
+
+	cv::Mat removeSensorNoise(const cv::Mat& img) const;
 
 protected:
 	std::vector<cv::Mat> msImgs;

@@ -23,6 +23,8 @@ void DkMSData::fixInput(std::vector<cv::Mat>& imgs) const {
 		if (img.channels() > 1)
 			cv::cvtColor(img, img, CV_RGB2GRAY);
 
+		img = removeSensorNoise(img);
+
 		//if (img.depth() != CV_32F)
 		//	img.convertTo(img, CV_32F, 1.0f/255.0f);
 	}
@@ -62,7 +64,7 @@ cv::Mat DkMSData::convertToSignal() const {
 		return cv::Mat();
 
 	DkTimer dt;
-	cv::Mat signal(msImgs[0].rows * msImgs[0].cols, msImgs.size(), msImgs[0].depth(), cv::Scalar(42));
+	cv::Mat signal(msImgs[0].rows * msImgs[0].cols, (int)msImgs.size(), msImgs[0].depth(), cv::Scalar(42));
 
 	for (int rIdx = 0; rIdx < msImgs.size(); rIdx++) {
 		imageToColumnVector(msImgs.at(rIdx)).copyTo(signal.col(rIdx));
@@ -71,6 +73,37 @@ cv::Mat DkMSData::convertToSignal() const {
 	mout << "signal converted in " << dt << dkendl;
 
 	return signal;
+}
+
+cv::Mat DkMSData::removeSensorNoise(const cv::Mat& img) const {
+
+	cv::Mat mImg;
+	cv::medianBlur(img, mImg, 5);
+
+	double minV, maxV;
+	cv::minMaxLoc(mImg, &minV, &maxV);
+
+	unsigned char minVC = (unsigned char)minV;
+	unsigned char maxVC = (unsigned char)maxV;
+
+	cv::Mat resImg = img.clone();
+
+	for (int rIdx = 0; rIdx < resImg.rows; rIdx++) {
+
+		unsigned char* rPtr = resImg.ptr<unsigned char>(rIdx);
+
+		for (int cIdx = 0; cIdx < resImg.cols; cIdx++) {
+
+			if (rPtr[cIdx] > maxVC)
+				rPtr[cIdx] = maxVC;
+			else if (rPtr[cIdx] < minVC)
+				rPtr[cIdx] = minVC;
+		}
+	}
+	
+	cv::normalize(resImg, resImg, 255.0f, 0.0f, NORM_MINMAX);
+
+	return resImg;
 }
 
 Mat DkMSData::imageToColumnVector(const cv::Mat& img) const {

@@ -69,7 +69,7 @@ cv::Ptr<cv::StatModel> DkRandomTrees::trainOnline(const cv::Mat& data, const cv:
 	//for (int rIdx = 0; rIdx < tData.rows; rIdx++)
 	//	moutc << tData.row(rIdx) << " p: " << labels.row(rIdx) << dkendl;
 
-	CvRTParams p(7, 50, 0, false, 10, 0, false, 0, 80, 0.001f, CV_TERMCRIT_ITER+CV_TERMCRIT_EPS);
+	CvRTParams p(7, 50, 0, false, 10, 0, false, 0, 80, 0.01f, CV_TERMCRIT_ITER+CV_TERMCRIT_EPS);
 	if (!classifier->train(tData, CV_ROW_SAMPLE, labels, cv::Mat(), cv::Mat(), cv::Mat(), cv::Mat(), p))
 		moutc << "[" << className << "] sorry, I could not train the random trees model..." << dkendl;
 	else
