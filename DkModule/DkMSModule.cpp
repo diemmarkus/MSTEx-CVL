@@ -12,6 +12,7 @@
 #include "DkTimer.h"
 #include "DkSegmentation.h"
 #include "DkRandomTrees.h"
+#include "DkGrabCut.h"
 
 //#include <winsock2.h>	// needed since libraw 0.16
 
@@ -112,9 +113,17 @@ void DkMSModule::compute() {
 	rt.compute();
 	pImg = rt.getPredictedImage();
 
-	segSuImg = segSuImg & pImg > 0.1;
-	segSuImg = segSuImg | pImg > 0.95;
-	segImg = segSuImg;
+	//segSuImg = segSuImg & pImg > 0.1;
+	//segSuImg = segSuImg | pImg > 0.95;
+	//segImg = segSuImg;
+
+	// grab cut
+
+	DkGrabCut gb(imgs, pImg);
+	gb.setReleaseDebug(DK_SAVE_IMGS);
+	gb.compute();
+
+	segImg = gb.getSegImg();
 
 	mout << "image predicted in: " << dt.getIvl() << dkendl;
 	//DkUtils::getMatInfo(pImg, "pImg");
