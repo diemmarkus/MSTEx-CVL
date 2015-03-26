@@ -105,11 +105,11 @@ void DkMSModule::compute() {
 	segM.filterSegImg(20);
 
 	segSuImg = segM.getSegmented();
-	segImg = imgs.estimateFgd(segSuImg);
+	cv::Mat fgdImg = imgs.estimateFgd(segSuImg);
 
 	mout << "image segmented in: " << dt << dkendl;
 
-	DkRandomTrees rt(imgs, segImg);
+	DkRandomTrees rt(imgs, fgdImg);
 	rt.compute();
 	pImg = rt.getPredictedImage();
 
@@ -118,7 +118,7 @@ void DkMSModule::compute() {
 	segImg = segSuImg;
 
 	// grab cut
-	DkGrabCut gb(imgs, pImg, segSuImg);
+	DkGrabCut gb(imgs, pImg, fgdImg);
 	gb.setReleaseDebug(DK_SAVE_IMGS);
 	gb.compute();
 
