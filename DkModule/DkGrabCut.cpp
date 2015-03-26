@@ -35,62 +35,23 @@ void DkGrabCut::compute() {
 	cv::Mat bgdModel;
 	cv::Rect r(cv::Point(0,0), pImg.size());
 	
-	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 5, GC_INIT_WITH_MASK);
+	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 10, GC_INIT_WITH_MASK);
 
+	if (releaseDebug == DK_SAVE_IMGS)
+		DkIP::imwrite(className + DkUtils::stringify(__LINE__) + ".png", mask, true);
 
-	//// TODO: 
-	//// the idea is to remove growing potential foreground elements
-	//// and then iteratively perform grabcut
-	//for (int idx = 0; idx < 10; idx++) {
+	mask = maskToBwImg(mask);
 
+	for (int idx = 0; idx < 8; idx++) {
+		cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
+		cv::erode(mask, mask, element);
+		//cv::dilate(mask, mask, element);
+	}
 
-	//	cv::Mat segImgCleaned = mask == GC_FGD | mask == GC_PR_FGD;
-	//	DkBlobs<DkAttr> segFilter(segImgCleaned);
-	//	segFilter.calcArea();
+	DkIP::mulMask(pImg, mask == 0);
+	mask = createMask(pImg);
 
-	//	std::list<float> areas;
-
-	//	for (int i = 0; i < segFilter.getSize(); i++) {
-	//		areas.push_back((float)abs(segFilter.getBlob(i).getArea()));
-	//	}
-
-	//	double q25 = DkMath::statMoment<float>(&areas, .25f);
-	//	double q75 = DkMath::statMoment<float>(&areas, .75f);
-	//	double ob = q75 + 1.5*(q75-q25);
-
-	//	mout << "max area: " << ob << " q25: " << q25 << " q75: " << q75 << dkendl;
-	//	
-	//	segImgCleaned = mask == GC_PR_FGD;
-	//	cv::imwrite("imgBeforeCleaning.png", segImgCleaned);
-
-	//	DkBlobs<DkAttr> sF(segImgCleaned);
-	//	segFilter.imgFilterArea(0, cvRound(ob));
-
-	//	cv::imwrite("imgCleaned.png", segImgCleaned);
-
-	//	bool done = true;
-
-	//	for (int rIdx = 0; rIdx < mask.rows; rIdx++) {
-
-	//		const unsigned char* sPtr = segImgCleaned.ptr<unsigned char>(rIdx);
-	//		unsigned char* mPtr = mask.ptr<unsigned char>(rIdx);
-
-	//		for (int cIdx = 0; cIdx < mask.cols; cIdx++) {
-	//			
-	//			if (mPtr[cIdx] == GC_PR_FGD && sPtr[cIdx] == 0) {
-	//				mPtr[cIdx] = GC_PR_BGD;
-	//				done = false;
-	//			}
-	//		}
-	//	}
-
-	//	if (done)
-	//		break;
-
-	//	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 5, GC_EVAL);
-
-	//	mout << "iter: " << idx << dkendl;
-	//}
+	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 10, GC_INIT_WITH_MASK);
 
 	if (releaseDebug == DK_SAVE_IMGS)
 		DkIP::imwrite(className + DkUtils::stringify(__LINE__) + ".png", mask, true);
@@ -120,15 +81,14 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 	// create the mask
 	cv::Mat mask(pImg.size(), CV_8UC1);
 
-	DkIP::imwrite("fgdGrabCut.png", segSuImg);
-	cv::Mat segSuSkel = DkIP::skeleton(segSuImg == 255);
-	DkIP::imwrite("fgdGrabCutSkel.png", segSuSkel);
-
+	//DkIP::imwrite("fgdGrabCut.png", segSuImg);
+	//cv::Mat segSuSkel = DkIP::skeleton(segSuImg == 255);
+	//DkIP::imwrite("fgdGrabCutSkel.png", segSuSkel);
 
 	for (int rIdx = 0; rIdx < mask.rows; rIdx++) {
 
 		unsigned char* mPtr = mask.ptr<unsigned char>(rIdx);
-		const unsigned char* sPtr = segSuSkel.ptr<unsigned char>(rIdx);
+		const unsigned char* sPtr = segSuImg.ptr<unsigned char>(rIdx);
 		const float* pPtr = pImg.ptr<float>(rIdx);
 
 		for (int cIdx = 0; cIdx < mask.cols; cIdx++) {
