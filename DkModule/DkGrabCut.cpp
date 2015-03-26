@@ -122,14 +122,49 @@ bool DkGrabCut::refineMask(const cv::Mat& maskImg, cv::Mat& pImg) const {
 }
 
 cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
+	
+	cv::Mat signal = data.convertToSignal();
+	cv::Mat meanImg(signal.rows, 1, CV_8UC1);
+	cv::Mat stdImg(signal.rows, 1, CV_8UC1);
+
+	unsigned char* mPtr = meanImg.ptr<unsigned char>();
+	unsigned char* sPtr = stdImg.ptr<unsigned char>();
+
+	for (int rIdx = 0; rIdx < signal.rows; rIdx++) {
+
+		double ms = 0;
+		double ss = 0;
+		const unsigned char* sigPtr = signal.ptr<unsigned char>(rIdx);
+
+		for (int cIdx = 0; cIdx < signal.cols; cIdx++) {
+
+			ms += (double)sigPtr[cIdx];
+			ss += (double)sigPtr[cIdx]*(double)sigPtr[cIdx];
+		}
+
+		double meanV = ms/signal.cols;
+		double stdV = sqrt(ss/signal.cols - (meanV*meanV));
+
+		mPtr[rIdx] = DkMath::cropToUChar(meanV);
+		sPtr[rIdx] = DkMath::cropToUChar(stdV);
+	}
+
+	meanImg = data.columnVectorToImage(meanImg);
+	stdImg = data.columnVectorToImage(stdImg);
+
+	cv::normalize(meanImg, meanImg, 255, 0, NORM_MINMAX);
+	cv::normalize(stdImg, stdImg, 255, 0, NORM_MINMAX);
+
+	DkUtils::getMatInfo(meanImg, "meanImg");
+	DkUtils::getMatInfo(stdImg, "stdImg");
 
 	// create color image
 	std::vector<cv::Mat> cImgs;
 	cv::Mat pImg8U;
 	pImg.convertTo(pImg8U, CV_8UC1, 255.0f);
 	cImgs.push_back(255-pImg8U);
-	cImgs.push_back(data.removeBackground(data.getVisChannel(), data.getBgChannel()));
-	cImgs.push_back(data.getBgChannel());
+	cImgs.push_back(meanImg);
+	cImgs.push_back(stdImg);
 
 	cv::Mat cImg(cImgs[0].size(), CV_8UC3);
 	cv::merge(cImgs, cImg);
@@ -162,7 +197,7 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 				mPtr[cIdx] = GC_PR_FGD;
 			else if (pPtr[cIdx] < 0.4f)
 				mPtr[cIdx] = GC_PR_BGD;
-			else if (sPtr[cIdx] == 0)	// fallback to foreground
+			else if (sPtr[cIdx] == 0)	// fallback to su
 				mPtr[cIdx] = GC_BGD;
 			else if (sPtr[cIdx] == 255)
 				mPtr[cIdx] = GC_PR_FGD;
