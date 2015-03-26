@@ -165,7 +165,7 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 			else if (sPtr[cIdx] == 0)	// fallback to foreground
 				mPtr[cIdx] = GC_BGD;
 			else if (sPtr[cIdx] == 255)
-				mPtr[cIdx] = GC_FGD;
+				mPtr[cIdx] = GC_PR_FGD;
 			else
 				mPtr[cIdx] = GC_PR_FGD;
 

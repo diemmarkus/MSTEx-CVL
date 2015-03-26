@@ -108,7 +108,7 @@ void DkMSModule::compute() {
 
 	mout << "image segmented in: " << dt << dkendl;
 
-	DkRandomTrees rt(imgs, fgdImg);
+	DkRandomTrees rt(imgs, segSuImg);
 	rt.compute();
 	pImg = rt.getPredictedImage();
 
