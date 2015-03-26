@@ -90,10 +90,9 @@ void DkMSModule::load() {
 
 void DkMSModule::compute() {
 
+	DkTimer dt;
 	cv::Mat img = imgs.getVisChannel();
 	cv::Mat mask(img.size(), CV_8UC1, cv::Scalar(255));
-
-	DkTimer dt;
 
 	cv::Mat bImg = imgs.removeBackground(img, imgs.getBgChannel());
 
@@ -119,14 +118,13 @@ void DkMSModule::compute() {
 
 	// grab cut
 	DkGrabCut gb(imgs, pImg, fgdImg);
-	gb.setReleaseDebug(DK_SAVE_IMGS);
+	//gb.setReleaseDebug(DK_SAVE_IMGS);
 	gb.compute();
 
 	segImg = gb.getSegImg();
 
-
-	mout << "image predicted in: " << dt.getIvl() << dkendl;
 	//DkUtils::getMatInfo(pImg, "pImg");
+	mout << "[DkMSModule] computed in " << dt << dkendl;
 }
 
 DkMSData DkMSModule::getMSImages() const {

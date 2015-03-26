@@ -33,4 +33,5 @@ protected:
 	cv::Mat createColImg(const DkMSData& data) const;
 	cv::Mat createMask(const cv::Mat& pImg) const;
 	cv::Mat maskToBwImg(const cv::Mat& mask) const;
+	bool refineMask(const cv::Mat& mask, cv::Mat& pImg) const;
 };

@@ -11,6 +11,7 @@
 
 #include "DkMath.h"
 #include "DkBlobs.h"
+#include "DkTimer.h"
 
 DkGrabCut::DkGrabCut(const DkMSData& data, const cv::Mat& pImg, const cv::Mat& segSuImg) {
 
@@ -22,6 +23,7 @@ DkGrabCut::DkGrabCut(const DkMSData& data, const cv::Mat& pImg, const cv::Mat& s
 
 void DkGrabCut::compute() {
 
+	DkTimer dt;
 	cv::Mat cImg = createColImg(data);
 	cv::Mat mask = createMask(pImg);
 
@@ -35,29 +37,67 @@ void DkGrabCut::compute() {
 	cv::Mat bgdModel;
 	cv::Rect r(cv::Point(0,0), pImg.size());
 	
-	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 10, GC_INIT_WITH_MASK);
+	DkTimer dtg;
+	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 5, GC_INIT_WITH_MASK);
+	mout << "grab cut takes: " << dtg << dkendl;
 
 	if (releaseDebug == DK_SAVE_IMGS)
 		DkIP::imwrite(className + DkUtils::stringify(__LINE__) + ".png", mask, true);
 
-	mask = maskToBwImg(mask);
 
-	for (int idx = 0; idx < 8; idx++) {
-		cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
-		cv::erode(mask, mask, element);
-		//cv::dilate(mask, mask, element);
+	for (int idx = 0; idx < 100; idx++) {
+
+		cv::Mat bwMask = maskToBwImg(mask);
+
+		if (!refineMask(bwMask, pImg)) {
+			mout << "optimum reached after " << idx << " iterations" << dkendl;
+			break;
+		}
+		
+		mask = createMask(pImg);
+		cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 5, GC_EVAL);
+	
+		if (releaseDebug == DK_SAVE_IMGS)
+			DkIP::imwrite(className + DkUtils::stringify(__LINE__) + "-" + DkUtils::stringify(idx) + ".png", mask, true);
+
+		mout << "iterating..." << dkendl;
 	}
-
-	DkIP::mulMask(pImg, mask == 0);
-	mask = createMask(pImg);
-
-	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 10, GC_INIT_WITH_MASK);
-
-	if (releaseDebug == DK_SAVE_IMGS)
-		DkIP::imwrite(className + DkUtils::stringify(__LINE__) + ".png", mask, true);
 
 	segImg = maskToBwImg(mask);
 
+	mout << "[" << className << "] computed in " << dt << dkendl;
+}
+
+bool DkGrabCut::refineMask(const cv::Mat& mask, cv::Mat& pImg) const {
+
+	DkTimer dt;
+
+	DkIP::imwrite("mask.png", mask);
+
+	for (int idx = 0; idx < 100; idx++) {
+		cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
+		cv::erode(mask, mask, element);
+		//cv::dilate(mask, mask, element);
+
+		if (!cv::sum(mask == 255)[0]) {
+			moutc << "image empty after " << idx << " iterations" << dkendl;
+			return false;
+		}
+
+		if (!cv::sum(mask & segSuImg)[0]) {
+			moutc << "non-overlapping reached after " << idx << " iterations" << dkendl;
+			break;
+		}
+	}
+
+	if (!cv::sum(mask == 255)[0])
+		return false;
+
+	DkIP::mulMask(pImg, mask == 0);	// remove eroded image from pImg
+
+	moutc << "mask refined in " << dt << dkendl;
+
+	return true;
 }
 
 cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
