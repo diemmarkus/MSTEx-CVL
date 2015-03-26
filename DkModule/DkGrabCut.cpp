@@ -38,7 +38,7 @@ void DkGrabCut::compute() {
 	cv::Rect r(cv::Point(0,0), pImg.size());
 	
 	DkTimer dtg;
-	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 5, GC_INIT_WITH_MASK);
+	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 1, GC_INIT_WITH_MASK);
 	mout << "grab cut takes: " << dtg << dkendl;
 
 	if (releaseDebug == DK_SAVE_IMGS)
@@ -55,7 +55,7 @@ void DkGrabCut::compute() {
 		}
 		
 		mask = createMask(pImg);
-		cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 5, GC_EVAL);
+		cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 1, GC_EVAL);
 	
 		if (releaseDebug == DK_SAVE_IMGS)
 			DkIP::imwrite(className + DkUtils::stringify(__LINE__) + "-" + DkUtils::stringify(idx) + ".png", mask, true);
@@ -63,16 +63,26 @@ void DkGrabCut::compute() {
 		mout << "iterating..." << dkendl;
 	}
 
+	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 4, GC_EVAL);
+
+	if (releaseDebug == DK_SAVE_IMGS)
+		DkIP::imwrite(className + DkUtils::stringify(__LINE__) + "-final.png", mask, true);
+
 	segImg = maskToBwImg(mask);
 
 	mout << "[" << className << "] computed in " << dt << dkendl;
 }
 
-bool DkGrabCut::refineMask(const cv::Mat& mask, cv::Mat& pImg) const {
+bool DkGrabCut::refineMask(const cv::Mat& maskImg, cv::Mat& pImg) const {
 
 	DkTimer dt;
 
-	DkIP::imwrite("mask.png", mask);
+	cv::Mat mask = maskImg.clone();
+	cv::Mat segImg = segSuImg.clone();
+	segImg = segImg > 0;
+	segImg.convertTo(segImg, CV_32F, 1.0f/255.0f);
+
+	double nPos = cv::sum(segImg)[0];
 
 	for (int idx = 0; idx < 100; idx++) {
 		cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
@@ -84,17 +94,28 @@ bool DkGrabCut::refineMask(const cv::Mat& mask, cv::Mat& pImg) const {
 			return false;
 		}
 
-		if (!cv::sum(mask & segSuImg)[0]) {
+		cv::Mat chkImg = mask.clone();
+		chkImg.convertTo(chkImg, CV_32F, 1.0f/255.0f);
+		chkImg = segImg+chkImg;
+
+		//DkIP::imwrite("chkImg" + DkUtils::stringify(idx) + ".png", chkImg, true);
+
+		if ((cv::sum(chkImg == 2.0f)[0]/2.0f)/nPos < 5.0) {
 			moutc << "non-overlapping reached after " << idx << " iterations" << dkendl;
 			break;
 		}
+		else
+			moutc << "too many overlaps: " << ((cv::sum(chkImg == 2.0f)[0]/2.0f)/nPos) << dkendl;
 	}
 
-	if (!cv::sum(mask == 255)[0])
+	mask = mask > 0 & segSuImg == 0;
+	DkIP::invertImg(mask);
+
+	if (!cv::sum(mask == 0)[0])
 		return false;
-
-	DkIP::mulMask(pImg, mask == 0);	// remove eroded image from pImg
-
+	
+	cv::Mat chkImg = pImg.clone();
+	DkIP::mulMask(pImg, mask);	// remove eroded image from pImg
 	moutc << "mask refined in " << dt << dkendl;
 
 	return true;
