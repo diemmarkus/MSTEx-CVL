@@ -316,6 +316,32 @@ public:
 		return dImg;
 	}
 
+	static Mat skeleton(const Mat& bwImg) {
+
+
+		cv::Mat img = bwImg.clone();
+		cv::Mat skel(bwImg.size(), CV_8UC1, cv::Scalar(0));
+		cv::Mat temp(bwImg.size(), CV_8UC1);
+
+		cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
+
+		bool done;
+		do
+		{
+			cv::morphologyEx(img, temp, cv::MORPH_OPEN, element);
+			cv::bitwise_not(temp, temp);
+			cv::bitwise_and(img, temp, temp);
+			cv::bitwise_or(skel, temp, skel);
+			cv::erode(img, img, element);
+
+			double max;
+			cv::minMaxLoc(img, 0, &max);
+			done = (max == 0);
+		} while (!done);
+
+		return skel;
+	}
+
 	template<typename num>
 	static Mat dilateLabelImageFast(const Mat& src) {
 

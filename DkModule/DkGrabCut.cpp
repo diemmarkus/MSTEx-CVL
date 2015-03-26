@@ -120,15 +120,19 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 	// create the mask
 	cv::Mat mask(pImg.size(), CV_8UC1);
 
+	DkIP::imwrite("fgdGrabCut.png", segSuImg);
+	cv::Mat segSuSkel = DkIP::skeleton(segSuImg == 255);
+	DkIP::imwrite("fgdGrabCutSkel.png", segSuSkel);
+
+
 	for (int rIdx = 0; rIdx < mask.rows; rIdx++) {
 
 		unsigned char* mPtr = mask.ptr<unsigned char>(rIdx);
-		const unsigned char* sPtr = segSuImg.ptr<unsigned char>(rIdx);
+		const unsigned char* sPtr = segSuSkel.ptr<unsigned char>(rIdx);
 		const float* pPtr = pImg.ptr<float>(rIdx);
 
 		for (int cIdx = 0; cIdx < mask.cols; cIdx++) {
 
-			// TODO!!!!!
 			if (pPtr[cIdx] > 0.95f && sPtr[cIdx] == 255)
 				mPtr[cIdx] = GC_FGD;
 			else if (pPtr[cIdx] < 0.1f && sPtr[cIdx] == 0)
