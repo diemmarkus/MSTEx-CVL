@@ -122,11 +122,11 @@ void DkMSModule::compute() {
 	//segImg = segSuImg;
 
 	//// grab cut
-	//DkGrabCut gb(imgs, pImg, fgdImg);
-	//gb.setReleaseDebug(DK_SAVE_IMGS);
-	//gb.compute();
+	DkGrabCut gb(imgs, pImg, fgdImg);
+	gb.setReleaseDebug(DK_SAVE_IMGS);
+	gb.compute();
 
-	//segImg = gb.getSegImg();
+	segImg = gb.getSegImg();
 
 	//DkUtils::getMatInfo(pImg, "pImg");
 	mout << "[DkMSModule] computed in " << dt << dkendl;

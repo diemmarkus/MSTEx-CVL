@@ -162,7 +162,8 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 	std::vector<cv::Mat> cImgs;
 	cv::Mat pImg8U;
 	pImg.convertTo(pImg8U, CV_8UC1, 255.0f);
-	cImgs.push_back(255-pImg8U);
+	//cImgs.push_back(255-pImg8U);
+	cImgs.push_back(data.getVisChannel());
 	cImgs.push_back(meanImg);
 	cImgs.push_back(stdImg);
 
@@ -189,13 +190,13 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 
 		for (int cIdx = 0; cIdx < mask.cols; cIdx++) {
 
-			if (pPtr[cIdx] > 0.95f && sPtr[cIdx] == 255)
+			if (pPtr[cIdx] > 0.3f && sPtr[cIdx] == 255)
 				mPtr[cIdx] = GC_FGD;
-			else if (pPtr[cIdx] < 0.1f && sPtr[cIdx] == 0)
+			else if (pPtr[cIdx] == 0 && sPtr[cIdx] == 0)
 				mPtr[cIdx] = GC_BGD;
-			else if (pPtr[cIdx] > 0.8f)
+			else if (pPtr[cIdx] > 0.1f)
 				mPtr[cIdx] = GC_PR_FGD;
-			else if (pPtr[cIdx] < 0.4f)
+			else if (pPtr[cIdx] > 0.0f)
 				mPtr[cIdx] = GC_PR_BGD;
 			else if (sPtr[cIdx] == 0)	// fallback to su
 				mPtr[cIdx] = GC_BGD;
