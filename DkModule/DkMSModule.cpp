@@ -111,9 +111,9 @@ void DkMSModule::compute() {
 
 	//DkRandomTrees rt(imgs, segSuImg);
 	//rt.compute();
-	//pImg = rt.getPredictedImage();
+	//cv::Mat pImgRT = rt.getPredictedImage();
 
-	DkAce ace(imgs, segSuImg);
+	DkAce ace(imgs, fgdImg);
 	ace.compute();
 	pImg = ace.getPredictedImage();
 
@@ -122,11 +122,14 @@ void DkMSModule::compute() {
 	//segImg = segSuImg;
 
 	//// grab cut
-	DkGrabCut gb(imgs, pImg, fgdImg);
+	DkGrabCut gb(imgs, pImg, segSuImg);
 	gb.setReleaseDebug(DK_SAVE_IMGS);
+	//gb.setPChannel(pImgRT);
 	gb.compute();
 
 	segImg = gb.getSegImg();
+	//segImg = segSuImg;
+	//pImg = fgdImg;
 
 	//DkUtils::getMatInfo(pImg, "pImg");
 	mout << "[DkMSModule] computed in " << dt << dkendl;

@@ -20,12 +20,14 @@ public:
 
 	void compute();
 	cv::Mat getSegImg() const;
+	void setPChannel(const cv::Mat& pImgRT);
 
 	std::string toString() const;
 
 protected:
 	DkMSData data;
 	cv::Mat pImg;	// probability image
+	cv::Mat pImgRT;
 	cv::Mat segImg;
 	cv::Mat segSuImg;
 

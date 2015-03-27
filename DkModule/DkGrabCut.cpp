@@ -160,10 +160,14 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 
 	// create color image
 	std::vector<cv::Mat> cImgs;
-	cv::Mat pImg8U;
-	pImg.convertTo(pImg8U, CV_8UC1, 255.0f);
-	//cImgs.push_back(255-pImg8U);
-	cImgs.push_back(data.getVisChannel());
+	
+	if (!pImgRT.empty()) {
+		cv::Mat pImg8U;
+		pImgRT.convertTo(pImg8U, CV_8UC1, 255.0f);
+		cImgs.push_back(pImg8U);
+	}
+	else
+		cImgs.push_back(data.getVisChannel());
 	cImgs.push_back(meanImg);
 	cImgs.push_back(stdImg);
 
@@ -230,6 +234,10 @@ cv::Mat DkGrabCut::maskToBwImg(const cv::Mat& mask) const {
 	}
 
 	return segImg;
+}
+
+void DkGrabCut::setPChannel(const cv::Mat& pImgRT) {
+	this->pImgRT = pImgRT;
 }
 
 cv::Mat DkGrabCut::getSegImg() const {
