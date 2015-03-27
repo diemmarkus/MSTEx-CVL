@@ -13,6 +13,7 @@
 #include "DkSegmentation.h"
 #include "DkRandomTrees.h"
 #include "DkGrabCut.h"
+#include "DkAce.h"
 
 //#include <winsock2.h>	// needed since libraw 0.16
 
@@ -108,20 +109,24 @@ void DkMSModule::compute() {
 
 	mout << "image segmented in: " << dt << dkendl;
 
-	DkRandomTrees rt(imgs, segSuImg);
-	rt.compute();
-	pImg = rt.getPredictedImage();
+	//DkRandomTrees rt(imgs, segSuImg);
+	//rt.compute();
+	//pImg = rt.getPredictedImage();
 
-	segSuImg = segSuImg & pImg > 0.1;
-	segSuImg = segSuImg | pImg > 0.95;
-	segImg = segSuImg;
+	DkAce ace(imgs, segSuImg);
+	ace.compute();
+	pImg = ace.getPredictedImage();
 
-	// grab cut
-	DkGrabCut gb(imgs, pImg, fgdImg);
-	gb.setReleaseDebug(DK_SAVE_IMGS);
-	gb.compute();
+	//segSuImg = segSuImg & pImg > 0.1;
+	//segSuImg = segSuImg | pImg > 0.95;
+	//segImg = segSuImg;
 
-	segImg = gb.getSegImg();
+	//// grab cut
+	//DkGrabCut gb(imgs, pImg, fgdImg);
+	//gb.setReleaseDebug(DK_SAVE_IMGS);
+	//gb.compute();
+
+	//segImg = gb.getSegImg();
 
 	//DkUtils::getMatInfo(pImg, "pImg");
 	mout << "[DkMSModule] computed in " << dt << dkendl;

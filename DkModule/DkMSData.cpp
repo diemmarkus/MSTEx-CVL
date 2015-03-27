@@ -79,37 +79,37 @@ cv::Mat DkMSData::convertToSignal() const {
 
 cv::Mat DkMSData::removeSensorNoise(const cv::Mat& img) const {
 
-	cv::Mat mImg;
-	cv::medianBlur(img, mImg, 5);	// remove small speckles
+	//cv::Mat mImg;
+	//cv::medianBlur(img, mImg, 5);	// remove small speckles
 
-	double minV, maxV;
-	cv::minMaxLoc(mImg, &minV, &maxV);
+	//double minV, maxV;
+	//cv::minMaxLoc(mImg, &minV, &maxV);
 
-	unsigned char minVC = (unsigned char)minV;
-	unsigned char maxVC = (unsigned char)maxV;
+	//unsigned char minVC = (unsigned char)minV;
+	//unsigned char maxVC = (unsigned char)maxV;
 
-	// nothing to do?
-	if (minVC == 0 && maxVC == 255)
-		return img.clone();
+	//// nothing to do?
+	//if (minVC == 0 && maxVC == 255)
+	//	return img.clone();
 
 	cv::Mat resImg = img.clone();
 
-	unsigned char mVal = (unsigned char)cv::mean(img)[0];
+	//unsigned char mVal = (unsigned char)cv::mean(img)[0];
 
-	// crop image values (outside the bounds)
-	for (int rIdx = 0; rIdx < resImg.rows; rIdx++) {
+	//// crop image values (outside the bounds)
+	//for (int rIdx = 0; rIdx < resImg.rows; rIdx++) {
 
-		unsigned char* rPtr = resImg.ptr<unsigned char>(rIdx);
+	//	unsigned char* rPtr = resImg.ptr<unsigned char>(rIdx);
 
-		for (int cIdx = 0; cIdx < resImg.cols; cIdx++) {
+	//	for (int cIdx = 0; cIdx < resImg.cols; cIdx++) {
 
-			if (rPtr[cIdx] > maxVC)
-				rPtr[cIdx] = maxVC;
-			else if (rPtr[cIdx] < minVC)
-				rPtr[cIdx] = minVC;
+	//		if (rPtr[cIdx] > maxVC)
+	//			rPtr[cIdx] = maxVC;
+	//		else if (rPtr[cIdx] < minVC)
+	//			rPtr[cIdx] = minVC;
 
-		}
-	}
+	//	}
+	//}
 	
 	cv::normalize(resImg, resImg, 255.0f, 0.0f, NORM_MINMAX);
 
