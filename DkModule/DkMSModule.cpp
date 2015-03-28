@@ -108,25 +108,24 @@ void DkMSModule::compute() {
 	cv::Mat fgdImg = imgs.estimateFgd(segSuImg);
 
 	mout << "image segmented in: " << dt << dkendl;
+	bool isRTActive = true;
 
 	DkRandomTrees rt(imgs, fgdImg);
 	rt.compute();
 	pImg = rt.getPredictedImage();
+	DkIP::imwrite("pImg-RT.png", pImg);
 
 	DkAce ace(imgs, fgdImg);
 	ace.compute();
+	isRTActive = false;
 	cv::Mat pImgA = ace.getPredictedImage();
+	pImg = pImg + pImgA;
+	pImg /= 2.0f;
 
-	//DkIP::imwrite("pImg-RT.png", pImg);
-	//DkIP::imwrite("pImg-ace.png", pImgA);
-
-	//pImgA = DkIP::thresholdImageOtsu(pImgA);
-	//DkIP::mulMask(pImg, pImgA);
-	//pImgA = pImg.mul(pImgA);
-	//DkIP::imwrite("pImg-RT-ace.png", pImg);
+	//DkIP::imwrite("pImg-ace.png", pImg);
 
 	// grab cut
-	DkGrabCut gb(imgs, pImg, segSuImg);
+	DkGrabCut gb(imgs, pImg, segSuImg, isRTActive);
 	gb.setReleaseDebug(DK_SAVE_IMGS);
 	//gb.setPChannel(pImg);
 	gb.compute();

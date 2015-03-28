@@ -16,7 +16,7 @@
 class DK_MODULE_API DkGrabCut : public DkModule {
 
 public:
-	DkGrabCut(const DkMSData& data, const cv::Mat& pImg, const cv::Mat& segSuImg);
+	DkGrabCut(const DkMSData& data, const cv::Mat& pImg, const cv::Mat& segSuImg, bool isVotingRT = true);
 
 	void compute();
 	cv::Mat getSegImg() const;
@@ -30,6 +30,7 @@ protected:
 	cv::Mat pImgRT;
 	cv::Mat segImg;
 	cv::Mat segSuImg;
+	bool isVotingRT;
 
 	void checkInput() const {};		// dummy
 	cv::Mat createColImg(const DkMSData& data) const;

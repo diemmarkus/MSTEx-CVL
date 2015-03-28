@@ -2346,7 +2346,7 @@ public:
 	 * @param otsuThresh deprecated
 	 * @return the thresholded image CV_32FC1
 	 **/
-	static Mat thresholdImageOtsu(const Mat src, const Mat mask = Mat(), const double otsuThresh = 0.0) {
+	static Mat thresholdImageOtsu(const Mat src, const Mat mask = Mat()) {
 
 		DkTimer dt = DkTimer();
 
@@ -2372,7 +2372,7 @@ public:
 
 		// compute histogram & threshold the image
 		Mat hist = computeHist(imgF, maskF);
-		double thresh = getThreshOtsu(hist, otsuThresh);
+		double thresh = getThreshOtsu(hist);
 		threshold(imgF, imgF, thresh/255.0f, 1.0f, THRESH_BINARY);
 
 		DkUtils::printDebug(DK_DEBUG_INFO, "otsu threshold: %.4f computed in: %s\n", thresh/255.0f, dt.getTotal().c_str());
@@ -2630,7 +2630,7 @@ public:
 	 * @param otsuThresh deprecated
 	 * @return the computed threshold
 	 **/
-	static double getThreshOtsu(const Mat hist, const double otsuThresh = 0) {
+	static double getThreshOtsu(const Mat hist, double* meanLow = 0, double* meanHigh = 0) {
 
 		if (hist.channels() > 1) {
 			std::string msg = "the histogram needs to have 1 channel, but it has: " + 
@@ -2651,7 +2651,8 @@ public:
 		double sum = 0, mu = 0;
 		bool uniform = false;
 		double low = 0, high = 0, delta = 0;
-		double mu1 = 0, q1 = 0;
+		double mu1 = 0, mu2 = 0;
+		double q1 = 0;
 		double max_sigma = 0;
 
 		count = hist.cols;
@@ -2671,11 +2672,10 @@ public:
 
 		sum = fabs(sum) > FLT_EPSILON ? 1./sum : 0;
 		mu *= sum;
-		mu1 = 0;
 		q1 = 0;
 
 		for( i = 0; i < count; i++ ) {
-			double p_i, q2, mu2, val_i, sigma;
+			double p_i, q2, val_i, sigma;
 			p_i = h[i]*sum;
 			mu1 *= q1;
 			q1 += p_i;
@@ -2695,11 +2695,16 @@ public:
 			}
 		}
 
-		// shift threshold if the contrast is low (no over segmentation)
-		double max_val_shift = (max_val-0.2 > 0) ? max_val-0.2 : 0;
+		if (meanLow)
+			*meanLow = mu1/255.0;
+		if (meanHigh)
+			*meanHigh = mu2/255.0;
 
-		return (max_sigma >= otsuThresh) ? max_val : max_val_shift; // 0.0007 (for textRectangles)
-		//return max_val;
+		//// shift threshold if the contrast is low (no over segmentation)
+		//double max_val_shift = (max_val-0.2 > 0) ? max_val-0.2 : 0;
+
+		//return (max_sigma >= otsuThresh) ? max_val : max_val_shift; // 0.0007 (for textRectangles)
+		return max_val;
 	}
 
 
@@ -3374,7 +3379,7 @@ public:
 
 		if (mean == -1.0f) {
 			Mat hist = DkIP::computeHist(src, mask);				//weight gray values with sigmoid function according		
-			mean = (float)DkIP::getThreshOtsu(hist, 0.0007);		//sigmoid slope, centered at l according text estimation
+			mean = (float)DkIP::getThreshOtsu(hist);		//sigmoid slope, centered at l according text estimation
 			mean = mean/255.0f;
 			DkUtils::printDebug(DK_DEBUG_INFO, "mean: %.3f\n", mean);
 		}

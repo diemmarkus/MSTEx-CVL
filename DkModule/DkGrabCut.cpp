@@ -13,11 +13,12 @@
 #include "DkBlobs.h"
 #include "DkTimer.h"
 
-DkGrabCut::DkGrabCut(const DkMSData& data, const cv::Mat& pImg, const cv::Mat& segSuImg) {
+DkGrabCut::DkGrabCut(const DkMSData& data, const cv::Mat& pImg, const cv::Mat& segSuImg, bool isVotingRT) {
 
 	this->data = data;
 	this->pImg = pImg;
 	this->segSuImg = segSuImg;
+	this->isVotingRT = isVotingRT;
 	className = "DkGrabCut";
 }
 
@@ -187,23 +188,53 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 
 	//DkIP::imwrite("fgdGrabCut.png", segSuImg);
 	//cv::Mat segSuSkel = DkIP::skeleton(segSuImg == 255);
+	cv::Mat segSuSkel;
+	cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(1, 1));
+	cv::erode(segSuImg, segSuSkel, element);
+
 	//DkIP::imwrite("fgdGrabCutSkel.png", segSuSkel);
+
+	float fgdThresh, prFgdThresh, prBgdThresh, bgdThresh;
+
+	if (!isVotingRT) {
+		//cv::normalize(pImg, pImg, 1.0f, 0.0f, NORM_MINMAX);
+		//cv::Mat hist = DkIP::computeHist(pImg);
+		//double m1, m2;
+		//float th = (float)DkIP::getThreshOtsu(hist, &m1, &m2)/255.0f;
+		//fgdThresh = (float)th+0.2f;
+		//bgdThresh = (float)0.0001;
+		//prFgdThresh = th;
+		//prBgdThresh = th;
+
+		//moutc << "m1: " << m1 << " m2: " << m2 << " th: " << th << dkendl;
+		fgdThresh = 0.3f;
+		prFgdThresh = 0.1f;
+		prBgdThresh = 0.0f;
+		bgdThresh = 0.0f;
+
+	}
+	else {
+		fgdThresh = 0.95f;
+		prFgdThresh = 0.8f;
+		prBgdThresh = 0.4f;
+		bgdThresh = 0.1f;
+	}
 
 	for (int rIdx = 0; rIdx < mask.rows; rIdx++) {
 
 		unsigned char* mPtr = mask.ptr<unsigned char>(rIdx);
-		const unsigned char* sPtr = segSuImg.ptr<unsigned char>(rIdx);
+		const unsigned char* sPtr = segSuSkel.ptr<unsigned char>(rIdx);
 		const float* pPtr = pImg.ptr<float>(rIdx);
 
 		for (int cIdx = 0; cIdx < mask.cols; cIdx++) {
 
-			if (pPtr[cIdx] > 0.95f && sPtr[cIdx] == 255)
+			if (pPtr[cIdx] > fgdThresh && sPtr[cIdx] == 255)
 				mPtr[cIdx] = GC_FGD;
-			else if (pPtr[cIdx] < 0.1f && sPtr[cIdx] == 0)
+			else if (pPtr[cIdx] <= bgdThresh && sPtr[cIdx] == 0)
 				mPtr[cIdx] = GC_BGD;
-			else if (pPtr[cIdx] > 0.8f)
+			else if (pPtr[cIdx] > prFgdThresh)
 				mPtr[cIdx] = GC_PR_FGD;
-			else if (pPtr[cIdx] < 0.4f)
+			else if (pPtr[cIdx] <= prBgdThresh)
 				mPtr[cIdx] = GC_PR_BGD;
 			else if (sPtr[cIdx] == 0)	// fallback to su
 				mPtr[cIdx] = GC_BGD;
