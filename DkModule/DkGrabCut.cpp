@@ -163,7 +163,7 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 	
 	if (!pImgRT.empty()) {
 		cv::Mat pImg8U;
-		cv::Mat vImg = data.getVisChannel();
+		cv::Mat vImg = data.removeBackground(data.getVisChannel(), data.getBgChannel());
 		vImg.convertTo(vImg, CV_32FC1, 1.0f/255.0f);
 		pImg8U = 1.0f-pImgRT;
 		pImg8U.mul(vImg);
@@ -186,27 +186,9 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 	// create the mask
 	cv::Mat mask(pImg.size(), CV_8UC1);
 
-	//DkIP::imwrite("fgdGrabCut.png", segSuImg);
-	//cv::Mat segSuSkel = DkIP::skeleton(segSuImg == 255);
-	cv::Mat segSuSkel;
-	cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(1, 1));
-	cv::erode(segSuImg, segSuSkel, element);
-
-	//DkIP::imwrite("fgdGrabCutSkel.png", segSuSkel);
-
 	float fgdThresh, prFgdThresh, prBgdThresh, bgdThresh;
 
 	if (!isVotingRT) {
-		//cv::normalize(pImg, pImg, 1.0f, 0.0f, NORM_MINMAX);
-		//cv::Mat hist = DkIP::computeHist(pImg);
-		//double m1, m2;
-		//float th = (float)DkIP::getThreshOtsu(hist, &m1, &m2)/255.0f;
-		//fgdThresh = (float)th+0.2f;
-		//bgdThresh = (float)0.0001;
-		//prFgdThresh = th;
-		//prBgdThresh = th;
-
-		//moutc << "m1: " << m1 << " m2: " << m2 << " th: " << th << dkendl;
 		fgdThresh = 0.3f;
 		prFgdThresh = 0.1f;
 		prBgdThresh = 0.0f;
@@ -223,7 +205,7 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 	for (int rIdx = 0; rIdx < mask.rows; rIdx++) {
 
 		unsigned char* mPtr = mask.ptr<unsigned char>(rIdx);
-		const unsigned char* sPtr = segSuSkel.ptr<unsigned char>(rIdx);
+		const unsigned char* sPtr = segSuImg.ptr<unsigned char>(rIdx);
 		const float* pPtr = pImg.ptr<float>(rIdx);
 
 		for (int cIdx = 0; cIdx < mask.cols; cIdx++) {
