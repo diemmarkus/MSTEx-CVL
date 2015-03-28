@@ -113,14 +113,22 @@ void DkMSModule::compute() {
 	rt.compute();
 	pImg = rt.getPredictedImage();
 
-	//DkAce ace(imgs, fgdImg);
-	//ace.compute();
-	//pImg = ace.getPredictedImage();
+	DkAce ace(imgs, fgdImg);
+	ace.compute();
+	cv::Mat pImgA = ace.getPredictedImage();
+
+	//DkIP::imwrite("pImg-RT.png", pImg);
+	//DkIP::imwrite("pImg-ace.png", pImgA);
+
+	//pImgA = DkIP::thresholdImageOtsu(pImgA);
+	//DkIP::mulMask(pImg, pImgA);
+	//pImgA = pImg.mul(pImgA);
+	//DkIP::imwrite("pImg-RT-ace.png", pImg);
 
 	// grab cut
 	DkGrabCut gb(imgs, pImg, segSuImg);
 	//gb.setReleaseDebug(DK_SAVE_IMGS);
-	//gb.setPChannel(pImgRT);
+	//gb.setPChannel(pImg);
 	gb.compute();
 
 	segImg = gb.getSegImg();

@@ -2346,12 +2346,12 @@ public:
 	 * @param otsuThresh deprecated
 	 * @return the thresholded image CV_32FC1
 	 **/
-	static Mat thresholdImageOtsu(const Mat src, const Mat mask, const double otsuThresh = 0.0) {
+	static Mat thresholdImageOtsu(const Mat src, const Mat mask = Mat(), const double otsuThresh = 0.0) {
 
 		DkTimer dt = DkTimer();
 
 		// check inputs
-		if (src.channels() != 1 || mask.channels() != 1) {
+		if (src.channels() != 1 || !mask.empty() && mask.channels() != 1) {
 			std::string msg = "The image has: " + DkUtils::stringify(src.channels()) + ", but 1 channel is required\n";
 			throw DkMatException(msg, __LINE__, __FILE__);
 		}
@@ -2364,8 +2364,11 @@ public:
 
 		// convert the mask image
 		Mat maskF = mask;
-		if (mask.depth() != CV_32F)
-			mask.convertTo(maskF, CV_32F, 1/255.0f);
+		
+		if (mask.empty()) {
+			if (mask.depth() != CV_32F)
+				mask.convertTo(maskF, CV_32F, 1/255.0f);
+		}
 
 		// compute histogram & threshold the image
 		Mat hist = computeHist(imgF, maskF);
