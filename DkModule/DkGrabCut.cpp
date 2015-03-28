@@ -50,7 +50,7 @@ void DkGrabCut::compute() {
 		cv::Mat bwMask = maskToBwImg(mask);
 
 		if (!refineMask(bwMask, pImg)) {
-			mout << "optimum reached after " << idx << " iterations" << dkendl;
+			//mout << "optimum reached after " << idx << " iterations" << dkendl;
 			break;
 		}
 		
@@ -59,8 +59,6 @@ void DkGrabCut::compute() {
 	
 		if (releaseDebug == DK_SAVE_IMGS)
 			DkIP::imwrite(className + DkUtils::stringify(__LINE__) + "-" + DkUtils::stringify(idx) + ".png", mask, true);
-
-		mout << "iterating..." << dkendl;
 	}
 
 	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 4, GC_EVAL);
@@ -98,14 +96,12 @@ bool DkGrabCut::refineMask(const cv::Mat& maskImg, cv::Mat& pImg) const {
 		chkImg.convertTo(chkImg, CV_32F, 1.0f/255.0f);
 		chkImg = segImg+chkImg;
 
-		//DkIP::imwrite("chkImg" + DkUtils::stringify(idx) + ".png", chkImg, true);
-
 		if ((cv::sum(chkImg == 2.0f)[0]/2.0f)/nPos < 5.0) {
-			moutc << "non-overlapping reached after " << idx << " iterations" << dkendl;
+			//moutc << "non-overlapping reached after " << idx << " iterations" << dkendl;
 			break;
 		}
-		else
-			moutc << "too many overlaps: " << ((cv::sum(chkImg == 2.0f)[0]/2.0f)/nPos) << dkendl;
+		//else
+		//	moutc << "too many overlaps: " << ((cv::sum(chkImg == 2.0f)[0]/2.0f)/nPos) << dkendl;
 	}
 
 	mask = mask > 0 & segSuImg == 0;
@@ -155,8 +151,8 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 	cv::normalize(meanImg, meanImg, 255, 0, NORM_MINMAX);
 	cv::normalize(stdImg, stdImg, 255, 0, NORM_MINMAX);
 
-	DkUtils::getMatInfo(meanImg, "meanImg");
-	DkUtils::getMatInfo(stdImg, "stdImg");
+	//DkUtils::getMatInfo(meanImg, "meanImg");
+	//DkUtils::getMatInfo(stdImg, "stdImg");
 
 	// create color image
 	std::vector<cv::Mat> cImgs;

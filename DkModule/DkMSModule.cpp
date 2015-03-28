@@ -102,7 +102,7 @@ void DkMSModule::compute() {
 	// initial su segmentation
 	DkSegmentationSu segM(bImg, mask);
 	segM.compute();
-	segM.filterSegImg(20);
+	//segM.filterSegImg(20);
 
 	segSuImg = segM.getSegmented();
 	cv::Mat fgdImg = imgs.estimateFgd(segSuImg);
