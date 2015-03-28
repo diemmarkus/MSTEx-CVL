@@ -117,19 +117,13 @@ void DkMSModule::compute() {
 	ace.compute();
 	pImg = ace.getPredictedImage();
 
-	//segSuImg = segSuImg & pImg > 0.1;
-	//segSuImg = segSuImg | pImg > 0.95;
-	//segImg = segSuImg;
-
-	//// grab cut
+	// grab cut
 	DkGrabCut gb(imgs, pImg, segSuImg);
-	gb.setReleaseDebug(DK_SAVE_IMGS);
+	//gb.setReleaseDebug(DK_SAVE_IMGS);
 	//gb.setPChannel(pImgRT);
 	gb.compute();
 
 	segImg = gb.getSegImg();
-	//segImg = segSuImg;
-	//pImg = fgdImg;
 
 	//DkUtils::getMatInfo(pImg, "pImg");
 	mout << "[DkMSModule] computed in " << dt << dkendl;

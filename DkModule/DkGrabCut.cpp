@@ -47,6 +47,7 @@ void DkGrabCut::compute() {
 
 	for (int idx = 0; idx < 100; idx++) {
 
+		DkTimer dt;
 		cv::Mat bwMask = maskToBwImg(mask);
 
 		if (!refineMask(bwMask, pImg)) {
@@ -59,9 +60,11 @@ void DkGrabCut::compute() {
 	
 		if (releaseDebug == DK_SAVE_IMGS)
 			DkIP::imwrite(className + DkUtils::stringify(__LINE__) + "-" + DkUtils::stringify(idx) + ".png", mask, true);
+
+		mout << "grab cut refined in " << dt << dkendl;
 	}
 
-	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 4, GC_EVAL);
+	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 1, GC_EVAL);
 
 	if (releaseDebug == DK_SAVE_IMGS)
 		DkIP::imwrite(className + DkUtils::stringify(__LINE__) + "-final.png", mask, true);
@@ -141,8 +144,8 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 		double meanV = ms/signal.cols;
 		double stdV = sqrt(ss/signal.cols - (meanV*meanV));
 
-		mPtr[rIdx] = DkMath::cropToUChar(meanV);
-		sPtr[rIdx] = DkMath::cropToUChar(stdV);
+		mPtr[rIdx] = DkMath::cropToUChar((float)meanV);
+		sPtr[rIdx] = DkMath::cropToUChar((float)stdV);
 	}
 
 	meanImg = data.columnVectorToImage(meanImg);
