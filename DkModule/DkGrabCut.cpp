@@ -193,13 +193,13 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 
 		for (int cIdx = 0; cIdx < mask.cols; cIdx++) {
 
-			if (pPtr[cIdx] > 0.3f && sPtr[cIdx] == 255)
+			if (pPtr[cIdx] > 0.95f && sPtr[cIdx] == 255)
 				mPtr[cIdx] = GC_FGD;
-			else if (pPtr[cIdx] == 0 && sPtr[cIdx] == 0)
+			else if (pPtr[cIdx] < 0.1f && sPtr[cIdx] == 0)
 				mPtr[cIdx] = GC_BGD;
-			else if (pPtr[cIdx] > 0.1f)
+			else if (pPtr[cIdx] > 0.8f)
 				mPtr[cIdx] = GC_PR_FGD;
-			else if (pPtr[cIdx] > 0.0f)
+			else if (pPtr[cIdx] < 0.4f)
 				mPtr[cIdx] = GC_PR_BGD;
 			else if (sPtr[cIdx] == 0)	// fallback to su
 				mPtr[cIdx] = GC_BGD;
@@ -207,6 +207,22 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 				mPtr[cIdx] = GC_PR_FGD;
 			else
 				mPtr[cIdx] = GC_PR_FGD;
+
+			//// used with ACE
+			//if (pPtr[cIdx] > 0.3f && sPtr[cIdx] == 255)
+			//	mPtr[cIdx] = GC_FGD;
+			//else if (pPtr[cIdx] == 0 && sPtr[cIdx] == 0)
+			//	mPtr[cIdx] = GC_BGD;
+			//else if (pPtr[cIdx] > 0.1f)
+			//	mPtr[cIdx] = GC_PR_FGD;
+			//else if (pPtr[cIdx] > 0.0f)
+			//	mPtr[cIdx] = GC_PR_BGD;
+			//else if (sPtr[cIdx] == 0)	// fallback to su
+			//	mPtr[cIdx] = GC_BGD;
+			//else if (sPtr[cIdx] == 255)
+			//	mPtr[cIdx] = GC_PR_FGD;
+			//else
+			//	mPtr[cIdx] = GC_PR_FGD;
 
 		}
 	}

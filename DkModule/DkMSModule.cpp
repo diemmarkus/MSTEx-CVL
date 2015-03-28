@@ -109,13 +109,13 @@ void DkMSModule::compute() {
 
 	mout << "image segmented in: " << dt << dkendl;
 
-	//DkRandomTrees rt(imgs, segSuImg);
-	//rt.compute();
-	//cv::Mat pImgRT = rt.getPredictedImage();
+	DkRandomTrees rt(imgs, segSuImg);
+	rt.compute();
+	pImg = rt.getPredictedImage();
 
-	DkAce ace(imgs, fgdImg);
-	ace.compute();
-	pImg = ace.getPredictedImage();
+	//DkAce ace(imgs, fgdImg);
+	//ace.compute();
+	//pImg = ace.getPredictedImage();
 
 	// grab cut
 	DkGrabCut gb(imgs, pImg, segSuImg);
