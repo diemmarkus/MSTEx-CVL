@@ -162,7 +162,11 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 	
 	if (!pImgRT.empty()) {
 		cv::Mat pImg8U;
-		pImgRT.convertTo(pImg8U, CV_8UC1, 255.0f);
+		cv::Mat vImg = data.getVisChannel();
+		vImg.convertTo(vImg, CV_32FC1, 1.0f/255.0f);
+		pImg8U = 1.0f-pImgRT;
+		pImg8U.mul(vImg);
+		pImg8U.convertTo(pImg8U, CV_8UC1, 255.0f);
 		cImgs.push_back(pImg8U);
 	}
 	else

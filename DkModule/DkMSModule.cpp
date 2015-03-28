@@ -127,8 +127,8 @@ void DkMSModule::compute() {
 
 	// grab cut
 	DkGrabCut gb(imgs, pImg, segSuImg);
-	//gb.setReleaseDebug(DK_SAVE_IMGS);
-	//gb.setPChannel(pImg);
+	gb.setReleaseDebug(DK_SAVE_IMGS);
+	gb.setPChannel(pImg);
 	gb.compute();
 
 	segImg = gb.getSegImg();
