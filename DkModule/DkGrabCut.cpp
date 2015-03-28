@@ -170,7 +170,7 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 		cImgs.push_back(pImg8U);
 	}
 	else
-		cImgs.push_back(data.getVisChannel());
+		cImgs.push_back(data.removeBackground(data.getVisChannel(), data.getBgChannel()));
 	cImgs.push_back(meanImg);
 	cImgs.push_back(stdImg);
 
