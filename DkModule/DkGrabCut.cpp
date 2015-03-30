@@ -164,16 +164,34 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 	if (!pImgRT.empty()) {
 		cv::Mat pImg8U;
 		cv::Mat vImg = data.removeBackground(data.getVisChannel(), data.getBgChannel());
-		vImg.convertTo(vImg, CV_32FC1, 1.0f/255.0f);
-		pImg8U = 1.0f-pImgRT;
-		pImg8U.mul(vImg);
-		pImg8U.convertTo(pImg8U, CV_8UC1, 255.0f);
+		cImgs.push_back(vImg);
+
+		pImg8U = vImg.clone();
+
+		for (int rIdx = 0; rIdx < pImg.rows; rIdx++) {
+
+			const float* pPtr = pImgRT.ptr<const float>(rIdx); 
+			unsigned char* p8Ptr = pImg8U.ptr<unsigned char>(rIdx); 
+
+			for (int cIdx = 0; cIdx < pImg.cols; cIdx++) {
+
+				if (pPtr[cIdx] < 1.0) {
+					p8Ptr[cIdx] = DkMath::cropToUChar((1.0f-pPtr[cIdx])*255.0f);
+				}
+
+			}
+		}
+
+		//vImg.convertTo(vImg, CV_32FC1, 1.0f/255.0f);
+		//pImg8U = 1.0f-pImgRT;
+		//pImg8U.mul(vImg);
+		//pImg8U.convertTo(pImg8U, CV_8UC1, 255.0f);
 		cImgs.push_back(pImg8U);
 	}
 	else
 		cImgs.push_back(data.removeBackground(data.getVisChannel(), data.getBgChannel()));
 	cImgs.push_back(meanImg);
-	cImgs.push_back(stdImg);
+	//cImgs.push_back(stdImg);
 
 	cv::Mat cImg(cImgs[0].size(), CV_8UC3);
 	cv::merge(cImgs, cImg);

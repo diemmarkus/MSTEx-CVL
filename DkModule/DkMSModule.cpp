@@ -113,21 +113,22 @@ void DkMSModule::compute() {
 	DkRandomTrees rt(imgs, fgdImg);
 	rt.compute();
 	cv::Mat pImgRT = rt.getPredictedImage();
+	pImg = pImgRT;
 	DkIP::imwrite("pImg-RT.png", pImg);
 
-	DkAce ace(imgs, fgdImg);
-	ace.compute();
-	isRTActive = false;
-	cv::Mat pImgA = ace.getPredictedImage();
-	pImg = pImgRT + pImgA;
-	pImg /= 2.0f;
+	//DkAce ace(imgs, fgdImg);
+	//ace.compute();
+	//isRTActive = false;
+	//cv::Mat pImgA = ace.getPredictedImage();
+	//pImg = pImgRT + pImgA;
+	//pImg /= 2.0f;
 
 	//DkIP::imwrite("pImg-ace.png", pImg);
 
 	// grab cut
-	DkGrabCut gb(imgs, pImgA, segSuImg, isRTActive);
-	//gb.setReleaseDebug(DK_SAVE_IMGS);
-	//gb.setPChannel(pImgRT);
+	DkGrabCut gb(imgs, pImg, segSuImg, isRTActive);
+	gb.setReleaseDebug(DK_SAVE_IMGS);
+	gb.setPChannel(pImgRT);
 	gb.compute();
 
 	segImg = gb.getSegImg();
