@@ -23,7 +23,7 @@
 DkMSModule::DkMSModule(const std::wstring& folderName) {
 
 	this->folderName = folderName;
-	strictInput = false;
+	strictInput = true;
 }
 
 void DkMSModule::load() {
@@ -84,9 +84,29 @@ void DkMSModule::load() {
 		throw DkIllegalArgumentException(msg, __LINE__, __FILE__);
 	}
 
+	if (strictInput) {
+		for (size_t idx = 0; idx < msImgs.size(); idx++) {
+			if (msImgs[idx].empty()) {
+				std::string msg = "Channel  " + DkUtils::stringify(idx+1) + " is empty! I need to abort sorry...";
+				throw DkIllegalArgumentException(msg, __LINE__, __FILE__);
+			}
+		}
+	}
 	imgs = DkMSData(msImgs);
 
 	iout << "images loaded in: " << dt << dkendl;
+}
+
+bool DkMSModule::saveImage(const std::string& imageName) const {
+
+	cv::Mat segImgInv = segImg.clone();
+	DkIP::invertImg(segImgInv);
+	bool ok = cv::imwrite(imageName, segImgInv);
+
+	if (!ok)
+		mout << "sorry, I could not write to: " << imageName << dkendl;
+
+	return ok;
 }
 
 void DkMSModule::compute() {
