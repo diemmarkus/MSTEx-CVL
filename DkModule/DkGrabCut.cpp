@@ -185,14 +185,19 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 	// create the mask
 	cv::Mat mask(pImg.size(), CV_8UC1);
 
-	float fgdThresh, bgdThresh;
+	float fgdThresh, prFgdThresh, prBgdThresh, bgdThresh;
 
 	if (!isVotingRT) {
 		fgdThresh = 0.3f;
-		bgdThresh = 0.1f;
+		prFgdThresh = 0.1f;
+		prBgdThresh = 0.0f;
+		bgdThresh = 0.0f;
+
 	}
 	else {
 		fgdThresh = 0.95f;
+		prFgdThresh = 0.8f;
+		prBgdThresh = 0.4f;
 		bgdThresh = 0.1f;
 	}
 
@@ -208,9 +213,9 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 				mPtr[cIdx] = GC_FGD;
 			else if (pPtr[cIdx] <= bgdThresh && sPtr[cIdx] == 0)
 				mPtr[cIdx] = GC_BGD;
-			else if (pPtr[cIdx] > bgdThresh && sPtr[cIdx] == 255)
+			else if (pPtr[cIdx] > prFgdThresh)
 				mPtr[cIdx] = GC_PR_FGD;
-			else if (pPtr[cIdx] <= fgdThresh && sPtr[cIdx] == 0)
+			else if (pPtr[cIdx] <= prBgdThresh)
 				mPtr[cIdx] = GC_PR_BGD;
 			else if (sPtr[cIdx] == 0)	// fallback to su
 				mPtr[cIdx] = GC_BGD;
