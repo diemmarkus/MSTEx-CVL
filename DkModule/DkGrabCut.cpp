@@ -65,7 +65,7 @@ void DkGrabCut::compute() {
 		mout << "grab cut refined in " << dt << dkendl;
 	}
 
-	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 8, GC_EVAL);
+	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 1, GC_EVAL);
 
 	if (releaseDebug == DK_SAVE_IMGS)
 		DkIP::imwrite(className + DkUtils::stringify(__LINE__) + "-final.png", mask, true);

@@ -120,12 +120,11 @@ void DkMSModule::compute() {
 	isRTActive = false;
 	cv::Mat pImgA = ace.getPredictedImage();
 	pImg = pImgA;
-
 	
-	//fgdImg = imgs.removeBackgroundBlobs(segSuImg);
+	fgdImg = imgs.removeBackgroundBlobs(segSuImg);
 
 	// grab cut
-	DkGrabCut gb(imgs, pImg, segSuImg, isRTActive);
+	DkGrabCut gb(imgs, pImg, fgdImg, isRTActive);
 	gb.setReleaseDebug(DK_SAVE_IMGS);
 	//gb.setPChannel(pImgRT);
 	gb.compute();

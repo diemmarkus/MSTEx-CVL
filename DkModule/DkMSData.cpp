@@ -26,6 +26,7 @@ void DkMSData::fixInput(std::vector<cv::Mat>& imgs) const {
 		if (img.channels() > 1)
 			cv::cvtColor(img, img, CV_RGB2GRAY);
 
+		cv::normalize(img, img, 255.0f, 0.0f, NORM_MINMAX);
 		//img = removeSensorNoise(img);
 
 		//if (img.depth() != CV_32F)
