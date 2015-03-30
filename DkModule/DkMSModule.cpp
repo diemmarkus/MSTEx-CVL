@@ -109,29 +109,23 @@ void DkMSModule::compute() {
 	mout << "image segmented in: " << dt << dkendl;
 	bool isRTActive = true;
 
-	//DkRandomTrees rt(imgs, fgdImg);
-	//rt.compute();
-	//cv::Mat pImgRT = rt.getPredictedImage();
-	//pImg = pImgRT;
+	DkRandomTrees rt(imgs, fgdImg);
+	rt.compute();
+	cv::Mat pImgRT = rt.getPredictedImage();
+	pImg = pImgRT;
 	//DkIP::imwrite("pImg-RT.png", pImg);
 
-	DkAce ace(imgs, fgdImg);
-	ace.compute();
-	isRTActive = false;
-	cv::Mat pImgA = ace.getPredictedImage();
-	pImg = pImgA;
-	//pImg = pImgRT + pImgA;
-	//pImg /= 2.0f;
-
-	//DkIP::imwrite("pImg-ace.png", pImg);
-	//fgdImg = imgs.removeBackgroundBlobs(segImg);
-
-	//fgdImg = imgs.removeBackgroundBlobs(segSuImg);
+	//DkAce ace(imgs, fgdImg);
+	//ace.compute();
+	//isRTActive = false;
+	//cv::Mat pImgA = ace.getPredictedImage();
+	//pImg = pImgA;
 
 	segM.filterSegImg(20);
+	fgdImg = imgs.removeBackgroundBlobs(segSuImg);
 
 	// grab cut
-	DkGrabCut gb(imgs, pImg, segSuImg, isRTActive);
+	DkGrabCut gb(imgs, pImg, fgdImg, isRTActive);
 	gb.setReleaseDebug(DK_SAVE_IMGS);
 	//gb.setPChannel(pImgRT);
 	gb.compute();
