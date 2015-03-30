@@ -16,7 +16,7 @@
 DkGrabCut::DkGrabCut(const DkMSData& data, const cv::Mat& pImg, const cv::Mat& segSuImg, bool isVotingRT) {
 
 	this->data = data;
-	this->pImg = pImg;
+	this->pImg = pImg.clone();
 	this->segSuImg = segSuImg;
 	this->isVotingRT = isVotingRT;
 	className = "DkGrabCut";
@@ -26,7 +26,7 @@ void DkGrabCut::compute() {
 
 	DkTimer dt;
 	cv::Mat cImg = createColImg(data);
-	cv::Mat mask = createMask(pImg);
+	cv::Mat mask = createMask(pImg, segSuImg);
 
 	if (releaseDebug == DK_SAVE_IMGS)
 		DkIP::imwrite(className + DkUtils::stringify(__LINE__) + ".png", cImg, true);
@@ -56,7 +56,7 @@ void DkGrabCut::compute() {
 			break;
 		}
 
-		mask = createMask(pImg);
+		mask = createMask(pImg, segSuImg);
 		cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 1, GC_EVAL);
 
 		mout << "grab cut refined in " << dt << dkendl;
@@ -130,12 +130,12 @@ bool DkGrabCut::refineMask(const cv::Mat& maskImg, cv::Mat& pImg) const {
  * Create color image for grab cut.
  * The color image is combined from the cleaned
  * vis channel (F2), the mean and the std of all channels.
- * @param data 
- * @return cv::Mat
+ * @param data  the raw data
+ * @return cv::Mat the color image (nice visualization btw)
  **/ 
 cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 	
-	cv::Mat signal = data.convertToSignal();
+	cv::Mat signal = data.getSignal();
 	cv::Mat meanImg(signal.rows, 1, CV_8UC1);
 	cv::Mat stdImg(signal.rows, 1, CV_8UC1);
 
@@ -180,7 +180,14 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 	return cImg;
 }
 
-cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
+/**
+ * Creates a mask image for the grab cut.
+ * The mask image combines the probability image with the segmented image
+ * for initializing the grab cut.
+ * @param pImg the probability image
+ * @return cv::Mat the resulting initialization mask
+ **/ 
+cv::Mat DkGrabCut::createMask(const cv::Mat& pImg, const cv::Mat& segImg) const {
 
 	// create the mask
 	cv::Mat mask(pImg.size(), CV_8UC1);
@@ -204,7 +211,7 @@ cv::Mat DkGrabCut::createMask(const cv::Mat& pImg) const {
 	for (int rIdx = 0; rIdx < mask.rows; rIdx++) {
 
 		unsigned char* mPtr = mask.ptr<unsigned char>(rIdx);
-		const unsigned char* sPtr = segSuImg.ptr<unsigned char>(rIdx);
+		const unsigned char* sPtr = segImg.ptr<unsigned char>(rIdx);
 		const float* pPtr = pImg.ptr<float>(rIdx);
 
 		for (int cIdx = 0; cIdx < mask.cols; cIdx++) {
@@ -248,10 +255,6 @@ cv::Mat DkGrabCut::maskToBwImg(const cv::Mat& mask) const {
 	}
 
 	return segImg;
-}
-
-void DkGrabCut::setPChannel(const cv::Mat& pImgRT) {
-	this->pImgRT = pImgRT;
 }
 
 cv::Mat DkGrabCut::getSegImg() const {

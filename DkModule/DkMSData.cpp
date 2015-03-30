@@ -17,8 +17,13 @@ DkMSData::DkMSData(const std::vector<cv::Mat>& data) {
 
 	msImgs = data;
 	fixInput(msImgs);
+	signal = convertToSignal();
 }
 
+/**
+ * Normalizes the input and converts it to grayscale (if needed).
+ * @param imgs all images
+ **/ 
 void DkMSData::fixInput(std::vector<cv::Mat>& imgs) const {
 
 	for (cv::Mat& img : imgs) {
@@ -27,18 +32,22 @@ void DkMSData::fixInput(std::vector<cv::Mat>& imgs) const {
 			cv::cvtColor(img, img, CV_RGB2GRAY);
 
 		cv::normalize(img, img, 255.0f, 0.0f, NORM_MINMAX);
-		//img = removeSensorNoise(img);
-
-		//if (img.depth() != CV_32F)
-		//	img.convertTo(img, CV_32F, 1.0f/255.0f);
 	}
 }
 
+/**
+ * Returns all channels as vector of images.
+ * @return std::vector<cv::Mat> channels.
+ **/ 
 std::vector<cv::Mat> DkMSData::getImages() const {
 
 	return msImgs;
 }
 
+/**
+ * Returns the visible light channel (F2)
+ * @return cv::Mat returns the vis channel.
+ **/ 
 cv::Mat DkMSData::getVisChannel() const {
 
 	if (!msImgs.empty() && msImgs.size() > 1)
@@ -47,12 +56,26 @@ cv::Mat DkMSData::getVisChannel() const {
 	return cv::Mat();
 }
 
+/**
+ * Returns the background (IR) channel.
+ * @return cv::Mat the IR channel.
+ **/ 
 cv::Mat DkMSData::getBgChannel() const {
 
 	if (!msImgs.empty())
 		return msImgs[msImgs.size()-1];	// bg channel is the last channel
 
 	return cv::Mat();
+}
+
+/**
+ * The data signal.
+ * Each channel is a column in this image.
+ * @return cv::Mat the data signal.
+ **/ 
+cv::Mat DkMSData::getSignal() const {
+	
+	return signal;
 }
 
 /**
@@ -79,6 +102,14 @@ cv::Mat DkMSData::convertToSignal() const {
 	return signal;
 }
 
+/**
+ * Estimates the foreground from the BW image.
+ * This method removes spectral outliers & small blobs
+ * that are present in the BW image. It thus increases
+ * the precision while decreasing the recall.
+ * @param bwImg a binary image
+ * @return cv::Mat the fgd image (8UC1)
+ **/ 
 cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 
 	DkTimer dt;
@@ -116,8 +147,6 @@ cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 		
 		lPtr[cIdx] = DkMath::cropToUChar(q25 - w*(q75-q25));
 		uPtr[cIdx] = DkMath::cropToUChar(q75 + w*(q75-q25));
-	
-		//mout << "lower bound: " << (int)lPtr[cIdx] << " upper bound: " << (int)uPtr[cIdx] << dkendl;
 	}
 
 	cv::Mat rImg = bwVec.clone();
@@ -133,7 +162,6 @@ cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 
 				if (sPtr[cIdx] < lPtr[cIdx] || sPtr[cIdx] > uPtr[cIdx]) {
 					*rPtr = ignoreVal;
-					//mout << "sPtr is an outlier: " << (int)sPtr[cIdx] << dkendl;
 					break;
 				}
 			}
@@ -141,34 +169,16 @@ cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 	}
 
 	rImg = columnVectorToImage(rImg);
-
-	cv::Mat rImgD;
-	Mat se = DkIP::createStructuringElement(1, DkIP::DK_DISK);
-	dilate(rImg == 100, rImgD, se, Point(-1,-1), 1, BORDER_CONSTANT, 0);
-	//cv::Mat rImgE = DkIP::erodeImage(rImg == 255, 3, DkIP::DK_SQUARE);
-	cv::Mat rImgC = DkSegmentationSu::filterSegImgAuto(rImg > 0);
-	
-	for (int rIdx = 0; rIdx < rImg.rows; rIdx++) {
-
-		unsigned char* rPtr = rImg.ptr<unsigned char>(rIdx);
-		const unsigned char* dPtr = rImgD.ptr<unsigned char>(rIdx);
-		//const unsigned char* ePtr = rImgE.ptr<unsigned char>(rIdx);
-		const unsigned char* cPtr = rImgC.ptr<unsigned char>(rIdx);
-
-		for (int cIdx = 0; cIdx < rImg.cols; cIdx++) {
-
-			if (dPtr[cIdx] > 0 || cPtr[cIdx] == 0 && rPtr[cIdx] == 255 /*|| rPtr[cIdx] == 255 && ePtr[cIdx] == 0*/)
-				rPtr[cIdx] = ignoreVal;
-		}
-	}
-
-	DkIP::imwrite("fgdImg.png", rImg);
-
-	mout << "foreground estimation takes " << dt << dkendl;
+	ioutc << "foreground estimation takes " << dt << dkendl;
 
 	return rImg;
 }
 
+/**
+ * Removes sensor noise (e.g. salt & pepper)
+ * @param img an 8UC1 image
+ * @return cv::Mat the cleaned & normalized 8UC1 image
+ **/ 
 cv::Mat DkMSData::removeSensorNoise(const cv::Mat& img) const {
 
 	cv::Mat mImg;
@@ -208,6 +218,12 @@ cv::Mat DkMSData::removeSensorNoise(const cv::Mat& img) const {
 	return resImg;
 }
 
+/**
+ * Removes background noise from an image.
+ * @param img the 8UC1 image to be cleaned.
+ * @param bgImg a background image (generally the IR image)
+ * @return cv::Mat the cleaned 8UC1 image.
+ **/ 
 cv::Mat DkMSData::removeBackground(const cv::Mat& img, const cv::Mat& bgImg) const {
 
 	if (img.size() != bgImg.size()) {
@@ -216,8 +232,6 @@ cv::Mat DkMSData::removeBackground(const cv::Mat& img, const cv::Mat& bgImg) con
 	}
 
 	cv::Mat rImg(img.size(), CV_16SC1);
-	//cv::absdiff(img, bgImg, rImg);
-	//rImg = 255-rImg;
 
 	// crop image values (outside the bounds)
 	for (int rIdx = 0; rIdx < rImg.rows; rIdx++) {
@@ -228,7 +242,6 @@ cv::Mat DkMSData::removeBackground(const cv::Mat& img, const cv::Mat& bgImg) con
 
 		for (int cIdx = 0; cIdx < rImg.cols; cIdx++) {
 
-			//rPtr[cIdx] = (iPtr[cIdx] > bPtr[cIdx]) ? iPtr[cIdx]-bPtr[cIdx] : iPtr[cIdx];
 			rPtr[cIdx] = iPtr[cIdx]-bPtr[cIdx];
 		}
 	}
@@ -239,6 +252,11 @@ cv::Mat DkMSData::removeBackground(const cv::Mat& img, const cv::Mat& bgImg) con
 	return rImg;
 }
 
+/**
+ * Removes small blobs that are not close to any other blobs.
+ * @param bwImg a 8UC1 binary image.
+ * @return cv::Mat the cleaned 8UC1 binary image.
+ **/ 
 cv::Mat DkMSData::removeBackgroundBlobs(const cv::Mat& bwImg) const {
 
 	cv::Mat cleanImg = bwImg.clone();
@@ -252,7 +270,6 @@ cv::Mat DkMSData::removeBackgroundBlobs(const cv::Mat& bwImg) const {
 
 	blobs.imgFilterArea(cvRound(sumArea/blobs.getSize()*0.75));
 
-
 	DkIP::invertImg(cleanImg);
 	distanceTransform(cleanImg, cleanImg, CV_DIST_L2, 3);
 
@@ -262,6 +279,11 @@ cv::Mat DkMSData::removeBackgroundBlobs(const cv::Mat& bwImg) const {
 	return cleanImg;
 }
 
+/**
+ * Converts an image to a column vector.
+ * @param img an image (MxN).
+ * @return cv::Mat the corresponding column vector (M*Nx1).
+ **/ 
 cv::Mat DkMSData::imageToColumnVector(const cv::Mat& img) const {
 
 	if (img.empty())
@@ -270,6 +292,13 @@ cv::Mat DkMSData::imageToColumnVector(const cv::Mat& img) const {
 	return img.reshape(0, img.rows*img.cols);
 }
 
+/**
+ * Converts a column vector to the image.
+ * NOTE: the column vector must have M*N elements.
+ * where MxN is the data image size.
+ * @param vec a M*N column vector.
+ * @return cv::Mat the resulting MxN image.
+ **/ 
 Mat DkMSData::columnVectorToImage(const cv::Mat& vec) const {
 
 	if (vec.empty() || msImgs.empty())

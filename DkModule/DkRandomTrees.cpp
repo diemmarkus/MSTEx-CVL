@@ -35,7 +35,7 @@ cv::Mat DkRandomTrees::getPredictedImage() const {
 void DkRandomTrees::compute() {
 
 	DkTimer dt;
-	cv::Mat data = imgs.convertToSignal();
+	cv::Mat data = imgs.getSignal();
 	data.convertTo(data, CV_32FC1, 1.0f/255.0f);
 	cv::Ptr<cv::StatModel> model = trainOnline(data, suImg);
 	pImg = predictImage(data, model);

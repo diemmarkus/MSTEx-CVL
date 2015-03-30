@@ -66,7 +66,7 @@ void DkMSModule::load() {
 			}
 
 			msImgs[chNum] = img;
-			std::wcout << cFile << " loaded into channel " << DkUtils::stringToWstring(DkUtils::stringify(chNum)) << std::endl;
+			//std::wcout << cFile << " loaded into channel " << DkUtils::stringToWstring(DkUtils::stringify(chNum)) << std::endl;
 		}
 		else if (!img.empty()) {
 			
@@ -74,7 +74,7 @@ void DkMSModule::load() {
 				cv::cvtColor(img, img, CV_RGB2GRAY);
 			
 			gtImg = img;
-			std::wcout << cFile << " GT loaded..." << std::endl;
+			//std::wcout << cFile << " GT loaded..." << std::endl;
 		}
 	}
 
@@ -86,7 +86,7 @@ void DkMSModule::load() {
 
 	imgs = DkMSData(msImgs);
 
-	mout << "images loaded in: " << dt << dkendl;
+	iout << "images loaded in: " << dt << dkendl;
 }
 
 void DkMSModule::compute() {
@@ -97,8 +97,6 @@ void DkMSModule::compute() {
 
 	cv::Mat bImg = imgs.removeBackground(img, imgs.getBgChannel());
 
-	DkIP::imwrite("cleanedFgdImage.png", bImg);
-
 	// initial su segmentation
 	DkSegmentationSu segM(bImg, mask);
 	segM.compute();
@@ -106,9 +104,9 @@ void DkMSModule::compute() {
 	segSuImg = segM.getSegmented();
 	cv::Mat fgdImg = imgs.estimateFgd(segSuImg);
 
-	mout << "image segmented in: " << dt << dkendl;
-	bool isRTActive = true;
+	iout << "image segmented in: " << dt << dkendl;
 
+	//// DkRandomTrees is an alternative to the ACE
 	//DkRandomTrees rt(imgs, fgdImg);
 	//rt.compute();
 	//cv::Mat pImgRT = rt.getPredictedImage();
@@ -117,22 +115,18 @@ void DkMSModule::compute() {
 
 	DkAce ace(imgs, fgdImg);
 	ace.compute();
-	isRTActive = false;
-	cv::Mat pImgA = ace.getPredictedImage();
-	pImg = pImgA;
+	pImg = ace.getPredictedImage();
 	
 	fgdImg = imgs.removeBackgroundBlobs(segSuImg);
 
 	// grab cut
-	DkGrabCut gb(imgs, pImg, fgdImg, isRTActive);
-	gb.setReleaseDebug(DK_SAVE_IMGS);
-	//gb.setPChannel(pImgRT);
+	DkGrabCut gb(imgs, pImg, fgdImg, false);
 	gb.compute();
 
 	segImg = gb.getSegImg();
 
 	//DkUtils::getMatInfo(pImg, "pImg");
-	mout << "[DkMSModule] computed in " << dt << dkendl;
+	iout << "[DkMSModule] computed in " << dt << dkendl;
 }
 
 DkMSData DkMSModule::getMSImages() const {
@@ -201,12 +195,13 @@ std::vector<std::wstring> DkMSModule::indexFolder(const std::wstring& folderName
 
 			fileName = findFileData.cFileName;
 			fileNameList.push_back(fileName);
-		} while(FindNextFileW(MyHandle, &findFileData) != 0);
+		} 
+		while(FindNextFileW(MyHandle, &findFileData) != 0);
 	}
 
 	FindClose(MyHandle);
 
-	std::wcout << fileNameList.size() << " files indexed in " << folderName << std::endl;
+	//std::wcout << fileNameList.size() << " files indexed in " << folderName << std::endl;
 
 	return fileNameList;
 }

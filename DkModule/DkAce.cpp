@@ -24,7 +24,7 @@ void DkAce::compute() {
 
 	DkTimer dt;
 
-	cv::Mat sig = msData.convertToSignal();
+	cv::Mat sig = msData.getSignal();
 	cv::Mat tS = getTargetSignature(sig, fgdImg);
 	sig.convertTo(sig, CV_32FC1, 1.0f/255.0f);
 
