@@ -48,7 +48,9 @@ public:
 	cv::Mat getSegImg() const;
 	DkMSData getMSImages() const;
 	cv::Mat getGT() const;
+
 	std::vector<std::wstring> indexFolder(const std::wstring& folderName) const;
+	bool saveImage(const std::string& imageName) const;
 
 protected:
 	std::wstring folderName;

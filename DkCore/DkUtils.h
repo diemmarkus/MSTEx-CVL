@@ -39,7 +39,6 @@
 //#include "DkCoreIncludes.h"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/core/core.hpp"
-#include "opencv2/features2d/features2d.hpp"
 #include <time.h>
 
 #include <sstream>
@@ -126,16 +125,6 @@ public:
 	static std::string printMat(const Mat src) {
 				
 		return printMat<float>(src);
-	}
-
-	static std::string keyPointToString(const KeyPoint& kp) {
-
-		std::string str;
-		str += "<" + DkUtils::stringify(kp.pt.x, 1) + ", " + DkUtils::stringify(kp.pt.y, 1) + "> "; 
-		str += "size|octave: " + DkUtils::stringify(kp.size) + " | " + DkUtils::stringify(kp.octave); 
-		str += " angle: " + DkUtils::stringify(kp.angle, 1);
-
-		return str;
 	}
 
 	/**
