@@ -34,7 +34,7 @@ void DkAce::compute() {
 
 	pImg = hyperAce(sig, tS);
 
-	mout << "[" << className << "] computed in " << dt << dkendl;
+	iout << "[" << className << "] computed in " << dt << dkendl;
 }
 
 /**

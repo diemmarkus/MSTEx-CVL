@@ -97,7 +97,7 @@ cv::Mat DkMSData::convertToSignal() const {
 		imageToColumnVector(msImgs.at(rIdx)).copyTo(signal.col(rIdx));
 	}
 
-	mout << "signal converted in " << dt << dkendl;
+	iout << "signal converted in " << dt << dkendl;
 
 	return signal;
 }
@@ -115,7 +115,7 @@ cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 	DkTimer dt;
 
 	unsigned char ignoreVal = 100;
-	cv::Mat signal = convertToSignal();
+	cv::Mat signal = getSignal();
 	cv::Mat bwVec = imageToColumnVector(bwImg);
 
 	cv::Mat fgdSignal(cvRound(cv::sum(bwImg)[0]/255.0f), signal.cols, signal.depth());

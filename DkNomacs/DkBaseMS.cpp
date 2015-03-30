@@ -72,7 +72,7 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 	if (mask.empty()) {
 		mask = Mat(img.size(), CV_8UC1);
 		mask = 255;
-		mout << "empty mask" << dkendl;
+		iout << "empty mask" << dkendl;
 	}
 
 	std::string fname = "binar_r_" + imgFile->file().absoluteDir().dirName().toStdString() + ".png";

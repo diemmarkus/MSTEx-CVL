@@ -40,7 +40,7 @@ void DkGrabCut::compute() {
 	
 	DkTimer dtg;
 	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 1, GC_INIT_WITH_MASK);
-	mout << "grab cut takes: " << dtg << dkendl;
+	iout << "grab cut takes: " << dtg << dkendl;
 
 	if (releaseDebug == DK_SAVE_IMGS)
 		DkIP::imwrite(className + DkUtils::stringify(__LINE__) + ".png", mask, true);
@@ -59,7 +59,7 @@ void DkGrabCut::compute() {
 		mask = createMask(pImg, segSuImg);
 		cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 1, GC_EVAL);
 
-		mout << "grab cut refined in " << dt << dkendl;
+		iout << "grab cut refined in " << dt << dkendl;
 	}
 
 	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 1, GC_EVAL);
@@ -69,7 +69,7 @@ void DkGrabCut::compute() {
 
 	segImg = maskToBwImg(mask);
 
-	mout << "[" << className << "] computed in " << dt << dkendl;
+	iout << "[" << className << "] computed in " << dt << dkendl;
 }
 
 /**

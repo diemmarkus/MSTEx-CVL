@@ -125,7 +125,6 @@ void DkMSModule::compute() {
 
 	segImg = gb.getSegImg();
 
-	//DkUtils::getMatInfo(pImg, "pImg");
 	iout << "[DkMSModule] computed in " << dt << dkendl;
 }
 
