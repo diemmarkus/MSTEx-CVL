@@ -110,17 +110,17 @@ void DkMSModule::compute() {
 	mout << "image segmented in: " << dt << dkendl;
 	bool isRTActive = true;
 
-	DkRandomTrees rt(imgs, fgdImg);
-	rt.compute();
-	cv::Mat pImgRT = rt.getPredictedImage();
-	pImg = pImgRT;
-	DkIP::imwrite("pImg-RT.png", pImg);
+	//DkRandomTrees rt(imgs, fgdImg);
+	//rt.compute();
+	//cv::Mat pImgRT = rt.getPredictedImage();
+	//pImg = pImgRT;
+	//DkIP::imwrite("pImg-RT.png", pImg);
 
-	//DkAce ace(imgs, fgdImg);
-	//ace.compute();
-	//isRTActive = false;
-	//cv::Mat pImgA = ace.getPredictedImage();
-	//pImg = pImgA;
+	DkAce ace(imgs, fgdImg);
+	ace.compute();
+	isRTActive = false;
+	cv::Mat pImgA = ace.getPredictedImage();
+	pImg = pImgA;
 	//pImg = pImgRT + pImgA;
 	//pImg /= 2.0f;
 

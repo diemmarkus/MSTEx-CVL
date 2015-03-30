@@ -242,7 +242,7 @@ cv::Mat DkMSData::removeBackgroundBlobs(const cv::Mat& bwImg) const {
 
 	cv::Mat cleanImg = bwImg.clone();
 	DkBlobs<DkAttr> blobs(cleanImg);
-	blobs.imgFilterArea(100);
+	blobs.imgFilterArea(50);
 
 	DkIP::invertImg(cleanImg);
 	distanceTransform(cleanImg, cleanImg, CV_DIST_L2, 3); //You want euclidian distance
