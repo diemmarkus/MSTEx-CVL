@@ -37,6 +37,12 @@ void DkAce::compute() {
 	mout << "[" << className << "] computed in " << dt << dkendl;
 }
 
+/**
+ * Returns the mean normalized data.
+ * @param data the raw signal
+ * @param meanVec the mean vector (if empty it's estimated)
+ * @return cv::Mat the mean normalized data.
+ **/ 
 cv::Mat DkAce::removeMean(const cv::Mat& data, cv::Mat& meanVec) const {
 
 	cv::Mat nData(data.size(), CV_32FC1);
@@ -71,6 +77,12 @@ cv::Mat DkAce::removeMean(const cv::Mat& data, cv::Mat& meanVec) const {
 	return nData;
 }
 
+/**
+ * Computes the ACE transformation
+ * @param data the raw signal NxM where M is the number of channels.
+ * @param signature the mean signature @see getTargetSignature.
+ * @return cv::Mat the transformed image
+ **/ 
 cv::Mat DkAce::hyperAce(const cv::Mat& data, const cv::Mat& signature) const {
 
 	DkTimer dt;
@@ -81,41 +93,57 @@ cv::Mat DkAce::hyperAce(const cv::Mat& data, const cv::Mat& signature) const {
 	signature.convertTo(sig64, CV_64FC1);
 	data.convertTo(data64, CV_64FC1);
 
+	cv::Mat dataBg;
+	cv::Mat fgdV = msData.imageToColumnVector(fgdImg);
+	unsigned char* fgdPtr = fgdV.ptr<unsigned char>();
+
+	for (int rIdx = 0; rIdx < data64.rows; rIdx++) {
+		if (fgdPtr[rIdx] == 0)
+			dataBg.push_back(data64.row(rIdx));
+	}
+
 	// compute inverted covariance matrix
 	cv::Mat cov, icov, meanC;
-	cov = (data64.t()*data64)/(float)(data.rows-1);
+	cov = (dataBg.t()*dataBg)/(float)(dataBg.rows-1);
 	cv::invert(cov, icov, DECOMP_SVD);
 
 	// pre-compute
 	sig64 = sig64.t();
 
+	// apply ACE - sorry I know it's hard to read, but this implementation is fast
 	double tmp = *(cv::Mat(sig64.t()*icov*sig64).ptr<double>());
 	cv::Mat icData = data64*icov*sig64;
-	cv::Mat om(data64.cols, 1, CV_64FC1, cv::Scalar(1));
+	cv::Mat om(data64.cols, 1, CV_64FC1, cv::Scalar(1));	// needed for sum
 	cv::Mat xInv = (data64*icov).mul(data64) * om;
 	
 	cv::Mat rImg = icData.mul(abs(icData));
 	rImg /= (tmp * xInv);
-		
-	double* rPtr = rImg.ptr<double>();
 	
+	// crop to [0 1]
+	double* rPtr = rImg.ptr<double>();
 	for (int rIdx = 0; rIdx < rImg.rows; rIdx++) {
 
 		if (rPtr[rIdx] < 0 || rPtr[rIdx] > 1.0)
 			rPtr[rIdx] = (rPtr[rIdx] < 0) ? 0 : 1.0 ;
 	}
 
+	// convert to our format
 	rImg = msData.columnVectorToImage(rImg);
-	cv::normalize(rImg, rImg, 1.0f, 0.0f, NORM_MINMAX);
+	cv::normalize(rImg, rImg, 1.0f, 0.0f, NORM_MINMAX);	// just for safety
 	rImg.convertTo(rImg, CV_32FC1);
 
-	moutc << "ACE computed in " << dt << dkendl;
+	ioutc << "ACE computed in " << dt << dkendl;
 
 	return rImg;
 }
 
+/**
+ * Computes the mean value of each foreground pixel in each channel.
+ * @param data the raw signal
+ * @param fgdImg a BW image 255 == foreground
+ * @return cv::Mat a 1x8 (channels) vector with all mean values
+ **/ 
 cv::Mat DkAce::getTargetSignature(const cv::Mat& data, const cv::Mat& fgdImg) const {
-
 	
 	cv::Mat signature(1, data.cols, CV_32FC1, cv::Scalar(0));
 	cv::Mat labels = msData.imageToColumnVector(fgdImg);

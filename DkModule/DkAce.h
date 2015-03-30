@@ -25,7 +25,7 @@ public:
 
 protected:
 	DkMSData msData;
-	cv::Mat pImg;	// probability image
+	cv::Mat pImg;	// probability (result) image
 	cv::Mat fgdImg;
 
 	void checkInput() const {};		// dummy

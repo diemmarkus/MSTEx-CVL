@@ -51,16 +51,13 @@ void DkGrabCut::compute() {
 		DkTimer dt;
 		cv::Mat bwMask = maskToBwImg(mask);
 
+		// is optimum reached? (no eroded areas outside su image)
 		if (!refineMask(bwMask, pImg)) {
-			//mout << "optimum reached after " << idx << " iterations" << dkendl;
 			break;
 		}
-		
+
 		mask = createMask(pImg);
 		cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 1, GC_EVAL);
-	
-		if (releaseDebug == DK_SAVE_IMGS)
-			DkIP::imwrite(className + DkUtils::stringify(__LINE__) + "-" + DkUtils::stringify(idx) + ".png", mask, true);
 
 		mout << "grab cut refined in " << dt << dkendl;
 	}
@@ -75,6 +72,16 @@ void DkGrabCut::compute() {
 	mout << "[" << className << "] computed in " << dt << dkendl;
 }
 
+/**
+ * Refines the mask image
+ * This method erodes the BW image until only 5% overlap with the Su image
+ * is reached. If the image has non-zero pixels at this time, we know
+ * that there are blobs which violate the Su stroke criterion. Hence,
+ * we set these pixels as definite background in the grabcut.
+ * @param maskImg the current BW mask
+ * @param pImg the probability image - violating pixel are set to 0.
+ * @return bool true if there were violiting pixel found
+ **/ 
 bool DkGrabCut::refineMask(const cv::Mat& maskImg, cv::Mat& pImg) const {
 
 	DkTimer dt;
@@ -89,10 +96,9 @@ bool DkGrabCut::refineMask(const cv::Mat& maskImg, cv::Mat& pImg) const {
 	for (int idx = 0; idx < 100; idx++) {
 		cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
 		cv::erode(mask, mask, element);
-		//cv::dilate(mask, mask, element);
 
+		// if the image is empty - we have reached the optiumum -> stop
 		if (!cv::sum(mask == 255)[0]) {
-			moutc << "image empty after " << idx << " iterations" << dkendl;
 			return false;
 		}
 
@@ -100,14 +106,13 @@ bool DkGrabCut::refineMask(const cv::Mat& maskImg, cv::Mat& pImg) const {
 		chkImg.convertTo(chkImg, CV_32F, 1.0f/255.0f);
 		chkImg = segImg+chkImg;
 
+		// if overlap is less than 5% with su image stop
 		if ((cv::sum(chkImg == 2.0f)[0]/2.0f)/nPos < 5.0) {
-			//moutc << "non-overlapping reached after " << idx << " iterations" << dkendl;
 			break;
 		}
-		//else
-		//	moutc << "too many overlaps: " << ((cv::sum(chkImg == 2.0f)[0]/2.0f)/nPos) << dkendl;
 	}
 
+	// combine su & current mask
 	mask = mask > 0 & segSuImg == 0;
 	DkIP::invertImg(mask);
 
@@ -116,11 +121,18 @@ bool DkGrabCut::refineMask(const cv::Mat& maskImg, cv::Mat& pImg) const {
 	
 	cv::Mat chkImg = pImg.clone();
 	DkIP::mulMask(pImg, mask);	// remove eroded image from pImg
-	moutc << "mask refined in " << dt << dkendl;
+	ioutc << "mask refined in " << dt << dkendl;
 
 	return true;
 }
 
+/**
+ * Create color image for grab cut.
+ * The color image is combined from the cleaned
+ * vis channel (F2), the mean and the std of all channels.
+ * @param data 
+ * @return cv::Mat
+ **/ 
 cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 	
 	cv::Mat signal = data.convertToSignal();
@@ -155,37 +167,10 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 	cv::normalize(meanImg, meanImg, 255, 0, NORM_MINMAX);
 	cv::normalize(stdImg, stdImg, 255, 0, NORM_MINMAX);
 
-	//DkUtils::getMatInfo(meanImg, "meanImg");
-	//DkUtils::getMatInfo(stdImg, "stdImg");
-
 	// create color image
 	std::vector<cv::Mat> cImgs;
 	
-	if (!pImgRT.empty()) {
-		cv::Mat pImg8U;
-		cv::Mat vImg = data.removeBackground(data.getVisChannel(), data.getBgChannel());
-		stdImg = vImg;
-
-		pImg8U = vImg.clone();
-
-		for (int rIdx = 0; rIdx < pImg.rows; rIdx++) {
-
-			const float* pPtr = pImgRT.ptr<const float>(rIdx); 
-			unsigned char* p8Ptr = pImg8U.ptr<unsigned char>(rIdx); 
-
-			for (int cIdx = 0; cIdx < pImg.cols; cIdx++) {
-
-				if (pPtr[cIdx] < 1.0) {
-					p8Ptr[cIdx] = DkMath::cropToUChar((1.0f-pPtr[cIdx])*255.0f);
-				}
-
-			}
-		}
-
-		cImgs.push_back(pImg8U);
-	}
-	else
-		cImgs.push_back(data.removeBackground(data.getVisChannel(), data.getBgChannel()));
+	cImgs.push_back(data.removeBackground(data.getVisChannel(), data.getBgChannel()));
 	cImgs.push_back(meanImg);
 	cImgs.push_back(stdImg);
 
