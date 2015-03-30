@@ -65,7 +65,7 @@ void DkGrabCut::compute() {
 		mout << "grab cut refined in " << dt << dkendl;
 	}
 
-	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 1, GC_EVAL);
+	cv::grabCut(cImg, mask, r, bgdModel, fgdModel, 8, GC_EVAL);
 
 	if (releaseDebug == DK_SAVE_IMGS)
 		DkIP::imwrite(className + DkUtils::stringify(__LINE__) + "-final.png", mask, true);
@@ -164,7 +164,7 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 	if (!pImgRT.empty()) {
 		cv::Mat pImg8U;
 		cv::Mat vImg = data.removeBackground(data.getVisChannel(), data.getBgChannel());
-		cImgs.push_back(vImg);
+		stdImg = vImg;
 
 		pImg8U = vImg.clone();
 
@@ -182,16 +182,12 @@ cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
 			}
 		}
 
-		//vImg.convertTo(vImg, CV_32FC1, 1.0f/255.0f);
-		//pImg8U = 1.0f-pImgRT;
-		//pImg8U.mul(vImg);
-		//pImg8U.convertTo(pImg8U, CV_8UC1, 255.0f);
 		cImgs.push_back(pImg8U);
 	}
 	else
 		cImgs.push_back(data.removeBackground(data.getVisChannel(), data.getBgChannel()));
 	cImgs.push_back(meanImg);
-	//cImgs.push_back(stdImg);
+	cImgs.push_back(stdImg);
 
 	cv::Mat cImg(cImgs[0].size(), CV_8UC3);
 	cv::merge(cImgs, cImg);

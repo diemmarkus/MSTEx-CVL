@@ -31,6 +31,7 @@ public:
 	cv::Mat removeSensorNoise(const cv::Mat& img) const;
 	cv::Mat removeBackground(const cv::Mat& img, const cv::Mat& bgImg) const;
 	cv::Mat estimateFgd(const cv::Mat& bwImg) const;
+	cv::Mat removeBackgroundBlobs(const cv::Mat& bwImg) const;
 
 protected:
 	std::vector<cv::Mat> msImgs;

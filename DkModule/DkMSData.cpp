@@ -11,6 +11,7 @@
 #include "DkTimer.h"
 #include "DkIP.h"
 #include "DkSegmentation.h"
+#include "DkBlobs.h"
 
 DkMSData::DkMSData(const std::vector<cv::Mat>& data) {
 
@@ -235,6 +236,23 @@ cv::Mat DkMSData::estimateFgd(const cv::Mat& bwImg) const {
 	mout << "foreground estimation takes " << dt << dkendl;
 
 	return rImg;
+}
+
+cv::Mat DkMSData::removeBackgroundBlobs(const cv::Mat& bwImg) const {
+
+	cv::Mat cleanImg = bwImg.clone();
+	DkBlobs<DkAttr> blobs(cleanImg);
+	blobs.imgFilterArea(100);
+
+	DkIP::invertImg(cleanImg);
+	distanceTransform(cleanImg, cleanImg, CV_DIST_L2, 3); //You want euclidian distance
+
+	cleanImg = cleanImg < 40;
+	cleanImg = bwImg & cleanImg;
+
+	DkIP::imwrite("cleanImg.png", cleanImg, true);
+
+	return cleanImg;
 }
 
 cv::Mat DkMSData::imageToColumnVector(const cv::Mat& img) const {

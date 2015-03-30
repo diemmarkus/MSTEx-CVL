@@ -102,7 +102,7 @@ void DkMSModule::compute() {
 	// initial su segmentation
 	DkSegmentationSu segM(bImg, mask);
 	segM.compute();
-	//segM.filterSegImg(20);
+	segM.filterSegImg(20);
 
 	segSuImg = segM.getSegmented();
 	cv::Mat fgdImg = imgs.estimateFgd(segSuImg);
@@ -120,15 +120,22 @@ void DkMSModule::compute() {
 	//ace.compute();
 	//isRTActive = false;
 	//cv::Mat pImgA = ace.getPredictedImage();
+	//pImg = pImgA;
 	//pImg = pImgRT + pImgA;
 	//pImg /= 2.0f;
 
 	//DkIP::imwrite("pImg-ace.png", pImg);
+	//fgdImg = imgs.removeBackgroundBlobs(segImg);
+
+	fgdImg = imgs.removeBackgroundBlobs(segSuImg);
+
+	DkIP::imwrite("segImgClean.png", fgdImg);
+	DkIP::imwrite("segImg.png", segSuImg);
 
 	// grab cut
-	DkGrabCut gb(imgs, pImg, segSuImg, isRTActive);
+	DkGrabCut gb(imgs, pImg, fgdImg, isRTActive);
 	gb.setReleaseDebug(DK_SAVE_IMGS);
-	gb.setPChannel(pImgRT);
+	//gb.setPChannel(pImgRT);
 	gb.compute();
 
 	segImg = gb.getSegImg();
