@@ -133,7 +133,7 @@ void DkMSModule::compute() {
 	DkIP::imwrite("segImg.png", segSuImg);
 
 	// grab cut
-	DkGrabCut gb(imgs, pImg, fgdImg, isRTActive);
+	DkGrabCut gb(imgs, pImg, segSuImg, isRTActive);
 	gb.setReleaseDebug(DK_SAVE_IMGS);
 	//gb.setPChannel(pImgRT);
 	gb.compute();
