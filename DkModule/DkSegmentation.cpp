@@ -375,16 +375,17 @@ void DkSegmentationSu::computeThrImg(Mat grayImg32F, Mat binContrast, Mat &thres
 		Mat sumKernel = Mat(filtersize, 1, CV_32FC1);
 		sumKernel = 1.0;
 
+		//BORDER_REFLECT
 		// filter y-coordinates
-		filter2D(meanImg, meanImg, CV_32FC1, sumKernel);
-		filter2D(stdImg, stdImg, CV_32FC1, sumKernel);
-		filter2D(intContrastBinary, intContrastBinary, CV_32FC1, sumKernel);
+		filter2D(meanImg, meanImg, CV_32FC1, sumKernel, cv::Point(-1,-1), 0.0, BORDER_REFLECT);
+		filter2D(stdImg, stdImg, CV_32FC1, sumKernel, cv::Point(-1,-1), 0.0, BORDER_REFLECT);
+		filter2D(intContrastBinary, intContrastBinary, CV_32FC1, sumKernel, cv::Point(-1,-1), 0.0, BORDER_REFLECT);
 
 		// filter x-coordinates
 		sumKernel = sumKernel.t();
-		filter2D(meanImg, meanImg, CV_32FC1, sumKernel);
-		filter2D(stdImg, stdImg, CV_32FC1, sumKernel);
-		filter2D(intContrastBinary, intContrastBinary, CV_32FC1, sumKernel);
+		filter2D(meanImg, meanImg, CV_32FC1, sumKernel, cv::Point(-1,-1), 0.0, BORDER_REFLECT);
+		filter2D(stdImg, stdImg, CV_32FC1, sumKernel, cv::Point(-1,-1), 0.0, BORDER_REFLECT);
+		filter2D(intContrastBinary, intContrastBinary, CV_32FC1, sumKernel, cv::Point(-1,-1), 0.0, BORDER_REFLECT);
 
 	}
 	else {
@@ -392,16 +393,16 @@ void DkSegmentationSu::computeThrImg(Mat grayImg32F, Mat binContrast, Mat &thres
 		// is way faster than the filter2D function for kernels > 7
 		Mat intImg;
 		integral(meanImg, intImg);
-		meanImg = DkIP::convolveIntegralImage(intImg, filtersize, 0, DkIP::DK_BORDER_ZERO);
+		meanImg = DkIP::convolveIntegralImage(intImg, filtersize, 0, DkIP::DK_BORDER_FLIP);
 
 		// compute the standard deviation image
 		integral(stdImg, intImg);
-		stdImg = DkIP::convolveIntegralImage(intImg, filtersize, 0, DkIP::DK_BORDER_ZERO);
+		stdImg = DkIP::convolveIntegralImage(intImg, filtersize, 0, DkIP::DK_BORDER_FLIP);
 		intImg.release(); // early release
 
 		integral(contrastBin32F, intContrastBinary);
 		contrastBin32F.release();
-		intContrastBinary = DkIP::convolveIntegralImage(intContrastBinary, filtersize, 0, DkIP::DK_BORDER_ZERO);
+		intContrastBinary = DkIP::convolveIntegralImage(intContrastBinary, filtersize, 0, DkIP::DK_BORDER_FLIP);
 	}
 	//DkIP::imwrite("meanImg343.png", meanImg, true);
 
@@ -1098,14 +1099,14 @@ Mat DkSegmentationSatIpk::computeSatImg() {
 	// filter each channel
 	Mat tmp;
 	Mat g = DkIP::get1DGauss(0.3f);	// 3x3 gaussian
-	filter2D(rgbCh[0], rgbCh[0], -1, g);
-	filter2D(rgbCh[0], rgbCh[0], -1, g.t());
+	filter2D(rgbCh[0], rgbCh[0], -1, g, cv::Point(-1,-1), 0.0, BORDER_REFLECT);
+	filter2D(rgbCh[0], rgbCh[0], -1, g.t(), cv::Point(-1,-1), 0.0, BORDER_REFLECT);
 
-	filter2D(rgbCh[1], rgbCh[1], -1, g);
-	filter2D(rgbCh[1], rgbCh[1], -1, g.t());
+	filter2D(rgbCh[1], rgbCh[1], -1, g, cv::Point(-1,-1), 0.0, BORDER_REFLECT);
+	filter2D(rgbCh[1], rgbCh[1], -1, g.t(), cv::Point(-1,-1), 0.0, BORDER_REFLECT);
 
-	filter2D(rgbCh[2], rgbCh[2], -1, g);
-	filter2D(rgbCh[2], rgbCh[2], -1, g.t());
+	filter2D(rgbCh[2], rgbCh[2], -1, g, cv::Point(-1,-1), 0.0, BORDER_REFLECT);
+	filter2D(rgbCh[2], rgbCh[2], -1, g.t()), cv::Point(-1,-1), 0.0, BORDER_REFLECT;
 
 	meanRgb[0] = (double)DkIP::statMomentMat(rgbCh[0], mask, 0.5f, 1000) + (double)FLT_MIN;		// edit: diem, max 1000 samples set -> speed-up
 	meanRgb[1] = (double)DkIP::statMomentMat(rgbCh[1], mask, 0.5f, 1000) + (double)FLT_MIN;		// edit: diem, max 1000 samples set -> speed-up

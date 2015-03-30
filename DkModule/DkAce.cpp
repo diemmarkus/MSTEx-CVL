@@ -93,18 +93,18 @@ cv::Mat DkAce::hyperAce(const cv::Mat& data, const cv::Mat& signature) const {
 	signature.convertTo(sig64, CV_64FC1);
 	data.convertTo(data64, CV_64FC1);
 
-	cv::Mat dataBg;
-	cv::Mat fgdV = msData.imageToColumnVector(fgdImg);
-	unsigned char* fgdPtr = fgdV.ptr<unsigned char>();
+	//cv::Mat dataBg;
+	//cv::Mat fgdV = msData.imageToColumnVector(fgdImg);
+	//unsigned char* fgdPtr = fgdV.ptr<unsigned char>();
 
-	for (int rIdx = 0; rIdx < data64.rows; rIdx++) {
-		if (fgdPtr[rIdx] == 0)
-			dataBg.push_back(data64.row(rIdx));
-	}
+	//for (int rIdx = 0; rIdx < data64.rows; rIdx++) {
+	//	if (fgdPtr[rIdx] == 0)
+	//		dataBg.push_back(data64.row(rIdx));
+	//}
 
 	// compute inverted covariance matrix
 	cv::Mat cov, icov, meanC;
-	cov = (dataBg.t()*dataBg)/(float)(dataBg.rows-1);
+	cov = (data64.t()*data64)/(float)(data64.rows-1);
 	cv::invert(cov, icov, DECOMP_SVD);
 
 	// pre-compute
