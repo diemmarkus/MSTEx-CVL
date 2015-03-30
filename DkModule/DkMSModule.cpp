@@ -102,7 +102,6 @@ void DkMSModule::compute() {
 	// initial su segmentation
 	DkSegmentationSu segM(bImg, mask);
 	segM.compute();
-	segM.filterSegImg(20);
 
 	segSuImg = segM.getSegmented();
 	cv::Mat fgdImg = imgs.estimateFgd(segSuImg);
@@ -127,10 +126,9 @@ void DkMSModule::compute() {
 	//DkIP::imwrite("pImg-ace.png", pImg);
 	//fgdImg = imgs.removeBackgroundBlobs(segImg);
 
-	fgdImg = imgs.removeBackgroundBlobs(segSuImg);
+	//fgdImg = imgs.removeBackgroundBlobs(segSuImg);
 
-	DkIP::imwrite("segImgClean.png", fgdImg);
-	DkIP::imwrite("segImg.png", segSuImg);
+	segM.filterSegImg(20);
 
 	// grab cut
 	DkGrabCut gb(imgs, pImg, segSuImg, isRTActive);
