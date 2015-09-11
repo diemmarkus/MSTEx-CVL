@@ -60,11 +60,11 @@ int main(int argc, char *argv[]) {
 		delete b;
 
 	}
-	catch(DkException iae) {
-		printf("Error...");
-		printf("%s\n", iae.Msg().c_str());
-		return 1;
-	}
+	//catch(DkException iae) {
+	//	printf("Error...");
+	//	printf("%s\n", iae.Msg().c_str());
+	//	return 1;
+	//}
 	catch(cv::Exception cvex) {
 		printf("Error in function %s, in file %s: msg %s\n", cvex.func.c_str(), cvex.file.c_str(), cvex.err.c_str());
 		return 2;

@@ -30,6 +30,7 @@
 
 #include "DkSegmentation.h"
 #include "DkMSModule.h"
+#include "DkRgbModule.h"
 
 #include <iostream>
 #include <fstream>
@@ -96,6 +97,7 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 	std::string fname = "binar_r_" + imgFile->file().absoluteDir().dirName().toStdString() + ".png";
 
 	DkMSModule module(imgFile->file().absoluteDir().absolutePath().toStdWString());
+	//DkRgbModule module(imgFile->file().absoluteFilePath().toStdWString());
 	module.load();
 	module.compute();
 
@@ -117,8 +119,8 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 	}
 	// mix with GT --------------------------------------------------------------------
 
-	//DkMSData m = module.getMSImages();
-	//cv::Mat cImg = m.removeBackground(m.getVisChannel(), m.getBgChannel());
+	DkMSData m = module.getMSImages();
+	cv::Mat cImg = m.removeBackground(m.getVisChannel(), m.getBgChannel());
 
 	if (DkIP::imwrite(DkBase::debugPath + fname, segImg))
 		mout << fname << " written..." << dkendl;

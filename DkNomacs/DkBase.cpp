@@ -215,9 +215,11 @@ void DkBase::scriptNomacs() {
 	// init slave first -> so nomacs has the focus
 	if (!nomacsSlave)
 		nomacsSlave = new nmc::DkNoMacsIpl();
-
 	if (!nomacs)
 		nomacs = new nmc::DkNoMacsIpl();
+
+	nomacsSlave->getTabWidget()->addTab();
+	nomacs->getTabWidget()->addTab();
 
 	// set our icon (so that we do not confuse viewers/snippet)
 	QIcon myIcon = QIcon(QString(":/DkNomacs/dir.ico"));
@@ -1146,6 +1148,7 @@ void DkBase::plot(Mat img, Mat mask, bool normImgs) {
 		//QCoreApplication::processEvents();
 	}
 	if (nomacsSlave) {
+		nomacsSlave->getTabWidget()->loadFile(nomacs->getTabWidget()->getCurrentImage()->file());
 		QImage qMask = mat2QImage(mask);
 		emit updateSlaveImageSignal(qMask);
 		//QCoreApplication::processEvents();
