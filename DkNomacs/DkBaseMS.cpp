@@ -94,41 +94,41 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 		iout << "empty mask" << dkendl;
 	}
 
-	//std::string fname = "binar_r_" + imgFile->file().absoluteDir().dirName().toStdString() + ".png";
+	std::string fname = "binar_r_" + imgFile->file().absoluteDir().dirName().toStdString() + ".png";
 
-	//DkMSModule module(imgFile->file().absoluteDir().absolutePath().toStdWString());
-	DkRgbModule module(imgFile->file().absoluteFilePath().toStdWString());
+	DkMSModule module(imgFile->file().absoluteDir().absolutePath().toStdWString());
+	//DkRgbModule module(imgFile->file().absoluteFilePath().toStdWString());
 	module.load();
 	module.compute();
 
 	Mat segImg = module.getSegImg();
 	Mat mixedImg;
 
-	//// mix with GT --------------------------------------------------------------------
-	//if (!module.getGT().empty() && !segImg.empty()) {
-	//	mixedImg = segImg;
-	//	mixedImg.convertTo(mixedImg, CV_32F, 0.2f/255.0f);
+	// mix with GT --------------------------------------------------------------------
+	if (!module.getGT().empty() && !segImg.empty()) {
+		mixedImg = segImg;
+		mixedImg.convertTo(mixedImg, CV_32F, 0.2f/255.0f);
 
-	//	Mat gtImgF = module.getGT();
-	//	gtImgF.convertTo(gtImgF, CV_32F, 1.0f/255.0f);
-	//	DkIP::invertImg(gtImgF);
-	//	gtImgF *= 0.4f;
+		Mat gtImgF = module.getGT();
+		gtImgF.convertTo(gtImgF, CV_32F, 1.0f/255.0f);
+		DkIP::invertImg(gtImgF);
+		gtImgF *= 0.4f;
 
-	//	mixedImg += gtImgF;
-	//	mixedImg.convertTo(mixedImg, CV_8UC1, 255.0f);
-	//}
-	//// mix with GT --------------------------------------------------------------------
+		mixedImg += gtImgF;
+		mixedImg.convertTo(mixedImg, CV_8UC1, 255.0f);
+	}
+	// mix with GT --------------------------------------------------------------------
 
-	//DkMSData m = module.getMSImages();
-	//cv::Mat cImg = m.removeBackground(m.getVisChannel(), m.getBgChannel());
+	DkMSData m = module.getMSImages();
+	cv::Mat cImg = m.removeBackground(m.getVisChannel(), m.getBgChannel());
 
-	//if (DkIP::imwrite(DkBase::debugPath + fname, segImg))
-	//	mout << fname << " written..." << dkendl;
-	//if (!mixedImg.empty() && DkIP::imwrite(DkBase::debugPath + DkUtils::createFileName(fname, "-res"), mixedImg))
-	//	mout << DkUtils::createFileName(fname, "-res") << " written..."  << dkendl;
+	if (DkIP::imwrite(DkBase::debugPath + fname, segImg))
+		mout << fname << " written..." << dkendl;
+	if (!mixedImg.empty() && DkIP::imwrite(DkBase::debugPath + DkUtils::createFileName(fname, "-res"), mixedImg))
+		mout << DkUtils::createFileName(fname, "-res") << " written..."  << dkendl;
 
-	//if (DkIP::imwrite(DkBase::debugPath + DkUtils::createFileName(fname, "-gray"), module.getPredictedImage(), true))
-	//	mout << DkUtils::createFileName(fname, "-gray") << " written..."  << dkendl;
+	if (DkIP::imwrite(DkBase::debugPath + DkUtils::createFileName(fname, "-gray"), module.getPredictedImage(), true))
+		mout << DkUtils::createFileName(fname, "-gray") << " written..."  << dkendl;
 
 	if (show) {
 
