@@ -7,12 +7,14 @@
  **************************************************/
 
 #include "DkMSModule.h"
+#include "DkRgbModule.h"
 
+// definition
 std::string helpText();
 
 int main(int argc, char *argv[]) {
 
-	if (argc != 3) {
+	if (argc < 3 || argc > 4) {
 		std::cout << "Wrong number of input arguments: " << argc-1 << " (2 expected)" << std::endl;
 		std::cout << helpText();
 		return 1;
@@ -20,16 +22,34 @@ int main(int argc, char *argv[]) {
 
 	try {
 
-		std::string folderName(argv[1]);
-	    std::replace(folderName.begin(), folderName.end(), '\\', '/');
-		std::wstring folderNameW(folderName.begin(), folderName.end());
-		std::string imageName(argv[2]);
+		if (argc == 3) {
+			std::cout << "MSI mode is active..." << std::endl;
+			std::string folderName(argv[1]);
+			std::replace(folderName.begin(), folderName.end(), '\\', '/');
+			std::wstring folderNameW(folderName.begin(), folderName.end());
+			std::string imageName(argv[2]);
 
-		DkMSModule module(folderNameW);
-		module.load();
-		module.compute();
-		module.saveImage(imageName);
+			DkMSModule module(folderNameW);
+			module.load();
+			module.compute();
+			module.saveImage(imageName);
+		}
+		else if (argc == 4) {
+			std::cout << "RGB mode is active..." << std::endl;
+			std::string fileName(argv[2]);
+			std::replace(fileName.begin(), fileName.end(), '\\', '/');
+			std::wstring folderNameW(fileName.begin(), fileName.end());
+			std::string imageName(argv[3]);
 
+			DkRgbModule module(folderNameW);
+			module.load();
+			module.compute();
+			module.saveImage(imageName);
+		}
+		else {
+			std::cout << "argc = " << argc << std::endl;
+			std::cout << helpText();
+		}
 	}
 	catch(DkException iae) {
 		printf("%s\n", iae.Msg().c_str());
@@ -52,6 +72,9 @@ std::string helpText() {
 	ht += "Welcome to ViennaMS.\n\n";
 	ht += "ViennaMS.exe <folder_name> <output_img_name>\n";
 	ht += "  <folder_name> path to the MS folder.\n       The folder should contain 8 image files (FXXs.png) where XX is the channel number.\n";
+	ht += "  <output_img_name> the output image name.\n\n";
+	ht += "RGB mode: ViennaMS.exe -rgb <file_path> <output_img_name>\n";
+	ht += "  <file_path> path to an RGB image.\n";
 	ht += "  <output_img_name> the output image name.\n\n";
 	ht += "  Enjoy your day!\n";
 

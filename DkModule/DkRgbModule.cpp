@@ -119,3 +119,14 @@ cv::Mat DkRgbModule::getSegImg() const {
 	return segImg;
 }
 
+bool DkRgbModule::saveImage(const std::string& imageName) const {
+
+	cv::Mat segImgInv = segImg.clone();
+	DkIP::invertImg(segImgInv);
+	bool ok = cv::imwrite(imageName, segImgInv);
+
+	if (!ok)
+		mout << "sorry, I could not write to: " << imageName << dkendl;
+
+	return ok;
+}

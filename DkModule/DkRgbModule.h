@@ -49,6 +49,8 @@ public:
 	DkMSData getMSImages() const;
 	cv::Mat getGT() const;
 
+	bool saveImage(const std::string& imageName) const;
+
 protected:
 	std::wstring fileName;
 	DkMSData imgs;
