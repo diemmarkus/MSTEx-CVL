@@ -91,22 +91,12 @@ using namespace cv;
 
 enum training {
 	DK_NO_TRAIN = 0, 
-	DK_CREATE_VOC,
-	DK_CREATE_VOC_OBJ,
-	DK_CREATE_VOC_SEG,
-	DK_SHOW_VOC,
-	DK_OBJ_DETECT,
-	DK_TEST_API,
-	DK_TRACK,
-	DK_TRAIN_ML,
-	DK_TRAIN_ML_OBJ,
-	DK_TRAIN_ML_SEG,
-	DK_TRAIN_ALL,
 	DK_SAVE,
 	DK_LCL,			// layout clustering
 	DK_LINK,		//makes links of files in a directory to files in a search directory
 	DK_FAST_PREVIEW,
 	DK_EVALUATION,
+	DK_RGB_MODE,
 };
 
 enum page_face{ONLY_FRONT = 0, ONLY_BACK, BOTH};

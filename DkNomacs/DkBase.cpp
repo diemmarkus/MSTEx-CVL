@@ -414,10 +414,6 @@ void DkBase::script(QFileInfo fileInfo) {
 			pb += "]\n";
 			mout << "\n\n" << pb << DkUtils::stringify(pc*100, 2) << "% computed...\n" << dkendl;
 
-			// don't compute all images for BoW visualization
-			if (mode == DK_SHOW_VOC && idx > 60)
-				break;
-
 			// TODO: Do we still need a loader update?
 			//// we need to do this a bit complicated, because we do not want to load in a thread
 			//loader->loadFile(loader->getChangedFileInfo(1, true));
@@ -514,20 +510,10 @@ void DkBase::compute() {
 
 	switch (mode) {
 		case DK_NO_TRAIN:	msg = "computing..."; break;
-		case DK_CREATE_VOC:	msg = "[Create Vocabulary]"; break;
-		case DK_CREATE_VOC_OBJ:	msg = "[Create Vocabulary WITH VIOLA]"; break;
-		case DK_CREATE_VOC_SEG:	msg = "[Create Vocabulary kMEANS]"; break;
-		case DK_TRAIN_ML:	msg = "[Train ML]"; break;
-		case DK_TRAIN_ML_OBJ: msg = "[Train ML WITH VIOLA]"; break;
-		case DK_TRAIN_ML_SEG: msg = "[Train ML WITH kMEANS]"; break;
-		case DK_TRAIN_ALL:	msg = "[Training]"; break;
 		case DK_EVALUATION:	msg = "[Evaluation]"; break;
-		case DK_SHOW_VOC:	msg = "[Show Vocabulary]"; break;
-		case DK_OBJ_DETECT:	msg = "[Object Detection]"; break;
-		case DK_TEST_API:	msg = "[API Test]"; break;
-		case DK_TRACK:		msg = "[Track]"; break;
 		case DK_SAVE:		msg = "[save debug]"; break;
 		case DK_LINK:		msg = "[link imgs]"; break;
+		case DK_RGB_MODE:	msg = "[rgb mode]"; break;
 		case DK_LCL:		break;
 		default:			
 			emit messageSignal("unknown mode: " + mode, 3000);
@@ -910,19 +896,9 @@ void DkBase::readConfigFile(std::string filename) {
 
 			// very very ugly... (but fast to implement)
 			if (param == "DK_NO_TRAIN") DkBase::mode = DK_NO_TRAIN;
-			else if (param == "DK_CREATE_VOC") DkBase::mode = DK_CREATE_VOC;
-			else if (param == "DK_CREATE_VOC_OBJ") DkBase::mode = DK_CREATE_VOC_OBJ;
-			else if (param == "DK_CREATE_VOC_SEG") DkBase::mode = DK_CREATE_VOC_SEG;
-			else if (param == "DK_TRAIN_ML") DkBase::mode = DK_TRAIN_ML;
-			else if (param == "DK_TRAIN_ML_OBJ") DkBase::mode = DK_TRAIN_ML_OBJ;
-			else if (param == "DK_TRAIN_ML_SEG") DkBase::mode = DK_TRAIN_ML_SEG;
-			else if (param == "DK_TRAIN_ALL") DkBase::mode = DK_TRAIN_ALL;
 			else if (param == "DK_LCL") DkBase::mode = DK_LCL;
 			else if (param == "DK_EVALUATION") DkBase::mode = DK_EVALUATION;
-			else if (param == "DK_SHOW_VOC") DkBase::mode = DK_SHOW_VOC;
-			else if (param == "DK_OBJ_DETECT") DkBase::mode = DK_OBJ_DETECT;
-			else if (param == "DK_TEST_API") DkBase::mode = DK_TEST_API;
-			else if (param == "DK_TRACK") DkBase::mode = DK_TRACK;
+			else if (param == "DK_RGB_MODE") DkBase::mode = DK_RGB_MODE;
 			else DkUtils::printDebug(DK_WARNING, "[readConfigFile] I don't know: '%s'\n", param.c_str());
 		}
 		else if (cmd == "DkBase::svmMode") {

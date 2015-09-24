@@ -32,14 +32,15 @@
 
 #include "DkUtils.h"
 #include "DkMSData.h"
+#include "DkMSModule.h"
 
 #include <string>
 #include <vector>
 
-class DK_MODULE_API DkRgbModule {
+class DK_MODULE_API DkRgbModule : public DkSegmentationModule {
 
 public:
-	DkRgbModule(const std::wstring& fileName);
+	DkRgbModule(const std::wstring& filePath, const std::wstring& fileName);
 
 	void load();
 	void compute();
@@ -52,7 +53,8 @@ public:
 	bool saveImage(const std::string& imageName) const;
 
 protected:
-	std::wstring fileName;
+	std::wstring mFilePath;
+	std::wstring mFileName;
 	DkMSData imgs;
 	cv::Mat segSuImg;	// Su binary image
 	cv::Mat segImg;		// result image

@@ -29,6 +29,7 @@
 #pragma once;
 
 #include "DkModuleInclude.h"
+#include "DkSegmentationModule.h"
 
 #include "DkUtils.h"
 #include "DkMSData.h"
@@ -36,7 +37,7 @@
 #include <string>
 #include <vector>
 
-class DK_MODULE_API DkMSModule {
+class DK_MODULE_API DkMSModule : public DkSegmentationModule {
 
 public:
 	DkMSModule(const std::wstring& folderName);
@@ -49,7 +50,6 @@ public:
 	DkMSData getMSImages() const;
 	cv::Mat getGT() const;
 
-	std::vector<std::wstring> indexFolder(const std::wstring& folderName) const;
 	bool saveImage(const std::string& imageName) const;
 
 protected:

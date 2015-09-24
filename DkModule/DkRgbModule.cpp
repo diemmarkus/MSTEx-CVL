@@ -39,9 +39,10 @@
 #include "opencv/highgui.h"
 
 // DkMSModule --------------------------------------------------------------------
-DkRgbModule::DkRgbModule(const std::wstring& fileName) {
+DkRgbModule::DkRgbModule(const std::wstring& filePath, const std::wstring& fileName) {
 
-	this->fileName = fileName;
+	mFilePath = filePath;
+	mFileName = fileName;
 }
 
 void DkRgbModule::load() {
@@ -51,7 +52,7 @@ void DkRgbModule::load() {
 
 	cv::Size lastSize;
 
-	std::wstring filePath = fileName;
+	std::wstring filePath = mFilePath + L"\\" + mFileName;
 	std::string fpStr(filePath.begin(), filePath.end());
 
 	cv::Mat img = cv::imread(fpStr);
@@ -117,6 +118,38 @@ cv::Mat DkRgbModule::getPredictedImage() const {
 cv::Mat DkRgbModule::getSegImg() const {
 
 	return segImg;
+}
+
+cv::Mat DkRgbModule::getGT() const {
+
+	std::vector<std::wstring> files = indexFolder(mFilePath);
+
+	for (std::wstring cFile : files) {
+
+		// is it gt?
+		size_t gtIdx = cFile.find(L"_GT");	// dibco gt
+		if (gtIdx == std::string::npos)
+			continue;
+
+		// wrong gt?
+		std::wstring baseName = cFile.substr(0, gtIdx);
+
+		if (mFileName.find(baseName) == std::string::npos)
+			continue;
+
+		std::wstring filePath = mFilePath + L"\\" + cFile;
+		std::string fpStr(filePath.begin(), filePath.end());
+		cv::Mat img = cv::imread(fpStr);
+
+		if (!img.empty()) {
+			if (img.channels() > 1)
+				cv::cvtColor(img, img, CV_RGB2GRAY);
+
+			return img;
+		}
+	}
+
+	return cv::Mat();
 }
 
 bool DkRgbModule::saveImage(const std::string& imageName) const {

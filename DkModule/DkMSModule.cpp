@@ -213,33 +213,3 @@ int DkMSModule::getChannelNumber(const std::wstring& fileName) const {
 
 	return -1;
 }
-
-std::vector<std::wstring> DkMSModule::indexFolder(const std::wstring& folderName) const {
-
-	std::wstring folderIdxName = folderName + L"\\*.*";
-
-	const wchar_t* fname = folderIdxName.c_str();
-
-	
-	WIN32_FIND_DATAW findFileData;
-	HANDLE MyHandle = FindFirstFileW(fname, &findFileData);
-
-	std::vector<std::wstring> fileNameList;
-	std::wstring fileName;
-
-	if( MyHandle != INVALID_HANDLE_VALUE) {
-
-		do {
-
-			fileName = findFileData.cFileName;
-			fileNameList.push_back(fileName);
-		} 
-		while(FindNextFileW(MyHandle, &findFileData) != 0);
-	}
-
-	FindClose(MyHandle);
-
-	//std::wcout << fileNameList.size() << " files indexed in " << folderName << std::endl;
-
-	return fileNameList;
-}

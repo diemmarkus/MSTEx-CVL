@@ -70,6 +70,7 @@ DkBaseComputeFunction DkBaseMS::resolveFunction(int mode) {
 
 	switch (mode) {
 		case DK_EVALUATION:			fnc = static_cast<DkBaseComputeFunction>(&DkBaseMS::showImages);			break;
+		case DK_RGB_MODE:			fnc = static_cast<DkBaseComputeFunction>(&DkBaseMS::showImages);			break;
 		//case DK_SAMPLE:		callFunction(currentFile, img, maskFile, mask);	break;
 
 		// if I don't know it - send it to the parent
@@ -80,6 +81,8 @@ DkBaseComputeFunction DkBaseMS::resolveFunction(int mode) {
 }
 
 void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPointer<DkImageContainerT> maskFile) {
+
+	//printf("OpenCV: %s", cv::getBuildInformation().c_str());
 
 	Mat img, mask;
 
@@ -96,20 +99,32 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 
 	std::string fname = "binar_r_" + imgFile->file().absoluteDir().dirName().toStdString() + ".png";
 
-	DkMSModule module(imgFile->file().absoluteDir().absolutePath().toStdWString());
-	//DkRgbModule module(imgFile->file().absoluteFilePath().toStdWString());
-	module.load();
-	module.compute();
+	DkSegmentationModule* module = 0;
 
-	Mat segImg = module.getSegImg();
+	if (mode == DK_RGB_MODE) {
+		module = new DkRgbModule(imgFile->file().absolutePath().toStdWString(), imgFile->file().fileName().toStdWString());
+		fname = "binar_r_" + imgFile->file().baseName().toStdString() + ".png";
+	}
+	else
+		module = new DkMSModule(imgFile->file().absoluteDir().absolutePath().toStdWString());
+
+	if (!module) {
+		wout << "We have some serious issues here - the module is NULL!!" << dkendl;
+		return;
+	}
+
+	module->load();
+	module->compute();
+
+	Mat segImg = module->getSegImg();
 	Mat mixedImg;
 
 	// mix with GT --------------------------------------------------------------------
-	if (!module.getGT().empty() && !segImg.empty()) {
+	if (!module->getGT().empty() && !segImg.empty()) {
 		mixedImg = segImg;
 		mixedImg.convertTo(mixedImg, CV_32F, 0.2f/255.0f);
 
-		Mat gtImgF = module.getGT();
+		Mat gtImgF = module->getGT();
 		gtImgF.convertTo(gtImgF, CV_32F, 1.0f/255.0f);
 		DkIP::invertImg(gtImgF);
 		gtImgF *= 0.4f;
@@ -119,7 +134,7 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 	}
 	// mix with GT --------------------------------------------------------------------
 
-	DkMSData m = module.getMSImages();
+	DkMSData m = module->getMSImages();
 	cv::Mat cImg = m.removeBackground(m.getVisChannel(), m.getBgChannel());
 
 	if (DkIP::imwrite(DkBase::debugPath + fname, segImg))
@@ -127,15 +142,15 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 	if (!mixedImg.empty() && DkIP::imwrite(DkBase::debugPath + DkUtils::createFileName(fname, "-res"), mixedImg))
 		mout << DkUtils::createFileName(fname, "-res") << " written..."  << dkendl;
 
-	if (DkIP::imwrite(DkBase::debugPath + DkUtils::createFileName(fname, "-gray"), module.getPredictedImage(), true))
+	if (DkIP::imwrite(DkBase::debugPath + DkUtils::createFileName(fname, "-gray"), module->getPredictedImage(), true))
 		mout << DkUtils::createFileName(fname, "-gray") << " written..."  << dkendl;
 
 	if (show) {
 
-		cv::Mat vImg = module.getMSImages().getVisChannel();
-		cv::Mat vImgL = module.getMSImages().getBgChannel();
+		cv::Mat vImg = module->getMSImages().getVisChannel();
+		cv::Mat vImgL = module->getMSImages().getBgChannel();
 
-		plot(module.getPredictedImage(), segImg, true);
+		plot(module->getPredictedImage(), segImg, true);
 		//plot(img, module.getPredictedImage());
 	}
 
