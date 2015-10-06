@@ -276,7 +276,6 @@ void DkBase::script(QFileInfo fileInfo) {
 	nmc::DkImageLoader* loader = new nmc::DkImageLoader();
 	nmc::DkImageLoader* maskLoader = new nmc::DkImageLoader();
 
-
 	setLoadFilters(loader);
 
 	QVector<QSharedPointer<DkImageContainerT> > files;

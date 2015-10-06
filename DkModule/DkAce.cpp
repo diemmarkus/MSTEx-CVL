@@ -165,7 +165,7 @@ cv::Mat DkAce::getTargetSignature(const cv::Mat& data, const cv::Mat& fgdImg) co
 
 	for (int rIdx = 0; rIdx < data.rows; rIdx++) {
 
-		if (labelPtr[rIdx] > 0) {		// TODO: check with labelPtr == 255
+		if (labelPtr[rIdx] == 255) {
 
 			const unsigned char* dataPtr = data.ptr<unsigned char>(rIdx);
 			sumPos++;
