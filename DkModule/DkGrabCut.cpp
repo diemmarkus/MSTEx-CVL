@@ -99,7 +99,7 @@ void DkGrabCut::compute() {
  * we set these pixels as definite background in the grabcut.
  * @param maskImg the current BW mask
  * @param pImg the probability image - violating pixel are set to 0.
- * @return bool true if there were violiting pixel found
+ * @return bool true if there were violating pixel found
  **/ 
 bool DkGrabCut::refineMask(const cv::Mat& maskImg, cv::Mat& pImg) const {
 
@@ -116,7 +116,7 @@ bool DkGrabCut::refineMask(const cv::Mat& maskImg, cv::Mat& pImg) const {
 		cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
 		cv::erode(mask, mask, element);
 
-		// if the image is empty - we have reached the optiumum -> stop
+		// if the image is empty - we have reached the optimum -> stop
 		if (!cv::sum(mask == 255)[0]) {
 			return false;
 		}

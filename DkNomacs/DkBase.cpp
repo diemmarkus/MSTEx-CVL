@@ -344,9 +344,11 @@ void DkBase::script(QFileInfo fileInfo) {
 		int idx = loader->findFileIdx(QFileInfo(filePath, QString::fromStdString(userFilename)), files);
 		if (idx == -1) idx = 0;
 
+		int s = (mode == DK_RGB_MODE) ? files.size() : 1;
+
 		// processing loop
 		// uncomment files.size() if you want to process all files
-		for (; idx < 1/*files.size()*/; idx+=numSkipFiles) {
+		for (; idx < s; idx+=numSkipFiles) {
 
 			// current file
 			currentFile = files[idx];

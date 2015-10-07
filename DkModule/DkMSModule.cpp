@@ -42,7 +42,7 @@
 DkMSModule::DkMSModule(const std::wstring& folderName) {
 
 	this->folderName = folderName;
-	strictInput = true;
+	strictInput = false;
 }
 
 void DkMSModule::load() {

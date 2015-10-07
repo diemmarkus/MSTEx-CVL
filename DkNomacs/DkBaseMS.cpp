@@ -143,7 +143,7 @@ void DkBaseMS::showImages(QSharedPointer<DkImageContainerT> imgFile, QSharedPoin
 		mout << DkUtils::createFileName(fname, "-res") << " written..."  << dkendl;
 
 	if (DkIP::imwrite(DkBase::debugPath + DkUtils::createFileName(fname, "-gray"), module->getPredictedImage(), true))
-		mout << DkUtils::createFileName(fname, "-gray") << " written..."  << dkendl;
+		mout << DkUtils::createFileName(DkBase::debugPath + fname, "-gray") << " written..."  << dkendl;
 
 	if (show) {
 
