@@ -76,6 +76,7 @@ void DkRgbModule::compute() {
 
 	// initial su segmentation
 	DkSegmentationSu segM(img, mask);
+	segM.setStrokeWidth(15);
 	segM.compute();
 	segM.filterSegImg(20);
 	segSuImg = segM.getSegmented();

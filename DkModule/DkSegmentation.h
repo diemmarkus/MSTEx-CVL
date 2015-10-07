@@ -289,6 +289,8 @@ public:
 	**/
 	virtual ~DkSegmentationSu() {};
 
+	void setStrokeWidth(int strokeW);
+
 protected:
 
 	void convertInputData();							//calculate grayvalue image and eroded mask

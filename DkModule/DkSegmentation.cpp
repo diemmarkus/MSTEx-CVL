@@ -89,6 +89,10 @@ DkSegmentationSu::DkSegmentationSu(DkImageSource *imgs)  : DkSegmentationBase(im
 	init();
 }
 
+void DkSegmentationSu::setStrokeWidth(int strokeW) {
+	this->strokeW = strokeW;
+}
+
 void DkSegmentationSu::checkInput() const {
 
 	if (rgbImg.channels() != 3 && grayImg.empty()) throw DkMatException("not a 3 channel input image", __LINE__, __FILE__);
@@ -385,7 +389,7 @@ void DkSegmentationSu::computeThrImg(Mat grayImg32F, Mat binContrast, Mat &thres
 	Mat intContrastBinary = contrastBin32F;
 
 	// save RAM for small filter sizes
-	if (filtersize <= 7) { 
+	if (filtersize <= 20) { 
 
 		DkUtils::printDebug(DK_DEBUG_C, "calling the new mean...\n");
 		// 1-dimensional since the filter is symmetric
