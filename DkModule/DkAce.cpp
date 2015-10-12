@@ -113,9 +113,14 @@ cv::Mat DkAce::hyperAce(const cv::Mat& data, const cv::Mat& signature) const {
 	signature.convertTo(sig64, CV_64FC1);
 	data.convertTo(data64, CV_64FC1);
 
+	//cv::Mat bgData64;
+	//cv::Mat bgData = data;//getBg(data, fgdImg);
+	//bgData.convertTo(bgData64, CV_64FC1);
+
 	// compute inverted covariance matrix
 	cv::Mat cov, icov, meanC;
 	cov = (data64.t()*data64)/(float)(data64.rows-1);
+	//cov = (bgData64.t()*bgData64)/(float)(bgData64.rows-1);
 	cv::invert(cov, icov, DECOMP_SVD);
 
 	// pre-compute
@@ -180,6 +185,26 @@ cv::Mat DkAce::getTargetSignature(const cv::Mat& data, const cv::Mat& fgdImg) co
 	signature /= (float)sumPos;
 
 	return signature;
+}
+
+cv::Mat DkAce::getBg(const cv::Mat& data, const cv::Mat& fgdImg) const {
+
+	int n = cvRound(cv::sum(fgdImg == 0)[0]/255.0f);
+	cv::Mat bgData(n, data.cols, CV_32FC1, cv::Scalar(0));
+
+	cv::Mat labels = msData.imageToColumnVector(fgdImg);
+	const unsigned char* labelPtr = labels.ptr<unsigned char>();
+
+	int bgIdx = 0;
+	for (int rIdx = 0; rIdx < data.rows; rIdx++) {
+
+		if (labelPtr[rIdx] == 0) {
+			data.row(rIdx).copyTo(bgData.row(bgIdx));
+			bgIdx++;
+		}
+	}
+
+	return bgData;
 }
 
 cv::Mat DkAce::getPredictedImage() const {

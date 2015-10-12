@@ -49,6 +49,7 @@ protected:
 
 	void checkInput() const {};		// dummy
 	cv::Mat getTargetSignature(const cv::Mat& data, const cv::Mat& fgdImg) const;
+	cv::Mat getBg(const cv::Mat& data, const cv::Mat& fgdImg) const;
 	cv::Mat removeMean(const cv::Mat& data, cv::Mat& meanVec) const;
 	cv::Mat hyperAce(const cv::Mat& data, const cv::Mat& signature) const;
 };
