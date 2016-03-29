@@ -34,6 +34,7 @@
 #include "DkMSData.h"
 #include "DkModule.h"
 
+#ifdef DK_STANDALONE
 #include "ml.h"
 
 class DK_MODULE_API DkRandomTrees : public DkModule {
@@ -57,3 +58,5 @@ protected:
 	cv::Mat predictImage(const cv::Mat& data, const cv::Ptr<cv::ml::RTrees>& classifier) const;
 	void converData(cv::Mat& trainData, cv::Mat& labels, int numPos) const;
 };
+
+#endif

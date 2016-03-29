@@ -34,7 +34,7 @@
 #include "DkImageSource.h"
 #include "DkModule.h"
 //#include "DkDogDetector.h"
-#include <opencv/ml.h>
+//#include <opencv/ml.h>
 #include <math.h>
 
 using namespace cv;

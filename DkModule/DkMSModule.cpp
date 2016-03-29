@@ -194,20 +194,18 @@ void DkMSModule::compute() {
 		
 		cv::Mat pImgC;
 		pImg.convertTo(pImgC, CV_8UC1, 255);
-		//DkIP::invertImg(pImgC);
 
 		cv::Mat img = DkGrabCut::createColImg(imgs);
-
 		cv::cvtColor(img, img, CV_RGB2Lab);
 		
 		std::vector<cv::Mat> cImg;
 		cv::split(img, cImg);
 		
+		// add the predicted image
 		if (!cImg.empty()) {
-			//cImg[1] = pImgC;
 			cv::addWeighted(cImg[1], 0.5, pImgC, 0.5, 0.0, cImg[1]);
-			//cv::addWeighted(cImg[0], 0.9, pImgC, 0.1, 0.0, cImg[0]);
 		}
+		
 		cv::merge(cImg, img);
 		colImg = img;
 		cv::cvtColor(colImg, colImg, CV_Lab2RGB);

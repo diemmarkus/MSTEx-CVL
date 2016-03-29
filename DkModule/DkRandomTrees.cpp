@@ -28,6 +28,8 @@
 
 #include "DkRandomTrees.h"
 
+#ifdef DK_STANDALONE
+
 DkRandomTrees::DkRandomTrees(const DkMSData& data, const cv::Mat&  suImg) {
 
 	className = "DkRandomTrees";
@@ -148,5 +150,5 @@ std::string DkRandomTrees::toString() const {
 void DkRandomTrees::checkInput() const {
 
 }
-
+#endif
 
