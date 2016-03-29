@@ -49,14 +49,32 @@ DkMSModule::DkMSModule(const std::wstring& folderName) {
 
 void DkMSModule::load() {
 
-	DkTimer dt;
 	std::vector<std::wstring> files = indexFolder(folderName);
+
 	std::vector<cv::Mat> msImgs;
-	msImgs.resize(8);	// we expect 8 channels
+
+	for (const std::wstring& cFile : files) {
+
+		std::wstring filePath = folderName + L"\\" + cFile;
+		std::string fpStr(filePath.begin(), filePath.end());
+
+		msImgs.push_back(DkIP::imread(fpStr));
+	}
+
+	setImages(files, msImgs);
+}
+
+void DkMSModule::setImages(const std::vector<std::wstring>& imgPaths, const std::vector<cv::Mat>& msImgs) {
+
+	DkTimer dt;
 
 	cv::Size lastSize;
+	std::vector<cv::Mat> sortedMsImages;
+	sortedMsImages.resize(8);	// 8 channels expected
 
-	for (std::wstring cFile : files) {
+	for (int idx = 0; idx < imgPaths.size(); idx++) {
+
+		const std::wstring& cFile = imgPaths[idx];
 
 		if (strictInput && cFile.find(L"F") == std::wstring::npos) {
 
@@ -68,7 +86,7 @@ void DkMSModule::load() {
 		std::wstring filePath = folderName + L"\\" + cFile;
 		std::string fpStr(filePath.begin(), filePath.end());
 
-		cv::Mat img = DkIP::imread(fpStr);
+		cv::Mat img = msImgs[idx];
 	
 		int chNum = getChannelNumber(cFile);
 
@@ -81,14 +99,14 @@ void DkMSModule::load() {
 			else if (lastSize.width == 0)
 				lastSize = img.size();
 
-			if (!msImgs[chNum].empty()) {
+			if (!sortedMsImages[chNum].empty()) {
 				std::string msg = "Image at channel  " + DkUtils::stringify(chNum) + " already exists!";
 				std::cout << msg << std::endl;
 				return;
 			}
 
-			msImgs[chNum] = img;
-			//std::wcout << cFile << " loaded into channel " << DkUtils::stringToWstring(DkUtils::stringify(chNum)) << std::endl;
+			sortedMsImages[chNum] = img;
+			std::wcout << cFile << " loaded into channel " << DkUtils::stringToWstring(DkUtils::stringify(chNum)) << std::endl;
 		}
 		else if (!img.empty()) {
 			
@@ -100,23 +118,23 @@ void DkMSModule::load() {
 		}
 	}
 
-	if (msImgs.size() != 8) {
+	if (sortedMsImages.size() != 8) {
 
-		std::string msg = "Wrong number of input channels: " + DkUtils::stringify(msImgs.size()) + " [8 expected]";
+		std::string msg = "Wrong number of input channels: " + DkUtils::stringify(sortedMsImages.size()) + " [8 expected]";
 		std::cout << msg << std::endl;
 		return;
 	}
 
 	if (strictInput) {
-		for (size_t idx = 0; idx < msImgs.size(); idx++) {
-			if (msImgs[idx].empty()) {
+		for (size_t idx = 0; idx < sortedMsImages.size(); idx++) {
+			if (sortedMsImages[idx].empty()) {
 				std::string msg = "Channel  " + DkUtils::stringify(idx+1) + " is empty! I need to abort sorry...";
 				std::cout << msg << std::endl;
 				return;
 			}
 		}
 	}
-	imgs = DkMSData(msImgs);
+	imgs = DkMSData(sortedMsImages);
 
 	iout << "images loaded in: " << dt << dkendl;
 }

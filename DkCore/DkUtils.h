@@ -84,7 +84,7 @@ using namespace cv;
 /**
 * This class DK_CORE_API contains general functions which are useful.
 **/
-class  DkUtils {
+class DkUtils {
 
 private:
 	DK_CORE_API static int debugLevel;
