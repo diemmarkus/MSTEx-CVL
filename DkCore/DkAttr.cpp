@@ -653,8 +653,8 @@ void DkFontAttr::computeAttrs(bool recursive, double angle) {
 	Mat classVotingAcc = Mat(classVoting.size(), classVoting.type());
 	classVotingAcc.setTo(0);
 
-	vector<Point2f> corners, cornersT;
-	vector<DkVector> upperCorners, lowerCorners;
+	std::vector<Point2f> corners, cornersT;
+	std::vector<DkVector> upperCorners, lowerCorners;
  
 	//mout << "I have: " << childs.size() << " children..." << dkendl;
 
@@ -662,7 +662,7 @@ void DkFontAttr::computeAttrs(bool recursive, double angle) {
 	for(unsigned int idx = 0; idx < childs.size(); idx++) {
 
 		// rect types might be varying...
-		vector<Point2f> cTmp = childs[idx].getMinAreaCorners()->getPoints32f();
+		std::vector<Point2f> cTmp = childs[idx].getMinAreaCorners()->getPoints32f();
 		corners.insert(corners.end(), cTmp.begin(), cTmp.end());
 
 		if (this->type == DK_TEXT_LINE_ATTR) {
@@ -810,8 +810,8 @@ void DkFontAttr::computeLineFrequencyAndFormatting() {
 	}
 	float medianWordHeight = (float)DkMath::statMoment(&wHeights, 0.5);
 
-	vector<DkFontAttr>::iterator childCmpItr;
-	vector<DkFontAttr> tmpChilds(childs); 
+	std::vector<DkFontAttr>::iterator childCmpItr;
+	std::vector<DkFontAttr> tmpChilds(childs); 
 	for (unsigned int idx = 0; idx < tmpChilds.size(); idx++) {
 		childCmpItr = tmpChilds.begin();
 		DkFontAttr child = tmpChilds[idx];
@@ -833,8 +833,8 @@ void DkFontAttr::computeLineFrequencyAndFormatting() {
 			// if the difference of the centers of the two lines are within a 1/4 of the heights
 			if (abs(child.getMinAreaRot()->center.y - cmpChild.getMinAreaRot()->center.y) < (child.getMinAreaRot()->size.height+cmpChild.getMinAreaRot()->size.height)/3) {
 
-				vector<Point2f> cornersT = DkRectCorners(*child.getMinAreaRot()).getPoints32f();
-				vector<Point2f> cTmpT = DkRectCorners(*cmpChild.getMinAreaRot()).getPoints32f();
+				std::vector<Point2f> cornersT = DkRectCorners(*child.getMinAreaRot()).getPoints32f();
+				std::vector<Point2f> cTmpT = DkRectCorners(*cmpChild.getMinAreaRot()).getPoints32f();
 				cornersT.insert(cornersT.end(), cTmpT.begin(), cTmpT.end());
 				DkRect newRect(cv::minAreaRect(Mat(cornersT)));
 
@@ -872,7 +872,7 @@ void DkFontAttr::computeLineFrequencyAndFormatting() {
 	}
 
 	if (tmpChilds.size() > 2) {
-		vector<DkFontAttr>::iterator child;
+		std::vector<DkFontAttr>::iterator child;
 		std::list<float> left;
 		std::list<float> right;
 
@@ -923,7 +923,7 @@ void DkFontAttr::computeLineFrequencyAndFormatting() {
 	}
 }
 
-DkRect DkFontAttr::estimateBox(vector<DkVector> upperPoints, vector<DkVector> lowerPoints, double angle) {
+DkRect DkFontAttr::estimateBox(std::vector<DkVector> upperPoints, std::vector<DkVector> lowerPoints, double angle) {
 
 	if (upperPoints.empty() && lowerPoints.empty()) {
 		upperPoints = this->upperPoints;
@@ -1005,7 +1005,7 @@ DkRect DkFontAttr::estimateBox(vector<DkVector> upperPoints, vector<DkVector> lo
 
 }
 
-DkRect DkFontAttr::computeMinBBox(vector<Point2f> points, bool minAreaT) {
+DkRect DkFontAttr::computeMinBBox(std::vector<Point2f> points, bool minAreaT) {
 
 	int n = 180;
 
@@ -1022,7 +1022,7 @@ DkRect DkFontAttr::computeMinBBox(vector<Point2f> points, bool minAreaT) {
 		orHist.setTo(0);
 
 		// compatibility
-		vector<DkFontAttr> attrs;
+		std::vector<DkFontAttr> attrs;
 		attrs.push_back(*this);
 		computeMeanAngle(&attrs, orHist, minAreaT);
 		double maxIdx = DkIP::findIplMaximumSymmetric(orHist);
@@ -1061,9 +1061,9 @@ DkRect DkFontAttr::computeMinBBox(vector<Point2f> points, bool minAreaT) {
 	return bbRect;
 }
 
-void DkFontAttr::computeMeanAngle(vector<DkFontAttr> *words, Mat& orHist, bool minAreaT) const {
+void DkFontAttr::computeMeanAngle(std::vector<DkFontAttr> *words, Mat& orHist, bool minAreaT) const {
 
-	vector<DkFontAttr>::iterator wIter = words->begin();
+	std::vector<DkFontAttr>::iterator wIter = words->begin();
 
 	float* ptrOr = orHist.ptr<float>();
 

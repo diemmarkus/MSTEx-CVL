@@ -81,7 +81,8 @@ void DkMSModule::load() {
 
 			if (!msImgs[chNum].empty()) {
 				std::string msg = "Image at channel  " + DkUtils::stringify(chNum) + " already exists!";
-				throw DkIllegalArgumentException(msg, __LINE__, __FILE__);
+				std::cout << msg << std::endl;
+				return;
 			}
 
 			msImgs[chNum] = img;
@@ -100,14 +101,16 @@ void DkMSModule::load() {
 	if (msImgs.size() != 8) {
 
 		std::string msg = "Wrong number of input channels: " + DkUtils::stringify(msImgs.size()) + " [8 expected]";
-		throw DkIllegalArgumentException(msg, __LINE__, __FILE__);
+		std::cout << msg << std::endl;
+		return;
 	}
 
 	if (strictInput) {
 		for (size_t idx = 0; idx < msImgs.size(); idx++) {
 			if (msImgs[idx].empty()) {
 				std::string msg = "Channel  " + DkUtils::stringify(idx+1) + " is empty! I need to abort sorry...";
-				throw DkIllegalArgumentException(msg, __LINE__, __FILE__);
+				std::cout << msg << std::endl;
+				return;
 			}
 		}
 	}

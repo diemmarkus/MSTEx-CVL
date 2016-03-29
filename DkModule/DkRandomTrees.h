@@ -36,19 +36,6 @@
 
 #include "ml.h"
 
-
-// ok: this is a bit frustrating
-// opencv has a bug so that we cannot query the training error
-// and all interesting params are protected
-// so this class is just designed to get a good statistics of the training
-class DkRTrees : public cv::RandomTrees {
-
-public:
-	virtual std::string toString() const;
-};
-
-
-
 class DK_MODULE_API DkRandomTrees : public DkModule {
 
 public:
@@ -66,7 +53,7 @@ protected:
 	int nSamples;
 
 	void checkInput() const;
-	cv::Ptr<cv::StatModel> trainOnline(const cv::Mat& data, const cv::Mat& fgdImg) const;
-	cv::Mat predictImage(const cv::Mat& data, const cv::Ptr<cv::StatModel>& classifier) const;
+	cv::Ptr<cv::ml::RTrees> trainOnline(const cv::Mat& data, const cv::Mat& fgdImg) const;
+	cv::Mat predictImage(const cv::Mat& data, const cv::Ptr<cv::ml::RTrees>& classifier) const;
 	void converData(cv::Mat& trainData, cv::Mat& labels, int numPos) const;
 };

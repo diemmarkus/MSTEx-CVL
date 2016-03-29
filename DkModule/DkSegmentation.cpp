@@ -46,7 +46,7 @@ void DkSegmentationBase::setRemoveBorderSize(int erodeMaskSize) {
 		this->erodeMaskSize = erodeMaskSize;
 	else {
 		std::string msg = "Filter Size must be >= 0, it is: " + DkUtils::stringify(erodeMaskSize) + "\n";
-		throw DkIllegalArgumentException(msg, __LINE__, __FILE__);
+		std::cout << msg << std::endl; return;
 	}
 }
 
@@ -91,17 +91,18 @@ DkSegmentationSu::DkSegmentationSu(DkImageSource *imgs)  : DkSegmentationBase(im
 
 void DkSegmentationSu::checkInput() const {
 
-	if (rgbImg.channels() != 3 && grayImg.empty()) throw DkMatException("not a 3 channel input image", __LINE__, __FILE__);
-	if (grayImg.channels() != 1 && rgbImg.empty()) throw DkMatException("not a 1 channel input image", __LINE__, __FILE__);
-	if (!rgbImg.empty() && rgbImg.depth() != CV_8U) throw DkMatException("not a CV_8U input image", __LINE__, __FILE__);
-	if (!grayImg.empty() && grayImg.depth() != CV_8U) throw DkMatException("not a CV_8U input image", __LINE__, __FILE__);
-	if (mask.empty()) throw DkMatException("empty mat", __LINE__, __FILE__);
-	if (mask.type() != CV_8UC1) throw DkMatException("not a CV_8UC1 mask image", __LINE__, __FILE__);
+	if (rgbImg.channels() != 3 && grayImg.empty()) woutc << "not a 3 channel input image" << dkendl;
+	if (grayImg.channels() != 1 && rgbImg.empty()) woutc << "not a 1 channel input image" << dkendl;
+	if (!rgbImg.empty() && rgbImg.depth() != CV_8U) woutc << "not a CV_8U input image" << dkendl;
+	if (!grayImg.empty() && grayImg.depth() != CV_8U) woutc << "not a CV_8U input image" << dkendl;
+	if (mask.empty()) woutc << "empty mat" << dkendl;
+	if (mask.type() != CV_8UC1) woutc << "not a CV_8UC1 mask image" << dkendl;
 
 	// check if the mask fits to the image
 	if (rgbImg.size() != mask.size() && grayImg.size() != mask.size()) {
 		std::string msg = "Image size does not correspond to the mask's size (" + DkVector(rgbImg.size()).toString() + " != " + DkVector(mask.size()).toString() + ")";
-		throw DkMatException(msg, __LINE__, __FILE__);
+		std::cout << msg << std::endl; 
+		return;
 	}
 }
 
@@ -553,7 +554,7 @@ void DkSegmentationSu::saveDebugImg(Mat img, std::string path, std::string filen
 		std::string msg = "[" + getName()  + "] debug images saved...";
 		DkUtils::printDebug(DK_INFO, msg.c_str());
 	} else
-		throw DkMatException("empty mat", __LINE__, __FILE__);
+		woutc << "empty mat" << dkendl;
 }
 
 std::string DkSegmentationSu::toString() const {
@@ -763,7 +764,7 @@ void DkSegmentationFgdIpk::setfgdEstFilterSize(int s) {
 		fgdEstFilterSize = s;
 	else {
 		std::string msg = "Filter Size must be >= 3, it is: " + DkUtils::stringify(s) + "\n";
-		throw DkIllegalArgumentException(msg, __LINE__, __FILE__);
+		std::cout << msg << std::endl; return;
 	}
 }
 
@@ -772,7 +773,7 @@ void DkSegmentationFgdIpk::setSigmSlope(float s) {
 		sigmSlope = s;
 	else {
 		std::string msg = "Sigmoid Slope must be > 1, it is: " + DkUtils::stringify(s) + "\n";
-		throw DkIllegalArgumentException(msg, __LINE__, __FILE__);
+		std::cout << msg << std::endl; return;
 	}
 
 }
@@ -938,7 +939,7 @@ void DkSegmentationSatIpk::setSensitivity(float sens) {
 		sensitivity = 1.0f - sens/100.0f;
 	else {
 		std::string msg = "Sensitivity must be ]0 1], it is: " + DkUtils::stringify(sens) + "\n";
-		throw DkIllegalArgumentException(msg, __LINE__, __FILE__);
+		std::cout << msg << std::endl; return;
 	}
 }
 
@@ -947,7 +948,7 @@ void DkSegmentationSatIpk::setConfidenceThresh(float th) {
 		confidenceThreshold = th;
 	else {
 		std::string msg = "Threshold must be [0 1], it is: " + DkUtils::stringify(th) + "\n";
-		throw DkIllegalArgumentException(msg, __LINE__, __FILE__);
+		std::cout << msg << std::endl; return;
 	}
 }
 
@@ -1391,7 +1392,7 @@ void DkSegmentationSatIpk::saveDebugImg(Mat img, std::string path, std::string f
 		//printf("done...\n", saveSeg.c_str());
 
 	} else
-		throw DkMatException("empty mat", __LINE__, __FILE__);
+		woutc << "empty mat" << dkendl;
 }
 
 std::string DkSegmentationSatIpk::toString() const {

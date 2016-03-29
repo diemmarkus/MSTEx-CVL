@@ -375,32 +375,6 @@ std::string DkDescriptor::toString() {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------
 
-DkLineDotted::DkLineDotted() : DkLine () {
-	this->frequency = 0;
-	this->skew = 0;
-}
-DkLineDotted::DkLineDotted(const float xStart, const float yStart, const float xEnd, const float yEnd, const float frequency, const float skew) : DkLine(xStart, yStart, xEnd, yEnd) {
-	this->frequency = frequency;
-	this->skew = skew;
-}
-DkLineDotted::DkLineDotted(const Point2f start, const Point2f end, const float frequency, const float skew) : DkLine(start, end) {
-	this->frequency = frequency;
-	this->skew = skew;
-}
-DkLineDotted::DkLineDotted(const DkInterestPoint start, const DkInterestPoint end, const float frequency, const float skew) : DkLine(start.vec, end.vec) {
-	this->frequency = frequency;
-	this->skew = skew;
-}
-DkLineDotted::DkLineDotted(const vector<DkInterestPoint> dots, const float frequency, const float skew) {
-	this->dots = dots;
-	this->frequency = frequency;
-	this->skew = skew;
-
-	this->setStart(dots.front().vec);
-	this->setEnd(dots.back().vec);
-}
-//-------------------------------------------------------------------------------------------------------------------------------------------
-
 double DkRectCorners::intersectArea(DkRectCorners *r) {
 
 	DkIntersectPoly ip(this->getCorners(), r->getCorners());

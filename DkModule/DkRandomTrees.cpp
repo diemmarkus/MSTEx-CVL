@@ -28,16 +28,6 @@
 
 #include "DkRandomTrees.h"
 
-// DkRandomTrees --------------------------------------------------------------------
-std::string DkRTrees::toString() const {
-
-	std::string msg;
-	msg += "training error: " + DkUtils::stringify(oob_error, 10) + 
-		" trees/classes: [" + DkUtils::stringify(ntrees) + "|" + DkUtils::stringify(nclasses) + "]";
-
-	return msg;
-}
-
 DkRandomTrees::DkRandomTrees(const DkMSData& data, const cv::Mat&  suImg) {
 
 	className = "DkRandomTrees";
@@ -56,20 +46,20 @@ void DkRandomTrees::compute() {
 	DkTimer dt;
 	cv::Mat data = imgs.getSignal();
 	data.convertTo(data, CV_32FC1, 1.0f/255.0f);
-	cv::Ptr<cv::StatModel> model = trainOnline(data, suImg);
+	cv::Ptr<cv::ml::RTrees> model = trainOnline(data, suImg);
 	pImg = predictImage(data, model);
 	mout << "[" << className << "] computed in " << dt << dkendl;
 }
 
-cv::Mat DkRandomTrees::predictImage(const cv::Mat& data, const cv::Ptr<cv::StatModel>& classifier) const {
+cv::Mat DkRandomTrees::predictImage(const cv::Mat& data, const cv::Ptr<cv::ml::RTrees>& classifier) const {
 
-	cv::Ptr<DkRTrees> rt = classifier;
+	cv::Ptr<cv::ml::RTrees> rt = classifier;
 	cv::Mat probabilities(1, data.rows, CV_32FC1);
 	float* pPtr = probabilities.ptr<float>();
 
 	for (int rIdx = 0; rIdx < data.rows; rIdx++) {
 		cv::Mat feature = data.row(rIdx);
-		pPtr[rIdx] = rt->predict_prob(feature);
+		pPtr[rIdx] = rt->predict(feature);
 		//moutc << feature << " p: " << pPtr[rIdx] << dkendl;
 	}
 
@@ -78,23 +68,32 @@ cv::Mat DkRandomTrees::predictImage(const cv::Mat& data, const cv::Ptr<cv::StatM
 	return probabilities;
 }
 
-cv::Ptr<cv::StatModel> DkRandomTrees::trainOnline(const cv::Mat& data, const cv::Mat& fgdImg) const {
+cv::Ptr<cv::ml::RTrees> DkRandomTrees::trainOnline(const cv::Mat& data, const cv::Mat& fgdImg) const {
 
 	cv::Mat labels = imgs.imageToColumnVector(fgdImg);
 
 	cv::Mat tData = data.clone();
 	converData(tData, labels, nSamples);
-	
-	cv::Ptr<DkRTrees> classifier = new DkRTrees();
+
+
+
+	cv::Ptr<cv::ml::RTrees> classifier = cv::ml::RTrees::create();
+	classifier->setMaxDepth(7);
+	classifier->setMinSampleCount(50);
+	classifier->setCalculateVarImportance(false);
+	classifier->setActiveVarCount(10);
+	classifier->setRegressionAccuracy(.01f);
 
 	//for (int rIdx = 0; rIdx < tData.rows; rIdx++)
 	//	moutc << tData.row(rIdx) << " p: " << labels.row(rIdx) << dkendl;
+	cv::Ptr<cv::ml::TrainData> td = cv::ml::TrainData::create(tData, cv::ml::ROW_SAMPLE, labels);
 
-	CvRTParams p(7, 50, 0, false, 10, 0, false, 0, 25, 0.01f, CV_TERMCRIT_ITER+CV_TERMCRIT_EPS);
-	if (!classifier->train(tData, CV_ROW_SAMPLE, labels, cv::Mat(), cv::Mat(), cv::Mat(), cv::Mat(), p))
+
+
+	if (!classifier->train(td))
 		moutc << "[" << className << "] sorry, I could not train the random trees model..." << dkendl;
 	else
-		moutc << "[" << className << "] " << classifier->toString() << dkendl;
+		moutc << "[" << className << "] " << "trained..." << dkendl;
 
 	return classifier;
 }

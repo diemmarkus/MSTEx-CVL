@@ -82,7 +82,7 @@ void DkImageSource::setSigmaErodeMask(float sigma) {
 		sigmaErodeBoundary = sigma;
 	else {
 		std::string msg = "Sigma must be > 1, it is: " + DkUtils::stringify(sigma) + "\n";
-		throw DkIllegalArgumentException(msg, __LINE__, __FILE__);
+		std::cout << msg << std::endl;
 	}
 }
 
@@ -95,13 +95,13 @@ bool DkImageSource::empty() {
 
 void DkImageSource::checkInput() {
 
-	if (rgb.empty()) throw DkMatException("empty rgb mat", __LINE__, __FILE__);
-	if (rgb.type() != CV_8UC3) throw DkMatException("not a CV_8UC3 rgb input image", __LINE__, __FILE__);
+	if (rgb.empty()) wout << "empty rgb mat" << dkendl;
+	if (rgb.type() != CV_8UC3) wout << "not a CV_8UC3 rgb input image" << dkendl;
 
 	// check if the mask fits to the image
 	if (!mask.empty() && rgb.size() != mask.size()) {
 		std::string msg = "Image size does not correspond to the mask's size (" + DkVector(rgb.size()).toString() + " != " + DkVector(mask.size()).toString() + ")";
-		throw DkMatException(msg, __LINE__, __FILE__);
+		wout << msg << dkendl;
 	}
 }
 

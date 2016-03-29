@@ -36,7 +36,6 @@
 #define dkendl "";
 #endif
 
-//#include "DkCoreIncludes.h"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/core/core.hpp"
 #include <time.h>
@@ -73,6 +72,8 @@
 		#define DK_CORE_API __declspec(dllimport)
 	#endif
 #endif
+
+#pragma warning (disable: 4251)	// disable dll interface warning
 
 enum morphTypes {DK_ERODE=0, DK_DILATE};
 enum DebugLevel {DK_DEFAULT_OUTPUT=-1, DK_NONE, DK_WARNING, DK_MODULE, DK_INFO, DK_DEBUG_INFO, DK_DEBUG_C, DK_DEBUG_ALL};
@@ -439,7 +440,8 @@ public:
 		std::stringstream stream;
 		if (! (stream << number)) {
 			std::string msg = "Sorry, I could not cast it to a string";
-			throw DkCastException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl;
+			return "";
 		}
 
 		return stream.str();

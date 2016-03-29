@@ -30,6 +30,7 @@
 #pragma once
 
 #include <list>
+#include <map>
 
 
 #include "DkMath.h"
@@ -240,7 +241,7 @@ public:
 		this->orientation = a.orientation;
 		this->bbRect = (a.bbRect) ? new DkBox(*a.bbRect) : 0;
 		this->minAreaRect = (a.minAreaRect) ? new DkRect(*a.minAreaRect) : 0;
-		this->contour = (a.contour) ? new vector<Point>(*a.contour) : 0;
+		this->contour = (a.contour) ? new std::vector<Point>(*a.contour) : 0;
 		this->type = a.type;
 		this->rectType = a.rectType;
 	};
@@ -279,7 +280,7 @@ public:
 		this->contourIdx = a.contourIdx;
 		this->bbRect = (a.bbRect) ? new DkBox(*a.bbRect) : 0;
 		this->minAreaRect = (a.minAreaRect) ? new DkRect(*a.minAreaRect) : 0;
-		this->contour = (a.contour) ? new vector<Point>(*a.contour) : 0;
+		this->contour = (a.contour) ? new std::vector<Point>(*a.contour) : 0;
 		this->type = a.type;
 		this->rectType = a.rectType;
 		
@@ -338,11 +339,11 @@ public:
 	 */
 	void setContourIdx(int idx) {contourIdx = idx;};
 
-	void setContour(vector<Point> newContour) {
+	void setContour(std::vector<Point> newContour) {
 
 		if (contour != 0) delete contour;
 		// TODO: compress here...
-		contour = new vector<Point>(newContour);
+		contour = new std::vector<Point>(newContour);
 	};
 
 	/** 
@@ -375,7 +376,7 @@ public:
 	 * Return the outer contour of the blob or 0 if no contour was computed.
 	 * @return contour (see OpenCV findContours)
 	 */
-	vector<Point>* getContour() {
+	std::vector<Point>* getContour() {
 		return contour;
 	};
 
@@ -424,7 +425,7 @@ protected:
 	float orientation;				/**< moment based orientation in rad **/
 	DkBox *bbRect;					/**< bounding box **/
 	DkRect *minAreaRect;			/**< minimum area rectangle **/
-	vector<Point> *contour;			/**< the blob's contour**/ // >DIR:  [2.2.2012 kleber]
+	std::vector<Point> *contour;			/**< the blob's contour**/ // >DIR:  [2.2.2012 kleber]
 	int contourIdx;					//Contour Index // >DIR:  [2.2.2012 kleber]
 
 };
@@ -542,14 +543,13 @@ public:
 	int cluster;			/**< cluster ID**/
 
 	std::vector<DkLineExt> underlinedBy;						/**< is the word underlined**/
-	std::vector<DkLineDotted> underlinedByDottedLine;			/**< is the word underlined**/
 	std::vector<DkVector> upperPoints;
 	std::vector<DkVector> lowerPoints;
 
 	float medianWordHeight; /**< median word height; type > DK_TEXT_LINE **/
 	
 	// text block, text line
-	vector<DkFontAttr> childs;	/**< The element's children (e.g. text lines or words).**/
+	std::vector<DkFontAttr> childs;	/**< The element's children (e.g. text lines or words).**/
 
 	// text line
 	float lineFreq;			/**< Line frequency of a TextBlock**/
@@ -587,7 +587,6 @@ public:
 			color[2] = 0;
 			this->type = DK_FONT_ATTR;
 			underlinedBy = std::vector<DkLineExt>();
-			underlinedByDottedLine = std::vector<DkLineDotted>();
 			keyName = "AttrRegion";
 	};
 
@@ -664,7 +663,6 @@ public:
 		this->cluster = a.cluster;
 				
 		this->underlinedBy = a.underlinedBy;
-		this->underlinedByDottedLine = a.underlinedByDottedLine;
 
 		this->medianWordHeight = a.medianWordHeight;
 
@@ -747,9 +745,9 @@ public:
 	 **/
 	void computeLineFrequencyAndFormatting();
 
-	DkRect estimateBox(vector<DkVector> upperPoints, vector<DkVector> lowerPoints, double angle = DBL_MAX);
-	DkRect computeMinBBox(vector<Point2f> points, bool minAreaT = false);
-	void computeMeanAngle(vector<DkFontAttr> *words, Mat& orHist, bool minAreaT = false) const;
+	DkRect estimateBox(std::vector<DkVector> upperPoints, std::vector<DkVector> lowerPoints, double angle = DBL_MAX);
+	DkRect computeMinBBox(std::vector<Point2f> points, bool minAreaT = false);
+	void computeMeanAngle(std::vector<DkFontAttr> *words, Mat& orHist, bool minAreaT = false) const;
 	
 	bool filter(DkFontAttr *fa, bool contains = true);
 
@@ -855,7 +853,8 @@ public:
 		if (fontClass < 0 || fontClass >= classVoting.cols) {
 
 			std::string msg = "[DkFontAttr] class index out of bounds: " + DkUtils::stringify(fontClass) + " number of classes: " + DkUtils::stringify(classVoting.cols);
-			throw DkIndexOutOfBoundsException(msg, __LINE__, __FILE__);
+			std::cout << msg << dkendl;
+			return 0.0f;
 		}
 
 		const float* cPtr = classVoting.ptr<float>();
@@ -881,7 +880,8 @@ public:
 		if (fontClass < 0 || fontClass >= classVoting.cols) {
 
 			std::string msg = "[DkFontAttr] class index out of bounds: " + DkUtils::stringify(fontClass) + " number of classes: " + DkUtils::stringify(classVoting.cols);
-			throw DkIndexOutOfBoundsException(msg, __LINE__, __FILE__);
+			std::cout << msg << dkendl;
+			return;
 		}
 
 		float* cPtr = classVoting.ptr<float>();
@@ -1034,7 +1034,7 @@ public:
 	* Returns a vector of the neighbors of the current DKNeighborAttr
 	* @return a vector of the neighbors of the current DKNeighborAttr
 	**/
-	vector<DkNeighborAttr> getNeighbors() {return neighbors;};
+	std::vector<DkNeighborAttr> getNeighbors() {return neighbors;};
 	
 	/**
 	* Adds a neighbor to the current DKNeighborAttr, an existing neighbor will be overwritten
@@ -1058,7 +1058,7 @@ public:
 	* Returns a vector of the childs of the current DKNeighborAttr
 	* @return a vector of the childs of the current DKNeighborAttr
 	**/
-	vector<DkNeighborAttr> getChilds() {return childs;};
+	std::vector<DkNeighborAttr> getChilds() {return childs;};
 	/**
 	* Adds a child to the current DKNeighborAttr
 	* @param child The DkNeighborAttr which should be added as child
@@ -1074,7 +1074,7 @@ public:
 	* Returns a vector (of lenght one) on which DkNeighborAttr the current one is lying on
 	* @return a vector (of lenght one) on which the current DkNeighborAttr is lying on
 	**/	
-	vector<DkNeighborAttr> getOnLine() {return onLine;};
+	std::vector<DkNeighborAttr> getOnLine() {return onLine;};
 	/**
 	* sets the given DKNeighborAttr as line of current DKNeighborAttr
 	* @param line The line on which the current DKNeighborAttr is lying on
@@ -1100,9 +1100,9 @@ public:
 
 
 private:
-	vector<DkNeighborAttr> onLine;		/**< a vector (of size one) which holds the DkNeighborAttr of the line the current is lying on**/
-	vector<DkNeighborAttr> neighbors;	/**< which DkNeighborAttr are neighbors of the current one**/
-	vector<DkNeighborAttr> childs;		/**< which DkNeighborAttr are childs of the current one**/
+	std::vector<DkNeighborAttr> onLine;		/**< a vector (of size one) which holds the DkNeighborAttr of the line the current is lying on**/
+	std::vector<DkNeighborAttr> neighbors;	/**< which DkNeighborAttr are neighbors of the current one**/
+	std::vector<DkNeighborAttr> childs;		/**< which DkNeighborAttr are childs of the current one**/
 };
 
 /**

@@ -30,10 +30,13 @@
 #pragma once
 
 #include "DkAttr.h"
-#include "DkError.h"
 #include "DkUtils.h"
 #include "DkMath.h"
 #include "DkIP.h"
+
+// TODO: there are bad pointer manipulations in the filtering process...
+#pragma warning (disable: 4311)
+#pragma warning (disable: 4302)
 
 
 /**
@@ -150,12 +153,12 @@ public:
 	 * All calculated properties are stored in vector and returned.
 	 * @return calculated attributes.
 	 */
-	vector<Attr> getProps() {/*calcProps();*/ return props;};
+	std::vector<Attr> getProps() {/*calcProps();*/ return props;};
 	/** 
 	 * Overwrites the props vector with the one given
 	 * @param the new props vector
 	 */
-	void setProps(vector<Attr> props) {this->props = props;};
+	void setProps(std::vector<Attr> props) {this->props = props;};
 	/** 
 	 * Returns the number of blobs in an image.
 	 * @return number of blobs in an image.
@@ -192,12 +195,12 @@ public:
 	 * @param the index of the contour.
 	 * @return the contour of the blob, 0 if the contour does not exist
 	 */
-	vector<Point> getContourOfBlob(int contourIdx) { return contours[contourIdx];};
+	std::vector<Point> getContourOfBlob(int contourIdx) { return contours[contourIdx];};
 	/** 
 	 * Returns all contours
 	 * @return all contours
 	 */
-	vector<vector<Point> > getContours() { return contours;};
+	std::vector<std::vector<Point> > getContours() { return contours;};
 
 	/** 
 	 * Returns the labeled image. Each blob in the image has the value of the contourIdx+1 (ATTENTION!!!) 
@@ -245,9 +248,9 @@ public:
 protected:
 	int size;							/**< the number of blobs **/							
 	Mat bwImg;							/**< the segmented image which is labelled **/
-	vector<vector<Point> > contours;	/**< vector with all blob contours  **/
-	vector<Vec4i> hierarchy;			/**< hierarchy vector of all blobs (see findContours)  **/
-	vector<Attr> props;					/**< property vector  **/
+	std::vector<std::vector<Point> > contours;	/**< vector with all blob contours  **/
+	std::vector<Vec4i> hierarchy;			/**< hierarchy vector of all blobs (see findContours)  **/
+	std::vector<Attr> props;					/**< property vector  **/
 	std::map<int, int> contourIdxInPropVector; /**< map to allocate which contour index is which blob in the props vector **/
 	Mat labeledImage;					/**< the image with the labels (the values in the image are 0 for background and contourIdx+1 (!!!) for the labels) **/
 
@@ -365,9 +368,9 @@ template <class Attr> DkBlobs<Attr>::DkBlobs() {
 template <class Attr> DkBlobs<Attr>::DkBlobs(Mat img) {
 
 	// TODO: never do that...
-	if (img.empty()) throw DkMatException("empty mat", __LINE__, __FILE__);
-	if (img.channels() != 1) throw DkMatException("not a single channel input image", __LINE__, __FILE__);
-	if (img.depth() != CV_8U) throw DkMatException("not a CV_8U image", __LINE__, __FILE__);
+	if (img.empty()) wout << "empty mat" << dkendl;
+	if (img.channels() != 1) wout << "not a single channel input image" << dkendl;
+	if (img.depth() != CV_8U) wout << "not a CV_8U image" << dkendl;
 
 	//img.convertTo(bwImg, CV_8U);
 	bwImg = img;
@@ -432,7 +435,7 @@ template <class Attr> void DkBlobs<Attr>::imgFilterArea(int minArea, int maxArea
 
 	//some properties are calculated, insert the missing ones
 
-	typename vector<Attr>::iterator it;
+	typename std::vector<Attr>::iterator it;
 
 	it = props.begin();
 	dout << "area blobs #: " << props.size() << dkendl;
@@ -549,6 +552,7 @@ template <class Attr> void DkBlobs<Attr>::imgFilterArea(int minArea, int maxArea
 				{
 					pCurImgPos = _POP_FG_LIST;
 
+					// TODO: fix warning
 					*(bwImg.data + (int(pCurImgPos) - int(bwImg2.data))) = 0;
 				}
 			}
@@ -574,7 +578,7 @@ template <class Attr> void DkBlobs<Attr>::filterArea(int threshArea) {
 
 
 	//some properties are calculated, insert the missing ones
-	typename vector<Attr>::iterator it;
+	typename std::vector<Attr>::iterator it;
 
 	int numberOfDeleted = 0;
 	it = props.begin();
@@ -623,7 +627,7 @@ template <class Attr> void DkBlobs<Attr>::imgFilterMarRatio(float ratio) {
 		imgFilterMarRatio(ratio);
 	} else {
 		//some properties are calculated, insert the missing ones
-		typename vector<Attr>::iterator it;
+		typename std::vector<Attr>::iterator it;
 
 		int numberOfDeleted = 0;
 		it = props.begin();
@@ -679,7 +683,7 @@ template <class Attr> void DkBlobs<Attr>::imgFilterMarWidth(int minWidth) {
 		imgFilterMarWidth(minWidth);
 	} else {
 		//some properties are calculated, insert the missing ones
-		typename vector<Attr>::iterator it;
+		typename std::vector<Attr>::iterator it;
 
 		int numberOfDeleted = 0;
 		it = props.begin();
@@ -740,7 +744,7 @@ template <class Attr> void DkBlobs<Attr>::imgFilterMarWidthCheckLines(int minWid
 		imgFilterMarWidthCheckLines(minWidth,rulLin);
 	} else {
 		//some properties are calculated, insert the missing ones
-		typename vector<Attr>::iterator it;
+		typename std::vector<Attr>::iterator it;
 
 		int numberOfDeleted = 0;
 		it = props.begin();
@@ -833,7 +837,7 @@ template <class Attr> void DkBlobs<Attr>::imgFilterMar(float ratio, int minWidth
 		imgFilterMar(ratio, minWidth);
 	} else {
 		//some properties are calculated, insert the missing ones
-		typename vector<Attr>::iterator it;
+		typename std::vector<Attr>::iterator it;
 
 		it = props.begin();
 		bwImg.setTo(0);
@@ -896,7 +900,7 @@ template <class Attr> void DkBlobs<Attr>::imgFilterRipple(float ratio, int minWi
 		imgFilterRipple(ratio, minWidth);
 	} else {
 		//some properties are calculated, insert the missing ones
-		typename vector<Attr>::iterator it;
+		typename std::vector<Attr>::iterator it;
 		it = props.begin();
 		bwImg = 0;
 		int numberOfDeleted = 0;
@@ -963,7 +967,7 @@ template <class Attr> void DkBlobs<Attr>::imgFilterOrientation(float angle, floa
 	calcOrientation();
 	Scalar color(255);
 
-	typename vector<Attr>::iterator it;
+	typename std::vector<Attr>::iterator it;
 	it = props.begin();
 	bwImg.setTo(0);
 	int numberOfDeleted = 0;
@@ -1019,7 +1023,7 @@ template <class Attr> void DkBlobs<Attr>::calcProps() {
 		calcProps();
 	} else {
 
-		typename vector<Attr>::iterator it;
+		typename std::vector<Attr>::iterator it;
 		RotatedRect rect;
 		Rect bb;
 		it = props.begin();
@@ -1083,7 +1087,7 @@ template <class Attr> Mat DkBlobs<Attr>::getFilledBlobImg(Attr *blob, Scalar val
 	Mat bImg = Mat(bb.getSize(), CV_8UC1);
 	bImg.setTo(0);
 
-	std::vector<std::vector<Point> > contours;
+	std::std::vector<std::std::vector<Point> > contours;
 	contours.push_back(*blob->getContour());
 
 	drawContours(bImg, contours, -1, val, CV_FILLED, 8, noArray(), INT_MAX, offset.getCvPoint());
@@ -1097,17 +1101,17 @@ template<class Attr> void DkBlobs<Attr>::drawBlob(Mat &img, Attr &blob, int maxL
 
 	if (img.empty()) {
 		std::string msg = "the image is empty...\n";
-		throw DkMatException(msg, __LINE__, __FILE__);
+		throw std::cout << msg << std::endl; return;
 	}
 
 	if (img.channels() > 1) {
 		std::string msg = "The image has: " + DkUtils::stringify(img.channels()) + ", but 1 channel is required.\n";
-		throw DkMatException(msg, __LINE__, __FILE__);
+		throw std::cout << msg << std::endl; return;
 	}
 
 	if (img.type() != CV_8U) {
 		std::string msg = "The image must be CV_8U but it is: " + DkUtils::getMatInfo(img);
-		throw DkMatException(msg, __LINE__, __FILE__);
+		throw std::cout << msg << std::endl; return;
 	}
 
 	drawContours(img, contours, blob.getContourIdx(), val, CV_FILLED, 8, hierarchy, maxLevel);
@@ -1130,7 +1134,7 @@ template <class Attr> void DkBlobs<Attr>::calcArea() {
 		//findContours(help, contours, hierarchy, RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
 	} else {
 
-		typename vector<Attr>::iterator it;
+		typename std::vector<Attr>::iterator it;
 		RotatedRect rect;
 		Rect bb;
 		it = props.begin();
@@ -1193,7 +1197,7 @@ template <class Attr> void DkBlobs<Attr>::calcOrientation() {
 
 		//formula according http://public.cranfield.ac.uk/c5354/teaching/dip/opencv/SimpleImageAnalysisbyMoments.pdf
 		//and http://en.wikipedia.org/wiki/Image_moment
-		typename vector<Attr>::iterator it;
+		typename std::vector<Attr>::iterator it;
 		it = props.begin();
 		while( it != props.end()) {
 			if ((*it).getOrientation() == -1) {
@@ -1262,7 +1266,7 @@ template <class Attr> void DkBlobs<Attr>::calcBb() {
 		//findContours(help, contours, hierarchy, RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
 	} else {
 
-		typename vector<Attr>::iterator it;
+		typename std::vector<Attr>::iterator it;
 		RotatedRect rect;
 		Rect bb;
 		it = props.begin();
@@ -1296,7 +1300,7 @@ template <class Attr> void DkBlobs<Attr>::calcMar() {
 		//findContours(help, contours, hierarchy, RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
 	} else {
 
-		typename vector<Attr>::iterator it;
+		typename std::vector<Attr>::iterator it;
 		//RotatedRect rect;
 		//Rect bb;
 		DkRect rect;
@@ -1321,7 +1325,7 @@ template <class Attr> void DkBlobs<Attr>::calculateMedianWordDims(const Mat img,
 	blobs.calcArea();
 	blobs.imgFilterArea(50);
 
-	std::vector<DkAttr> attrs = blobs.getProps();
+	std::std::vector<DkAttr> attrs = blobs.getProps();
 
 	double normAngle = DkMath::normAngleRad(angle);
 
@@ -1360,7 +1364,7 @@ template <class ColorAttr> void DkColorBlobs<ColorAttr>::calcMeanColors(Mat rgb,
 	iout << "calculate mean color: # of blobs: " << this->props.size() << dkendl;
 
 	if (this->props.size() != 0) {
-		typename vector<ColorAttr>::iterator it;
+		typename std::vector<ColorAttr>::iterator it;
 
 		DkBox bb;
 		it = this->props.begin();
@@ -1420,7 +1424,7 @@ template <class ColorAttr> void DkColorBlobs<ColorAttr>::calcMeanColors(Mat rgb,
 //DkUtils::getMatInfo(imgMagnPatch, "magnppatch");
 //DkUtils::getMatInfo(imgMagnPatch, "magnpatch");
 //DkUtils::getMatInfo(imgPatch, "imgpatch");
-				std::vector<Mat> rgbCh;
+				std::std::vector<Mat> rgbCh;
 				split(imgPatch, rgbCh);
 				rgbCh[0] = rgbCh[0].mul(imgMagnPatch);
 				rgbCh[1] = rgbCh[1].mul(imgMagnPatch);
@@ -1475,7 +1479,7 @@ template <class ColorAttr> void DkColorBlobs<ColorAttr>::calcMeanColors(Mat rgb,
 			//DkIP::imwrite("colorpatchMask.png", tmpMask);
 
 			Mat ihls = DkIP::convertRGBtoIHLS(imgPatch, tmpMask);
-			std::vector<Mat> ihlsCh;
+			std::std::vector<Mat> ihlsCh;
 			split(ihls, ihlsCh);
 			//saturation weighted hue histogram
 			//printf("h: %f l: %f s: %f\n", ihlsVal.x, ihlsVal.y, ihlsVal.z);						
@@ -1556,7 +1560,7 @@ public:
 	 * Returns the centroids as a vector (no further Blob-Attributes)
 	 * @return vector of centroids 
 	 */
-	vector<DkInterestPoint> getCentroids() {return centroids;};
+	std::vector<DkInterestPoint> getCentroids() {return centroids;};
 
 	
 	/**
@@ -1575,7 +1579,7 @@ private:
 	 */
 	DkInterestPoint calcCent(const Mat& p);
 
-	vector<DkInterestPoint> centroids;
+	std::vector<DkInterestPoint> centroids;
 };
 
 template <class DkCentAttr> void DkCentBlobs<DkCentAttr>::calcCentroids() {
@@ -1612,7 +1616,7 @@ template <class DkCentAttr> void DkCentBlobs<DkCentAttr>::calcCentroids() {
 			props.push_back(a);
 		}*/
 		//
-		//vector<vector<Point> >::iterator it; // iterator over all contours of an image (list of "blobs")
+		//std::vector<std::vector<Point> >::iterator it; // iterator over all contours of an image (list of "blobs")
 		//it = this->contours.begin(); // first element/contour vector of first blob
 		//while( it != this->contours.end()) {
 		//	DkCentAttr a;
@@ -1628,7 +1632,7 @@ template <class DkCentAttr> void DkCentBlobs<DkCentAttr>::calcCentroids() {
 
 	//some properties are calculated, insert the missing ones
 	} else {
-			vector<DkCentAttr>::iterator it; // iterator over all contours of an image (list of "blobs")
+			std::vector<DkCentAttr>::iterator it; // iterator over all contours of an image (list of "blobs")
 			it = this->props.begin(); // first element/contour vector of first blob
 			while( it != this->props.end()) {
 				DkInterestPoint ip; 
@@ -1653,7 +1657,7 @@ template <class DkCentAttr> DkInterestPoint DkCentBlobs<DkCentAttr>::calcCent(co
 template <class DkCentAttr> Mat DkCentBlobs<DkCentAttr>::drawCentroids(const Mat& src) {
 	Mat img = src.clone();
 
-	typename vector<DkCentAttr>::iterator it; // iterator on properties
+	typename std::vector<DkCentAttr>::iterator it; // iterator on properties
 	it = this->props.begin();
 
 	while (it != this->props.end()) {
@@ -1690,7 +1694,7 @@ template <class DkCentAttr> Mat DkCentBlobs<DkCentAttr>::imFilterOutOfCent(float
 		contourIdxInPropVector.clear();
 	} else {
 		//some properties are calculated, insert the missing ones
-		vector<DkCentAttr>::iterator it;
+		std::vector<DkCentAttr>::iterator it;
 
 
 
@@ -1706,7 +1710,7 @@ template <class DkCentAttr> Mat DkCentBlobs<DkCentAttr>::imFilterOutOfCent(float
 		it = props.begin();
 		while( it != props.end()) {
 			Mat tmp = this->getBwImg().clone(); 		
-				vector<vector<Point>> ctrs; 
+				std::vector<std::vector<Point>> ctrs; 
 				ctrs.push_back(contours[it->getContourIdx()]);
 				drawContours(tmp, ctrs, -1, Scalar(100), CV_FILLED, 8, noArray(), INT_MAX, Point(0,0)); //hierarchy
 				imwrite("C:\\VSProjects\\test.png", tmp); 	
