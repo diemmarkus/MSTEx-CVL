@@ -41,7 +41,7 @@ class DK_MODULE_API DkRgbModule {
 public:
 	DkRgbModule(const std::wstring& fileName);
 
-	void load();
+	void load(const cv::Mat& src = cv::Mat());
 	void compute();
 
 	cv::Mat getPredictedImage() const;

@@ -41,6 +41,8 @@ NMC_FIND_OPENCV()
           
 if (ENABLE_PLUGIN)
 
+	NMC_PREPARE_PLUGIN()
+
 	NMC_FINDQT()
 
 	NMC_EXIV_INCLUDES()
@@ -52,13 +54,15 @@ if (ENABLE_PLUGIN)
 	endif()
 
 	set(BUILDING_MULTIPLE_PLUGINS true)
+	
+	MAKE_ViennaMS()
 
-	add_subdirectory(MstexPlugin)
+	add_subdirectory(DkPlugin)
 	
 else(ENABLE_PLUGIN)
 
 	find_package(OpenCV REQUIRED highgui imgcodecs)
-	MAKE_ViennaMS()
+	MAKE_ViennaMS_exe()
 
 endif (ENABLE_PLUGIN)		  
 

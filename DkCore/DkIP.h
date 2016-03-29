@@ -4135,8 +4135,7 @@ public:
 	}
 
 
-
-#ifdef DK_SAVE_DEBUG
+#ifdef DK_STANDALONE
 	static bool imwrite(std::string path, Mat img, bool norm = false) {
 
 		
@@ -4157,10 +4156,17 @@ public:
 				
 		return cv::imwrite(path, imgW);
 	}
+
+	static cv::Mat imread(const std::string& imgPath) {
+		return cv::imread(imgPath);
+	}
+
 #else
-#pragma warning(disable: 4100)
-	static void imwrite(std::string path, Mat img, bool norm = false) { return false; };
-#pragma warning(default: 4100)
+	static bool imwrite(std::string, Mat, bool = false) { return false; };
+	static cv::Mat imread(const std::string&) {
+		wout << "EMPTY imread function called" << dkendl;
+		return cv::Mat();
+	};
 #endif
 
 };

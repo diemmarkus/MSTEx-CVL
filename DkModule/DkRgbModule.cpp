@@ -34,34 +34,35 @@
 #include "DkGrabCut.h"
 #include "DkAce.h"
 
-//#include <winsock2.h>	// needed since libraw 0.16
-
-#include "opencv/highgui.h"
-
 // DkMSModule --------------------------------------------------------------------
 DkRgbModule::DkRgbModule(const std::wstring& fileName) {
 
 	this->fileName = fileName;
 }
 
-void DkRgbModule::load() {
+void DkRgbModule::load(const cv::Mat& src) {
 
 	DkTimer dt;
 	std::vector<cv::Mat> msImgs;
 
 	cv::Size lastSize;
 
-	std::wstring filePath = fileName;
-	std::string fpStr(filePath.begin(), filePath.end());
+	cv::Mat img = src;
 
-	cv::Mat img = cv::imread(fpStr);
+	if (img.empty()) {
+		std::wstring filePath = fileName;
+		std::string fpStr(filePath.begin(), filePath.end());
+
+		cv::Mat img = DkIP::imread(fpStr);
+
+		if (msImgs.empty())
+			wout << "Error: could not load " << fpStr << dkendl;
+	}
+
 	cv::split(img, msImgs);
 
 	if (msImgs.size() < 3)
 		wout << "The image has less than 3 channels - note that this method was NOT designed for gray-scale images." << dkendl;
-
-	if (msImgs.empty())
-		wout << "Error: could not load " << fpStr << dkendl;
 
 	imgs = DkMSData(msImgs);
 	iout << "images loaded in: " << dt << dkendl;
@@ -123,7 +124,7 @@ bool DkRgbModule::saveImage(const std::string& imageName) const {
 
 	cv::Mat segImgInv = segImg.clone();
 	DkIP::invertImg(segImgInv);
-	bool ok = cv::imwrite(imageName, segImgInv);
+	bool ok = DkIP::imwrite(imageName, segImgInv);
 
 	if (!ok)
 		mout << "sorry, I could not write to: " << imageName << dkendl;

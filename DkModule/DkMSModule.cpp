@@ -36,7 +36,9 @@
 
 //#include <winsock2.h>	// needed since libraw 0.16
 
+#ifdef DK_STANDALONE
 #include "opencv/highgui.h"
+#endif
 
 // DkMSModule --------------------------------------------------------------------
 DkMSModule::DkMSModule(const std::wstring& folderName) {
@@ -66,8 +68,8 @@ void DkMSModule::load() {
 		std::wstring filePath = folderName + L"\\" + cFile;
 		std::string fpStr(filePath.begin(), filePath.end());
 
-		cv::Mat img = cv::imread(fpStr);
-		
+		cv::Mat img = DkIP::imread(fpStr);
+	
 		int chNum = getChannelNumber(cFile);
 
 		if (!img.empty() && cFile.find(L"GT") == std::wstring::npos && chNum != -1) {
@@ -123,7 +125,7 @@ bool DkMSModule::saveImage(const std::string& imageName) const {
 
 	cv::Mat segImgInv = segImg.clone();
 	DkIP::invertImg(segImgInv);
-	bool ok = cv::imwrite(imageName, segImgInv);
+	bool ok = DkIP::imwrite(imageName, segImgInv);
 
 	if (!ok)
 		mout << "sorry, I could not write to: " << imageName << dkendl;
