@@ -33,7 +33,6 @@
 
 #include <list>
 #include <limits>
-#include "DkError.h"
 #include "DkUtils.h"
 #include "DkTimer.h"
 #include "DkMath.h"
@@ -251,13 +250,13 @@ public:
 		if (bwImg.channels() > 1) {
 			std::string msg = "the image needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(bwImg.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (!(bwImg.type() == CV_32FC1 || bwImg.type() == CV_8UC1)) {
 			std::string msg = "the image needs to be CV_32FC1 or CV_8UC1, it is: " + 
 				DkUtils::getMatInfo(bwImg);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		// nothing to do in here
@@ -295,7 +294,7 @@ public:
 
 			DkUtils::printDebug(DK_DEBUG_INFO, "fast image erosion 32F: %s ", dt.getIvl().c_str());
 		}
-		DkUtils::printDebug(DK_DEBUG_INFO, "(total: %s)\n", dt.getTotal().c_str());
+		DkUtils::printDebug(DK_DEBUG_INFO, "(total: %s) ", dt.getTotal().c_str());
 
 		return eImg;
 	}
@@ -331,7 +330,7 @@ public:
 		dilate(imgU, dImg, se, Point(-1,-1), 1, BORDER_CONSTANT, 0);
 
 		DkUtils::printDebug(DK_DEBUG_INFO, "image dilation: %s", dt.getIvl().c_str());
-		DkUtils::printDebug(DK_DEBUG_INFO, " (total: %s)\n", dt.getTotal().c_str());
+		DkUtils::printDebug(DK_DEBUG_INFO, " (total: %s) ", dt.getTotal().c_str());
 
 		return dImg;
 	}
@@ -605,13 +604,13 @@ public:
 		if (bwImg.channels() > 1) {
 			std::string msg = "the image needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(bwImg.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (!(bwImg.type() == CV_32FC1 || bwImg.type() == CV_8UC1)) {
 			std::string msg = "the image needs to be CV_32FC1 or CV_8UC1, it is: " + 
 				DkUtils::getMatInfo(bwImg);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		// nothing to do in here
@@ -648,7 +647,7 @@ public:
 			DkUtils::printDebug(DK_DEBUG_INFO, "fast image dilation 32F: %s ", dt.getIvl().c_str());
 		}
 
-		DkUtils::printDebug(DK_DEBUG_INFO, "(total: %s)\n", dt.getTotal().c_str());
+		DkUtils::printDebug(DK_DEBUG_INFO, "(total: %s) ", dt.getTotal().c_str());
 
 		return dImg;
 	}
@@ -684,7 +683,7 @@ public:
 					// squared pixel distance to center
 					int dist = (rIdx-c)*(rIdx-c) + (cIdx-c)*(cIdx-c);
 
-					//printf("distance: %i, radius: %i\n", dist, r);
+					//printf("distance: %i, radius: %i ", dist, r);
 					if (dist < r)
 						sePtr[cIdx] = 1;
 				}
@@ -706,19 +705,19 @@ public:
 		if (img.type() != CV_32FC3) {
 			std::string msg = "the image needs to be CV_32FC3, it is: " + 
 				DkUtils::getMatInfo(img);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 		if (mask.type() != CV_8UC1) {
 			std::string msg = "the image needs to be CV_8UC3, it is: " + 
 				DkUtils::getMatInfo(img);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
-		std::vector<Mat> rgbCh;
+		std::std::vector<Mat> rgbCh;
 		split(img, rgbCh);
 
 		Mat ihls = Mat(img.size(), CV_32FC3);
-		std::vector<Mat> hlsCh;
+		std::std::vector<Mat> hlsCh;
 		split(ihls, hlsCh);
 
 		for(int i = 0; i < rgbCh[0].rows; i++)
@@ -932,7 +931,7 @@ public:
 
 
 		if (sum(gKernel).val[0] == 0)
-			throw DkIllegalArgumentException("The kernel sum is zero\n", __LINE__, __FILE__);
+			throw DkIllegalArgumentException("The kernel sum is zero ", __LINE__, __FILE__);
 		else
 			gKernel *= 1.0f/sum(gKernel).val[0];
 
@@ -964,7 +963,7 @@ public:
 		//float ks = (float)sum(abs(gKernel)).val[0];
 
 		//if (ks == 0)
-		//	throw DkIllegalArgumentException("The kernel sum is zero\n", __LINE__, __FILE__);
+		//	throw DkIllegalArgumentException("The kernel sum is zero ", __LINE__, __FILE__);
 		//else
 		//	gKernel *= 1/ks;
 
@@ -1081,25 +1080,25 @@ public:
 		if (hist.channels() > 1) {
 			std::string msg = "the histogram needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(hist.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (kernel.channels() > 1) {
 			std::string msg = "the kernel needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(kernel.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (hist.type() != CV_32FC1) {
 			std::string msg = "the histogram needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(hist);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (kernel.type() != CV_32FC1) {
 			std::string msg = "the kernel needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(kernel);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		int hs = hist.rows * hist.cols;			// histogram size
@@ -1138,12 +1137,12 @@ public:
 		if (hist.channels() > 1) {
 			std::string msg = "the histogram needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(hist.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 		if (hist.type() != CV_32FC1) {
 			std::string msg = "the histogram needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(hist);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		float* histPtr = hist.ptr<float>();
@@ -1175,13 +1174,13 @@ public:
 		if (vec.channels() > 1) {
 			std::string msg = "the vector needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(vec.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (vec.type() != CV_32FC1) {
 			std::string msg = "the vector needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(vec);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		Mat sHist;
@@ -1272,13 +1271,13 @@ public:
 		if (vec.channels() > 1) {
 			std::string msg = "the vector needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(vec.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (vec.type() != CV_32FC1) {
 			std::string msg = "the vector needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(vec);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		Mat sHist;
@@ -1351,13 +1350,13 @@ public:
 		if (vec.channels() > 1) {
 			std::string msg = "the vector needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(vec.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (vec.type() != CV_32FC1) {
 			std::string msg = "the vector needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(vec);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		Mat sHist;
@@ -1401,7 +1400,7 @@ public:
 				//	max = (vecPtr[suc] > vecPtr[pre]) ? suc : pre;
 
 				//if (vecPtr[max] != 0) localMaxList->push_back(max);
-				//if (vecPtr[max] != 0) printf("max: %i\n", max);
+				//if (vecPtr[max] != 0) printf("max: %i ", max);
 				localMaxList->push_back(idx);
 			}
 		}
@@ -1413,22 +1412,24 @@ public:
 	 * @param thr a threshold, local maxima below this threshold are rejected.
 	 * @return a vector containing interest points (DkInterestPoint)
 	 **/
-	static vector<DkInterestPoint> findLocalMaxima2D(const Mat src, float thr) {
+	static std::vector<DkInterestPoint> findLocalMaxima2D(const Mat src, float thr) {
 
 		if (src.channels() > 1) {
 			std::string msg = "the image needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(src.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; 
+			return std::vector<DkInterestPoint>();
 		}
 
 		if (src.type() != CV_32FC1) {
 			std::string msg = "the image needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(src);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; 
+			return std::vector<DkInterestPoint>();
 		}
 
 
-		vector<DkInterestPoint> ips = vector<DkInterestPoint>();
+		std::vector<DkInterestPoint> ips = std::vector<DkInterestPoint>();
 
 		for (int rIdx = 1; rIdx < src.rows-1; rIdx++) {
 
@@ -1495,13 +1496,13 @@ public:
 		if (hist.channels() > 1) {
 			std::string msg = "the histogram needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(hist.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (hist.type() != CV_32FC1) {
 			std::string msg = "the histogram needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(hist);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		double gMin, gMax;
@@ -1538,13 +1539,13 @@ public:
 		if (hist.channels() > 1) {
 			std::string msg = "the histogram needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(hist.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (hist.type() != CV_32FC1) {
 			std::string msg = "the histogram needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(hist);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		double maxIdx;
@@ -1588,19 +1589,19 @@ public:
 		if (img.channels() > 1) {
 			std::string msg = "the image needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(img.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (!maskImg.empty() && maskImg.channels() > 1) {
 			std::string msg = "the mask needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(maskImg.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (img.type() != CV_32FC1) {
 			std::string msg = "the image needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(img);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		DkTimer dt = DkTimer();	// stop
@@ -1633,7 +1634,7 @@ public:
 		patchBox.width  = (patchBox.x+newDim < img.cols) ? newDim : img.cols-patchBox.x;
 		patchBox.height = (patchBox.y+newDim < img.rows) ? newDim : img.rows-patchBox.y;
 
-		DkUtils::printDebug(DK_INFO, "Extract image patch computed in %s\n", dt.getTotal().c_str());
+		DkUtils::printDebug(DK_INFO, "Extract image patch computed in %s ", dt.getTotal().c_str());
 
 		return patchBox;
 
@@ -1650,11 +1651,11 @@ public:
 
 		if (patch.channels() != 3) {
 			std::string msg = "patch is not an rgb image, it is: " + DkUtils::getMatInfo(patch);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 		if (maskImg.channels() != 1) {
 			std::string msg = "the mask patch is not a single channel image, it is: " + DkUtils::getMatInfo(maskImg);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		////meanStdDev needs 8U mask
@@ -1691,20 +1692,20 @@ public:
 		if (src.channels() > 1) {
 			std::string msg = "the image needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(src.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (src.type() != CV_32FC1) {
 			std::string msg = "the image needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(src);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		double mSum = src.rows*src.cols;
 		if (mSum > UINT_MAX) {
 			std::string msg = "the image is too big for our integral computation: " + 
 				DkUtils::stringify(mSum) + " > " + DkUtils::stringify(FLT_MAX);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 			// TODO: do something (e.g. opencv integral)
 		}
 
@@ -1730,7 +1731,7 @@ public:
 
 				sc += (unsigned int)*cpxSrc;
 				*cpx = sc + *lpx;
-				//printf("cpx: %i\n", *cpx);
+				//printf("cpx: %i ", *cpx);
 			}
 		}
 
@@ -1750,19 +1751,19 @@ public:
 
 		if (src.empty()) {
 			std::string msg = "the image assigned is empty";
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (src.channels() > 1) {
 			std::string msg = "the image needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(src.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (src.type() != CV_32SC1) {
 			std::string msg = "the image needs to be CV_32SC1, it is: " + 
 				DkUtils::getMatInfo(src);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		Mat dst = Mat(src.rows-1, src.cols-1, CV_8UC1);
@@ -1837,7 +1838,7 @@ public:
 			}
 		}
 		
-		DkUtils::printDebug(DK_DEBUG_INFO, "convolving integral image 32S in: %s\n", dt.getTotal().c_str());
+		DkUtils::printDebug(DK_DEBUG_INFO, "convolving integral image 32S in: %s ", dt.getTotal().c_str());
 
 		return dst;
 	}
@@ -1855,19 +1856,19 @@ public:
 
 		if (src.empty()) {
 			std::string msg = "the image assigned is empty";
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (src.channels() > 1) {
 			std::string msg = "the image needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(src.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (src.type() != CV_32SC1) {
 			std::string msg = "the image needs to be CV_32SC1, it is: " + 
 				DkUtils::getMatInfo(src);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		Mat dst = Mat(src.rows-1, src.cols-1, CV_32FC1);
@@ -1942,7 +1943,7 @@ public:
 			}
 		}
 		
-		DkUtils::printDebug(DK_DEBUG_INFO, "convolving integral image 32S in: %s\n", dt.getTotal().c_str());
+		DkUtils::printDebug(DK_DEBUG_INFO, "convolving integral image 32S in: %s ", dt.getTotal().c_str());
 
 		return dst;
 	}
@@ -1961,25 +1962,25 @@ public:
 		if (src.channels() > 1) {
 			std::string msg = "the source image needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(src.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (src.type() != CV_32SC1) {
 			std::string msg = "the source image needs to be CV_32SC1, it is: " + 
 				DkUtils::getMatInfo(src);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (dst->type() != CV_8U) {
 			std::string msg = "the destination image needs to be CV_8UC1, it is: " + 
 				DkUtils::getMatInfo(*dst);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (DkVector(dst->size()) != DkVector(src.size())-1) {
 			std::string msg = "the destination image needs to have src.rows-1 and src.cols-1, but it has src: " + 
 				DkVector(src.size()).toString() + " dst: " + DkVector(dst->size()).toString();
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 
 		}
 
@@ -2114,16 +2115,16 @@ public:
 	//	if (src.channels() > 1) {
 	//		std::string msg = "the image needs to have 1 channel, but it has: " + 
 	//			DkUtils::stringify(src.channels());
-	//		throw DkMatException(msg, __LINE__, __FILE__);
+	//		std::cout << msg << std::endl; return;
 	//	}
 
 	//	if (src.type() != CV_32SC1) {
 	//		std::string msg = "the image needs to be CV_32SC1, it is: " + 
 	//			DkUtils::getMatInfo(src);
-	//		throw DkMatException(msg, __LINE__, __FILE__);
+	//		std::cout << msg << std::endl; return;
 	//	}
 
-	//	if (kernelSize < 3) DkUtils::printDebug(DK_WARNING, "[convolveIntegralImage8U] kernelsize is < 3, it is set to 3\n");
+	//	if (kernelSize < 3) DkUtils::printDebug(DK_WARNING, "[convolveIntegralImage8U] kernelsize is < 3, it is set to 3 ");
 
 	//	Mat dst = Mat(src.rows-1, src.cols-1, CV_32SC1);
 	//	
@@ -2187,7 +2188,7 @@ public:
 	//		}
 	//	}
 	//	
-	//	DkUtils::printDebug(DK_DEBUG_B, "convolving integral image 32S in: %s\n", dt.getTotal().c_str());
+	//	DkUtils::printDebug(DK_DEBUG_B, "convolving integral image 32S in: %s ", dt.getTotal().c_str());
 
 	//	return dst;
 	//}
@@ -2206,13 +2207,13 @@ public:
 		if (src.channels() > 1) {
 			std::string msg = "the image needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(src.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (src.type() != CV_64FC1) {
 			std::string msg = "the image needs to be CV_64FC1, it is: " + 
 				DkUtils::getMatInfo(src);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		int ksY = (kernelSizeY != 0) ? kernelSizeY : kernelSizeX;	// make squared kernel
@@ -2309,7 +2310,7 @@ public:
 			}
 		}
 		
-		DkUtils::printDebug(DK_DEBUG_INFO, "convolving integral image in: %s\n", dt.getTotal().c_str());
+		DkUtils::printDebug(DK_DEBUG_INFO, "convolving integral image in: %s ", dt.getTotal().c_str());
 		//normalize(dst, dst, 1, 0, NORM_MINMAX);
 
 		return dst;
@@ -2356,7 +2357,7 @@ public:
 	//	*std = 1/sum0 * sqrt(sum0*sum2 - sum1*sum1);
 
 	//	if (DEBUG >= 3)
-	//		printf(">> avg & std computed in: %s\n", dt.getTotal().c_str());
+	//		printf(">> avg & std computed in: %s ", dt.getTotal().c_str());
 	//}
 
 	/**
@@ -2372,8 +2373,8 @@ public:
 
 		// check inputs
 		if (src.channels() != 1 || !mask.empty() && mask.channels() != 1) {
-			std::string msg = "The image has: " + DkUtils::stringify(src.channels()) + ", but 1 channel is required\n";
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::string msg = "The image has: " + DkUtils::stringify(src.channels()) + ", but 1 channel is required ";
+			std::cout << msg << std::endl; return;
 		}
 
 		// convert the source image
@@ -2395,7 +2396,7 @@ public:
 		double thresh = getThreshOtsu(hist);
 		threshold(imgF, imgF, thresh/255.0f, 1.0f, THRESH_BINARY);
 
-		DkUtils::printDebug(DK_DEBUG_INFO, "otsu threshold: %.4f computed in: %s\n", thresh/255.0f, dt.getTotal().c_str());
+		DkUtils::printDebug(DK_DEBUG_INFO, "otsu threshold: %.4f computed in: %s ", thresh/255.0f, dt.getTotal().c_str());
 
 		return imgF;
 
@@ -2412,25 +2413,25 @@ public:
 		if (img.channels() > 1) {
 			std::string msg = "the image needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(img.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (!mask.empty() && mask.channels() > 1) {
 			std::string msg = "the mask needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(mask.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (img.type() != CV_32FC1) {
 			std::string msg = "the image needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(img);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (!mask.empty() && !(mask.type() == CV_32FC1 || mask.type() == CV_8UC1)) {
 			std::string msg = "the mask needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(mask);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		// compute gradient magnitude
@@ -2467,7 +2468,7 @@ public:
 					(mask.depth() == CV_32F && maskPtr32F[cIdx] > 0) ||
 					(mask.depth() == CV_8U  && maskPtr8U[cIdx]	> 0)) {
 					int hIdx = cvFloor(imgPtr[cIdx]*255);
-					//printf("%.3f, %i\n", imgPtr[cIdx], hIdx);
+					//printf("%.3f, %i ", imgPtr[cIdx], hIdx);
 					if (hIdx >= 0 && hIdx < 256)	// -> bug in normalize!
 						histPtr[hIdx] ++;
 				}
@@ -2493,25 +2494,25 @@ public:
 		if (img.channels() > 1) {
 			std::string msg = "the image needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(img.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (!mask.empty() && mask.channels() > 1) {
 			std::string msg = "the mask needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(mask.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (img.type() != CV_32FC1) {
 			std::string msg = "the image needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(img);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (!mask.empty() && !(mask.type() == CV_32FC1 || mask.type() == CV_8UC1)) {
 			std::string msg = "the mask needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(mask);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		// compute gradient magnitude
@@ -2556,7 +2557,7 @@ public:
 						hIdx = cvRound(imgPtr[cIdx]/perBin - (minimum)/perBin); // TODO: 20110819 floating point invalid operation
 
 					if (hIdx >= 0 && hIdx < (int) numBin){	// -> bug in normalize!
-						//printf("%d \n", hIdx - cvFloor(minimum/perBin));
+						//printf("%d  ", hIdx - cvFloor(minimum/perBin));
 						histPtr[hIdx] ++; // shifting dot distance into histogram
 					}  
 				}
@@ -2600,13 +2601,13 @@ public:
 	//	if (img.channels() > 1) {
 	//		std::string msg = "the image needs to have 1 channel, but it has: " + 
 	//			DkUtils::stringify(img.channels());
-	//		throw DkMatException(msg, __LINE__, __FILE__);
+	//		std::cout << msg << std::endl; return;
 	//	}
 
 	//	if (img.type() != CV_32FC1) {
 	//		std::string msg = "the image needs to be CV_32FC1, it is: " + 
 	//			DkUtils::getMatInfo(img);
-	//		throw DkMatException(msg, __LINE__, __FILE__);
+	//		std::cout << msg << std::endl; return;
 	//	}
 
 	//	Mat hist = computeHist(img, mask);
@@ -2655,13 +2656,13 @@ public:
 		if (hist.channels() > 1) {
 			std::string msg = "the histogram needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(hist.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (hist.type() != CV_32FC1) {
 			std::string msg = "the histogram needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(hist);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		double max_val = 0;
@@ -2742,13 +2743,13 @@ public:
 		if (img.channels() > 1) {
 			std::string msg = "the image needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(img.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (img.type() != CV_32FC1) {
 			std::string msg = "the image needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(img);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		Mat fftImg;
@@ -2818,13 +2819,13 @@ public:
 		if (src.channels() > 1) {
 			std::string msg = "the images needs to have 1 channel, but it has: " + 
 				DkUtils::stringify(src.channels());
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (src.type() != CV_32FC1) {
 			std::string msg = "the image needs to be CV_32FC1, it is: " + 
 				DkUtils::getMatInfo(src);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		Mat mapx = Mat(dst.size(), dst.type());
@@ -2894,7 +2895,7 @@ public:
 
 		if (src.depth() != CV_32FC1) {
 			std::string msg = "Mat must be CV_32FC1: " + DkUtils::getMatInfo(src);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		// transpose hist if it is Nx1
@@ -2910,7 +2911,7 @@ public:
 		if (nHist.cols != dst.rows) {
 			std::string msg = "Histogram cols must be equal to src.rows or src.cols. it is: " + DkUtils::stringify(nHist.cols) 
 				+ " mat dim: " + DkUtils::stringify(dst.rows) + std::string(" x ") + DkUtils::stringify(dst.cols);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		int magnitude = 500;
@@ -2976,12 +2977,12 @@ public:
 
 		if (src.depth() != CV_32F) {
 			std::string msg = "The src histogram has not the type CV_32F: " + DkUtils::getMatInfo(src);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if ((src.cols!=1) || (src.rows<binFactor)) {
 			std::string msg = "The binFactor > rows or the number of columns is greater 1: " + DkUtils::stringify(src.cols);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		int newSize = (int)ceil((float)src.rows/(float)binFactor);
@@ -3019,20 +3020,20 @@ public:
 		// check input
 		if (src.type() != CV_32FC1) {
 			std::string msg = "Mat must be CV_32FC1 but it is: " + DkUtils::getMatInfo(src);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (!mask.empty()) {
 			if (src.rows != mask.rows || src.cols != mask.cols) {
-				std::string msg = "Matrix dimension mismatch: \n  img  (" + 
-					DkUtils::stringify(src.rows) + " x " + DkUtils::stringify(src.cols) + ")\n  mask (" +
-					DkUtils::stringify(mask.rows) + " x " + DkUtils::stringify(mask.cols) + ")\n";
-				throw DkMatException(msg, __LINE__, __FILE__);
+				std::string msg = "Matrix dimension mismatch:    img  (" + 
+					DkUtils::stringify(src.rows) + " x " + DkUtils::stringify(src.cols) + ")   mask (" +
+					DkUtils::stringify(mask.rows) + " x " + DkUtils::stringify(mask.cols) + ") ";
+				std::cout << msg << std::endl; return;
 			}
 
 			if (mask.depth() != CV_32F && mask.depth() != CV_8U) {
 				std::string msg = "The mask obtained is neither of type CV_32F nor CV_8U: " + DkUtils::getMatInfo(mask);
-				throw DkMatException(msg, __LINE__, __FILE__);
+				std::cout << msg << std::endl; return;
 			}
 		}
 
@@ -3129,20 +3130,20 @@ public:
 	//	// check input
 	//	if (src.type() != CV_32FC1) {
 	//		std::string msg = "Mat must be CV_32FC1 but it is: " + DkUtils::getMatInfo(src);
-	//		throw DkMatException(msg, __LINE__, __FILE__);
+	//		std::cout << msg << std::endl; return;
 	//	}
 
 	//	if (!mask.empty()) {
 	//		if (src.rows != mask.rows || src.cols != mask.cols) {
-	//			std::string msg = "Matrix dimension mismatch: \n  img  (" + 
-	//				DkUtils::stringify(src.rows) + " x " + DkUtils::stringify(src.cols) + ")\n  mask (" +
-	//				DkUtils::stringify(mask.rows) + " x " + DkUtils::stringify(mask.cols) + ")\n";
-	//			throw DkMatException(msg, __LINE__, __FILE__);
+	//			std::string msg = "Matrix dimension mismatch:    img  (" + 
+	//				DkUtils::stringify(src.rows) + " x " + DkUtils::stringify(src.cols) + ")   mask (" +
+	//				DkUtils::stringify(mask.rows) + " x " + DkUtils::stringify(mask.cols) + ") ";
+	//			std::cout << msg << std::endl; return;
 	//		}
 
 	//		if (mask.depth() != CV_32F && mask.depth() != CV_8U) {
 	//			std::string msg = "The mask obtained is neither of type CV_32F nor CV_8U: " + DkUtils::getMatInfo(mask);
-	//			throw DkMatException(msg, __LINE__, __FILE__);
+	//			std::cout << msg << std::endl; return;
 	//		}
 	//	}
 
@@ -3267,7 +3268,7 @@ public:
 		// check inputs
 		if (src.empty()) {
 			std::string msg = "[DkIP::rotateImg] I cannot rotate an empty image";
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (angleRad == 0.0f)
@@ -3298,14 +3299,14 @@ public:
 
 		//	DkTimer tt = DkTimer();
 		//	DkBox b = findBoundingBox(rImg);
-		//	DkUtils::printDebug(DK_MODULE, "box found in: %s\n", tt.getTotal().c_str());
+		//	DkUtils::printDebug(DK_MODULE, "box found in: %s ", tt.getTotal().c_str());
 
 		//	
 		//	
 		//	b.clip(rImg.size());
 		//	b.size -= 1;
 
-		//	printf("new image border: %s\nc size: %s\n", b.toString().c_str(), DkVector(rImg.size()).toString().c_str());
+		//	printf("new image border: %s c size: %s ", b.toString().c_str(), DkVector(rImg.size()).toString().c_str());
 		//	rImg = rImg(b.getCvRect()).clone();
 		//}
 
@@ -3341,7 +3342,7 @@ public:
 		// check inputs
 		if (src.empty()) {
 			std::string msg = "[DkIP::rotateInvImg] I cannot rotate an empty image";
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 
@@ -3380,20 +3381,20 @@ public:
 		// check inputs
 		if (src.type() != CV_32FC1) {
 			std::string msg = "The image obtained is not of type CV_32FC1: " + DkUtils::getMatInfo(src);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (!mask.empty()) {
 			if (src.rows != mask.rows || src.cols != mask.cols) {
-				std::string msg = "Matrix dimension mismatch: \n  img  (" + 
-					DkUtils::stringify(src.rows) + " x " + DkUtils::stringify(src.cols) + ")\n  mask (" +
-					DkUtils::stringify(mask.rows) + " x " + DkUtils::stringify(mask.cols) + ")\n";
-				throw DkMatException(msg, __LINE__, __FILE__);
+				std::string msg = "Matrix dimension mismatch:    img  (" + 
+					DkUtils::stringify(src.rows) + " x " + DkUtils::stringify(src.cols) + ")   mask (" +
+					DkUtils::stringify(mask.rows) + " x " + DkUtils::stringify(mask.cols) + ") ";
+				std::cout << msg << std::endl; return;
 			}
 
 			if (mask.depth() != CV_32F && mask.depth() != CV_8U) {
 				std::string msg = "The mask obtained is neither of type CV_32F nor CV_8U: " + DkUtils::getMatInfo(mask);
-				throw DkMatException(msg, __LINE__, __FILE__);
+				std::cout << msg << std::endl; return;
 			}
 		}
 
@@ -3401,7 +3402,7 @@ public:
 			Mat hist = DkIP::computeHist(src, mask);				//weight gray values with sigmoid function according		
 			mean = (float)DkIP::getThreshOtsu(hist);		//sigmoid slope, centered at l according text estimation
 			mean = mean/255.0f;
-			DkUtils::printDebug(DK_DEBUG_INFO, "mean: %.3f\n", mean);
+			DkUtils::printDebug(DK_DEBUG_INFO, "mean: %.3f ", mean);
 		}
 
 		const float *maskPtrF;
@@ -3450,11 +3451,11 @@ public:
 	static Mat swapChannels(Mat img) {
 
 		if (img.channels() != 3) {
-			std::string msg = "A 3 channel image is required, the image is: " + DkUtils::getMatInfo(img) + "\n";
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::string msg = "A 3 channel image is required, the image is: " + DkUtils::getMatInfo(img) + " ";
+			std::cout << msg << std::endl; return;
 		}
 
-		std::vector<Mat> rgbCh;
+		std::std::vector<Mat> rgbCh;
 		split(img, rgbCh);
 		Mat tmp;
 		tmp = rgbCh[0];
@@ -3484,7 +3485,7 @@ public:
 		// just allow 32FC1 mats
 		if (img.type() != CV_32FC1) {
 			std::string msg = "The image obtained is not of type CV_32FC1: " + DkUtils::getMatInfo(img);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (maxDim.empty()) {
@@ -3531,7 +3532,7 @@ public:
 		// just allow 32FC1 mats
 		if (img.type() != CV_32FC1) {
 			std::string msg = "The image obtained is not of type CV_32FC1: " + DkUtils::getMatInfo(img);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (img.empty() || !maxDim && !minDim) 
@@ -3539,20 +3540,20 @@ public:
 
 		if (maxDim && minDim && maxDim->cols != minDim->cols) {
 			std::string msg = "[minMaxDim] min.cols != max.cols: " + DkUtils::stringify(minDim->cols) + " != " + DkUtils::stringify(maxDim->cols);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (maxDim && maxDim->rows != 1 || minDim && minDim->rows != 1) {
 			std::string msg = "[minMaxDim] min and max must be a 1xN Matrix (minDim: " + 
 				DkUtils::stringify(minDim->rows) + "x" + DkUtils::stringify(minDim->cols) + ", maxDim: " +
 				DkUtils::stringify(maxDim->rows) + "x" + DkUtils::stringify(maxDim->cols) + ")";
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (maxDim && maxDim->cols != img.cols && maxDim->cols != img.rows ||
 			minDim && minDim->cols != img.cols && minDim->cols != img.rows) {
 				std::string msg = "[minMaxDim] min and max Matrix must either equal the image rows or the image cols";
-				throw DkMatException(msg, __LINE__, __FILE__);
+				std::cout << msg << std::endl; return;
 		}
 
 
@@ -3593,7 +3594,7 @@ public:
 
 		if (img.type() != CV_32FC1) {
 			std::string msg = "The image obtained is not of type CV_32FC1: " + DkUtils::getMatInfo(img);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		double minV, maxV;
@@ -3646,9 +3647,9 @@ public:
 			DkIP::mulMask(img, mask);
 
 		} else {
-			std::string msg = "[DkIP::invertImg] the input image's depth must be 32F or 8U, it is:\n";
+			std::string msg = "[DkIP::invertImg] the input image's depth must be 32F or 8U, it is: ";
 			msg += DkUtils::getMatInfo(img);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 	}
@@ -3658,7 +3659,7 @@ public:
 		// check inputs
 		if (mask.type() != CV_8UC1) {
 			std::string msg = "The image obtained is not of type CV_8UC1: " + DkUtils::getMatInfo(mask);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		Mat dst = Mat(mask.size(), CV_32FC1);
@@ -3691,7 +3692,7 @@ public:
 	static Mat localProjectionProfile(const Mat img, int kernelSize, int dim = DK_S_DIM_X) {
 
 		if (img.type() != CV_32FC1) {
-			std::string msg = "localProjectionProfile: img  must be 32FC1, it is: " + DkUtils::getMatInfo(img) + "\n";
+			std::string msg = "localProjectionProfile: img  must be 32FC1, it is: " + DkUtils::getMatInfo(img) + " ";
 			throw DkIllegalArgumentException(msg, __LINE__, __FILE__);
 		}
 
@@ -3762,7 +3763,7 @@ public:
 
 		return false;
 		//else {
-		//	DkUtils::printDebug(DK_WARNING, "empty mask...\n");
+		//	DkUtils::printDebug(DK_WARNING, "empty mask... ");
 		//}
 	}
 
@@ -3789,7 +3790,7 @@ public:
 			}
 		}
 		//else {
-		//	DkUtils::printDebug(DK_WARNING, "empty mask...\n");
+		//	DkUtils::printDebug(DK_WARNING, "empty mask... ");
 		//}
 	}
 
@@ -3816,13 +3817,13 @@ public:
 
 	static Mat convexHull(const Mat& bw, cv::Rect& bbox) {
 
-		vector<vector<Point> > contours;
-		vector<Vec4i> hierarchy;
+		std::vector<std::vector<Point> > contours;
+		std::vector<Vec4i> hierarchy;
 
 		findContours(bw, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
 		// Find the convex hull object for each contour
-		vector<vector<Point> > hull(contours.size());
+		std::vector<std::vector<Point> > hull(contours.size());
 		for(int i = 0; i < contours.size(); i++) { 
 			cv::convexHull(Mat(contours[i]), hull[i], false); 
 		}
@@ -3832,8 +3833,8 @@ public:
 
 		for(int i = 0; i< contours.size(); i++ ) {
 			Scalar color = Scalar(255);
-			//drawContours(hullImg, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
-			//drawContours(hullImg, hull, i, color, 1, 8, vector<Vec4i>(), 0, Point(), CV_);
+			//drawContours(hullImg, contours, i, color, 1, 8, std::vector<Vec4i>(), 0, Point() );
+			//drawContours(hullImg, hull, i, color, 1, 8, std::vector<Vec4i>(), 0, Point(), CV_);
 			drawContours(hullImg, hull, i, color, CV_FILLED);
 		}
 
@@ -3985,7 +3986,7 @@ public:
 			DkMatException(msg, __LINE__, __FILE__);
 		}
 
-		printf("%s @ (%i,%i) = %f\n", varname.c_str(), x, y, pixelVal);
+		printf("%s @ (%i,%i) = %f ", varname.c_str(), x, y, pixelVal);
 	}
 
 	static Mat mulMaskClone(const Mat src, const Mat mask) {
@@ -4015,16 +4016,16 @@ public:
 
 		if (histTemplate.depth() != CV_32F) {
 			std::string msg = "A CV_8U image is required, but it is: " + DkUtils::getMatInfo(histTemplate);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 		if (histTest.depth() != CV_32F) {
 			std::string msg = "A CV_8U image is required, but it is: " + DkUtils::getMatInfo(histTest);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		if (histTemplate.cols!=1 || histTest.cols!=1) {
 			std::string msg = "columns size must be 1, but it is:  " + DkUtils::getMatInfo(histTemplate) + DkUtils::getMatInfo(histTest);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << msg << std::endl; return;
 		}
 
 		double minV, maxV;
@@ -4070,7 +4071,7 @@ public:
 		if (minP.y > histTest.rows-1) minP.y = histTest.rows-1;
 		if (maxP.y > histTest.rows-1) maxP.y = histTest.rows-1;
 
-		//printf("correlation idx:  %i\n", maxP);
+		//printf("correlation idx:  %i ", maxP);
 
 		if (method==CV_TM_CCORR || method==CV_TM_CCORR_NORMED || method==CV_TM_CCOEFF || method==CV_TM_CCOEFF_NORMED) {
 			shift = maxP;
@@ -4125,7 +4126,7 @@ public:
 		if (opacity <= 0.0f)
 			return;
 
-		vector<Point> rPts = rect.getPoints();
+		std::vector<Point> rPts = rect.getPoints();
 		const Point* rPtsA = &rPts[0];
 		int n = (int)rPts.size();
 		
@@ -4157,7 +4158,7 @@ public:
 		line(img, rect.d.getCvPoint32f(), rect.a.getCvPoint32f(), Scalar(col), linewidth, lineType);
 	}
 
-	static void drawDots(Mat& img, std::vector<DkVector> &dots, Scalar col=Scalar(0), int radius = 3) {
+	static void drawDots(Mat& img, std::std::vector<DkVector> &dots, Scalar col=Scalar(0), int radius = 3) {
 
 		// now find the k nearest
 		for (unsigned int idx = 0; idx < dots.size(); idx++) {
@@ -4171,15 +4172,15 @@ public:
 
 	//input angle [rad]
 	//angleDiff in [deg]
-	static std::vector<DkLine> filterLineAngle(std::vector<DkLine>& inputLines, double angle, float angleDiff=5.0f) {
+	static std::std::vector<DkLine> filterLineAngle(std::std::vector<DkLine>& inputLines, double angle, float angleDiff=5.0f) {
 
-		std::vector<DkLine> tmp = inputLines;
-		std::vector<DkLine>::iterator lineIter = tmp.begin();
+		std::std::vector<DkLine> tmp = inputLines;
+		std::std::vector<DkLine>::iterator lineIter = tmp.begin();
 
 		//dout << class DK_CORE_APIName << " filterLineAngle" << dkendl;
 
 		if (angle == 361.0f) {
-			//DkUtils::printDebug(DK_WARNING, "[DkLines] no page angle set\n");
+			//DkUtils::printDebug(DK_WARNING, "[DkLines] no page angle set ");
 			return tmp;
 		}
 
@@ -4205,9 +4206,9 @@ public:
 		return tmp;
 	}
 
-	static void filterBorderLines(std::vector<DkLine> &lineVectorH, std::vector<DkLine> &lineVectorV, Size imgS, int borderThres) {
+	static void filterBorderLines(std::std::vector<DkLine> &lineVectorH, std::std::vector<DkLine> &lineVectorV, Size imgS, int borderThres) {
 
-		std::vector<DkLine>::iterator lineIter = lineVectorH.begin();
+		std::std::vector<DkLine>::iterator lineIter = lineVectorH.begin();
 
 		//test horizontal lines if they are located within the borderThreshold
 		while (lineIter != lineVectorH.end()) {
@@ -4232,7 +4233,7 @@ public:
 
 	}
 
-	static void drawLines(Mat& img, const std::vector<DkLine> &lineVector, Scalar col=Scalar(0,0,255), int thickness=4, int circles=1) {
+	static void drawLines(Mat& img, const std::std::vector<DkLine> &lineVector, Scalar col=Scalar(0,0,255), int thickness=4, int circles=1) {
 		
 		if (img.empty())
 			return;
@@ -4252,7 +4253,7 @@ public:
 		}
 	}
 
-	static Mat drawLinesClone(const Mat img, const std::vector<DkLine> &lineVector, Scalar col=Scalar(0,0,255), int thickness=4, int circles=1) {
+	static Mat drawLinesClone(const Mat img, const std::std::vector<DkLine> &lineVector, Scalar col=Scalar(0,0,255), int thickness=4, int circles=1) {
 
 		Mat linImg = img.clone();
 		drawLines(linImg, lineVector, col, thickness, circles);
@@ -4260,15 +4261,15 @@ public:
 		return linImg;
 	}
 
-	static Mat drawLinesClone(Mat img, const std::vector<DkLineExt> &lineVector, Scalar col=Scalar(0,0,255), int thickness=4, int circles=1) {
+	static Mat drawLinesClone(Mat img, const std::std::vector<DkLineExt> &lineVector, Scalar col=Scalar(0,0,255), int thickness=4, int circles=1) {
 
-		return drawLinesClone(img, std::vector<DkLine>(lineVector.begin(), lineVector.end()), col, thickness, circles);
+		return drawLinesClone(img, std::std::vector<DkLine>(lineVector.begin(), lineVector.end()), col, thickness, circles);
 
 	}
 
-	static Mat drawLinesClone(Mat img, const std::vector<DkLineDotted> &lineVector, Scalar col=Scalar(0,0,255), int thickness=4, int circles=1) {
+	static Mat drawLinesClone(Mat img, const std::std::vector<DkLineDotted> &lineVector, Scalar col=Scalar(0,0,255), int thickness=4, int circles=1) {
 
-		return drawLinesClone(img, std::vector<DkLine>(lineVector.begin(), lineVector.end()), col, thickness, circles);
+		return drawLinesClone(img, std::std::vector<DkLine>(lineVector.begin(), lineVector.end()), col, thickness, circles);
 
 	}
 
@@ -4299,22 +4300,22 @@ public:
 	}
 
 
-	static void drawSingleContour(Mat &img, vector<Point> *contour, Scalar col = Scalar(255)) {
+	static void drawSingleContour(Mat &img, std::vector<Point> *contour, Scalar col = Scalar(255)) {
 		
 		// is anything to do in here?
 		if (!contour)
 			return;
 
 		if (img.empty()) {
-			throw DkMatException("drawSingleContour: image should not be empty\n", __LINE__, __FILE__);
+			throw DkMatException("drawSingleContour: image should not be empty ", __LINE__, __FILE__);
 		}
 
 		if (img.type() != CV_8UC1) {
-			std::string msg = "drawSingleContour: img  must be 8UC1, it is: " + DkUtils::getMatInfo(img) + "\n";
+			std::string msg = "drawSingleContour: img  must be 8UC1, it is: " + DkUtils::getMatInfo(img) + " ";
 			throw DkIllegalArgumentException(msg, __LINE__, __FILE__);
 		}
 
-		vector<vector<Point> > contours;
+		std::vector<std::vector<Point> > contours;
 		contours.push_back(*contour);
 				
 		drawContours(img, contours, 0, col, CV_FILLED, 8);

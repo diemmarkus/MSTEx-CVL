@@ -48,15 +48,30 @@
 #include <iostream>
 #include <fstream>
 
-#include "DkError.h"
-
 #ifdef _WIN32
 	#include <wtypes.h>
-
 #endif
 
 #ifdef linux
 	typedef unsigned long DWORD;
+#endif
+
+
+#ifdef linux
+	#ifdef DK_CORE_EXPORTS
+		#define DK_CORE_API
+	#else
+		#define DK_CORE_API
+	#endif
+#endif
+
+
+#ifdef WIN32
+	#ifdef DK_CORE_EXPORTS
+		#define DK_CORE_API __declspec(dllexport)
+	#else
+		#define DK_CORE_API __declspec(dllimport)
+	#endif
 #endif
 
 enum morphTypes {DK_ERODE=0, DK_DILATE};
@@ -290,17 +305,21 @@ public:
 
 			float* srcPtr = img.ptr<float>(rIdx);
 
-			if (!getline(stream, line))
-				throw DkIllegalArgumentException("wrong file format sorry: " + filePath, __LINE__, __FILE__);
+			if (!getline(stream, line)) {
+				std::cout << "wrong file format sorry: " << filePath;
+				return cv::Mat();
+			}
 
 			std::stringstream linestream(line);
 			std::string value;
 
 			for (int cIdx = 0; cIdx < cols; cIdx++) {
 
-				if (!getline(linestream, value, ','))
-					throw DkIllegalArgumentException("wrong column format sorry: " + filePath, __LINE__, __FILE__);
-				
+				if (!getline(linestream, value, ',')) {
+					std::cout << "wrong column format sorry: " << filePath;
+					return cv::Mat();
+				}
+
 				srcPtr[cIdx] = (float)atof(value.c_str());
 			}
 		}
@@ -313,12 +332,12 @@ public:
 	static void histToText(std::string filePath, const Mat& img) {
 #ifdef WIN32
 		if (img.type() != CV_32FC1) {
-			std::string msg = "The image should be CV_32FC1, but it is: " + getMatInfo(img);
-			throw DkMatException(msg, __LINE__, __FILE__);
+			std::cout << "The image should be CV_32FC1, but it is: " << getMatInfo(img) << std::endl;
+			return;
 		}
 		if (img.rows != 1) {
-
-			throw DkMatException("Image must be 1xN\n", __LINE__, __FILE__);
+			std::cout << "Image must be 1xN\n" << std::endl;
+			return;
 		}
 
 		try {
@@ -907,59 +926,6 @@ static DkDebugStream& woutc = DebugResources::wout();
 static DkDebugStream& moutc = DebugResources::mout();
 static DkDebugStream& ioutc = DebugResources::iout();
 static DkDebugStream& doutc = DebugResources::dout();
-
-
-class DK_CORE_API DkHandleLog {
-
-public:
-	static std::string getHandleReport() {
-
-#ifdef WIN32
-		DWORD type_char = 0, 
-			type_disk = 0, 
-			type_pipe = 0, 
-			type_remote = 0, 
-			type_unknown = 0,
-			handles_count = 0;
-
-		GetProcessHandleCount(GetCurrentProcess(), &handles_count);
-		handles_count *= 4;
-		for (DWORD handle = 0x4; handle < handles_count; handle += 4) {
-			switch (GetFileType((HANDLE)handle)){
-			case FILE_TYPE_CHAR:
-				type_char++;
-				break;
-			case FILE_TYPE_DISK:
-				type_disk++;
-				break;
-			case FILE_TYPE_PIPE: 
-				type_pipe++;
-				break;
-			case FILE_TYPE_REMOTE: 
-				type_remote++;
-				break;
-			case FILE_TYPE_UNKNOWN:
-				if (GetLastError() == NO_ERROR) type_unknown++;
-				break;
-
-			}
-		}
-
-		std::string str;
-		str += "Handle report: ";
-		str += DkUtils::stringify(type_char) + " char handles ";
-		str += DkUtils::stringify(type_disk) + " disk handles ";
-		str += DkUtils::stringify(type_pipe) + " pipe handles ";
-		str += DkUtils::stringify(type_remote) + " remote handles ";
-		str += DkUtils::stringify(type_unknown) + " unknown handles ";
-
-		return str;
-#endif
-		return "";
-	}
-
-};
-
 
 //#define wout DebugResources::wout()
 //#define mout DebugResources::mout()

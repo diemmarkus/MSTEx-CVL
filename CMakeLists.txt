@@ -10,11 +10,7 @@
 #
 PROJECT(ViennaMS)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-if(COMMAND cmake_policy)
-      cmake_policy(SET CMP0003 NEW)
-endif(COMMAND cmake_policy)
-
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 set(VIENNAMS_VERSION 0.0.l)
 add_definitions(-DVIENNAMS_VERSION="${VIENNAMS_VERSION}")
@@ -46,14 +42,14 @@ find_package(PkgConfig)
 
 	          
 # OpenCV
-SET(OpenCV_REQUIRED_MODULES core imgproc highgui ml features2d nonfree flann objdetect video calib3d)
+SET(OpenCV_REQUIRED_MODULES core imgproc highgui ml features2d flann objdetect video calib3d)
 SET(OpenCV_LIBS "")
 if (PKG_CONFIG_FOUND) # not sure: pkgconfig is needed for old linux  with old old opencv systems
 	pkg_check_modules(OpenCV  opencv>=2.1.0)
 	SET(OpenCV_LIBS ${OpenCV_LIBRARIES})
 endif(PKG_CONFIG_FOUND)
 IF (OpenCV_LIBS STREQUAL "") 
-	find_package(OpenCV 2.1.0 REQUIRED ${OpenCV_REQUIRED_MODULES})
+	find_package(OpenCV 3.0.0 REQUIRED ${OpenCV_REQUIRED_MODULES})
 ENDIF()
 IF (OpenCV_VERSION VERSION_LESS 2.4.0 AND OpenCV_FOUND AND MSVC) # OpenCV didn't allow to define packages before version 2.4.0 ... nomacs was linking against all libs even if they were not compiled -> error
 	string(REGEX REPLACE "\\." "" OpenCV_SHORT_VERSION ${OpenCV_VERSION})

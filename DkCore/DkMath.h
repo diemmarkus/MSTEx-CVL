@@ -29,9 +29,7 @@
 #pragma once
 
 #include <list>
-//#include "DkCoreIncludes.h"
 
-#include "DkError.h"
 #include "DkUtils.h"
 
 #ifdef max
@@ -355,8 +353,10 @@ public:
 			*xMax = (rp[0] != 0.0f) ? -rp[1]/(2*rp[0]) : xValues[1];
 			*yMax = *xMax * *xMax * rp[0] + *xMax*rp[1] + rp[2];
 		}
-		else
-			throw DkIllegalArgumentException("I could not solve the system...", __LINE__, __FILE__);
+		else {
+			std::cout << "I could not solve the system..." << std::endl;
+			return;
+		}
 
 		printf("old spline xMax: %.6f\n", *xMax);
 
@@ -407,8 +407,10 @@ public:
 			*xMax += firstXVal-1.0f;
 			*yMax = *xMax * *xMax * rp[0] + *xMax*rp[1] + rp[2];
 		}
-		else
-			throw DkIllegalArgumentException("I could not solve the system...", __LINE__, __FILE__);
+		else {
+			std::cout << "I could not solve the system...";
+			return;
+		}
 	}
 
 	static double computePcaAngle(const std::vector<DkVector>& points);
@@ -2185,7 +2187,7 @@ public:
 		return Rect(cvRound(uc.x), cvRound(uc.y), cvRound(size().width), cvRound(size().height));
 	}
 
-	static DkBox contour2BBox(const vector<vector<Point> >& pts) {
+	static DkBox contour2BBox(const std::vector<std::vector<cv::Point> >& pts) {
 		
 		if (pts.empty())
 			return DkBox();
@@ -2796,11 +2798,11 @@ public:
 
 	/**
 	 * Returns the corner points of the DkRectCorners as a vector, whereas the corners are stored as opencv Point2f (for cv::minAreaRect).
-	 * @return corner points clockwise as a vector<Point2f>.
+	 * @return corner points clockwise as a std::vector<Point2f>.
 	**/
-	vector<Point2f> getPoints32f() const {
+	std::vector<Point2f> getPoints32f() const {
 
-		vector<Point2f> pts;
+		std::vector<Point2f> pts;
 		pts.push_back(a.getCvPoint32f());
 		pts.push_back(b.getCvPoint32f());
 		pts.push_back(c.getCvPoint32f());
@@ -2809,9 +2811,9 @@ public:
 		return pts;
 	};
 
-	vector<Point> getPoints() const {
+	std::vector<Point> getPoints() const {
 
-		vector<Point> pts;
+		std::vector<Point> pts;
 		pts.push_back(a.getCvPoint());
 		pts.push_back(b.getCvPoint());
 		pts.push_back(c.getCvPoint());
@@ -2820,9 +2822,9 @@ public:
 		return pts;
 	};
 
-	vector<DkVector> getCorners() const {
+	std::vector<DkVector> getCorners() const {
 
-		vector<DkVector> crn;
+		std::vector<DkVector> crn;
 		crn.push_back(a);
 		crn.push_back(b);
 		crn.push_back(c);
@@ -2958,7 +2960,7 @@ public:
 
 	/**
 	 * Compares the value of two interest points.
-	 * This method is needed in order to sort a std::vector of interest points.
+	 * This method is needed in order to sort a std::vector< of interest points.
 	 * @param o an other interest point to compare the current with.
 	 * @return true if the obtained interest point (o) has a greater value (val) than the current.
 	 **/
@@ -3071,7 +3073,7 @@ public:
 
 	/**
 	 * Compares the value of two interest points.
-	 * This method is needed in order to sort a std::vector of interest points.
+	 * This method is needed in order to sort a std::vector< of interest points.
 	 * @param o an other interest point to compare the current with.
 	 * @return true if the obtained interest point (o) has a greater value (val) than the current.
 	 **/
@@ -3100,246 +3102,6 @@ public:
 	 * @return a string containing all values of the given instance.
 	 **/
 	std::string toString();
-
-};
-/**
- * The dotted line class DK_CORE_API extends the line class DK_CORE_API and represents a dotted line within an image and its properties. 
- * In addition to its base class DK_CORE_API DkLine it stores the frequency of the dots and the skew of the line.
- **/
-class DK_CORE_API DkLineDotted : public DkLine {
-
-public:
-	/**
-	 * Default constructor.
-	 * All values are initialized with zero.
-	**/
-	DkLineDotted();
-	/**
-	 * Creates a line with the defined starting and end point, an orientation and thickness.
-	 * @param xStart The starting column value of the line.
-	 * @param yStart The starting row value of the line.
-	 * @param xEnd The ending column value of the line.
-	 * @param yEnd The ending row value of the line.
-	 * @param frequency The mean frequency of the dots.
-	 * @param skew The skew of the line. 
-	**/
-	DkLineDotted(const float xStart, const float yStart, const float xEnd, const float yEnd, const float frequency, const float skew);
-	/**
-	 * Creates a line with the defined starting and end point.
-	 * @param start The starting point of the line.
-	 * @param end The ending point of the line.
-	 * @param frequency The frequency of the dots.
-	 * @param skew The skew of the line. 
-	**/
-	DkLineDotted(const Point2f start, const Point2f end, const float frequency, const float skew);
-	/**
-	 * Creates a line with the defined starting and end point.
-	 * @param start The starting point of the line.
-	 * @param end The ending point of the line.
-	 * @param frequency The frequency of the dots.
-	 * @param skew The skew of the line. 
-	**/
-	DkLineDotted(const DkInterestPoint start, const DkInterestPoint end, const float frequency, const float skew);
-	/**
-	 * Creates a line with the defined starting and end point.
-	 * @param dots Vector holding the dots of the line.
-	 * @param frequency The frequency of the dots.
-	 * @param skew The skew of the line. 
-	**/
-	DkLineDotted(const vector<DkInterestPoint> dots, const float frequency,  const float skew);
-	/**
-	 * Default destructor.
-	**/
-	~DkLineDotted() {};
-	/**
-	 * Compares two lines.
-	 * @return true if start point, end point or dots are not the same
-	 *          start point and end point because of efficiency issues -> breaks immediately if these two don't apply
-	 */
-	bool operator!= (const DkLineDotted &line) const {
-		return (this->start != line.start || this->end != line.end || this->dots.size() != line.dots.size());
-	};
-	/**
-	 * Compares two lines.
-	 * @return true if start point, end point and dots are the same 
-	 *          start point and end point because of efficiency issues -> breaks immediately if these two don't apply
-	 */
-	bool operator== (const DkLineDotted &line) const {
-		return (this->start == line.start && this->end == line.end && this->dots.size() == line.dots.size());
-	};
-	/**
-	* Sets the frequency of the dots of a line.
-	* @param f The frequency of the dots
-	**/
-	void setFrequency(float f) {
-		this->frequency = f;
-	};
-
-	/**
-	* Sets the skew of a line.
-	**/
-	void setSkew(){
-		if (slope == 0)	this->setSlope();
-		this->skew = atan(slope);
-		this->skew = this->skew < 0 ? 180 + this->skew: this->skew; // 180 - angle
-	};
-	/**
-	* Sets the slope of a line based on the x and y coordinates.
-	**/
-	void setSlope(){	
-		this->slope = start.slope(end);
-	};
-	/**
-	* Sets the coordinates of the dots of a line.
-	* @param d Vector of coordinates of the dots (centroids)
-	**/
-	void setDots(vector<DkInterestPoint> d){
-		this->dots = d;
-	};
-	/**
-	* Add a dot to the dots vector. 
-	* CAUTION: does not alter the begin/endpoint of a line!
-	* @param d coordinates of the dot.
-	**/
-	void addDots(vector<DkInterestPoint> d){
-		for (unsigned int idx = 0; idx < d.size(); idx++)
-			this->dots.push_back(d.at(idx));
-	};
-	/**
-	* Add a vector of dot to the dots vector. 
-	* CAUTION: does not alter the begin/endpoint of a line!
-	* @param d coordinates of the dot.
-	**/
-	void addDot(DkInterestPoint d){
-		this->dots.push_back(d);
-	};
-	/**
-	* Remove the last dot of the vector 
-	* Sets the endpoint to the last dot
-	**/
-	void removeFirstDot(){
-		this->dots.erase(this->dots.begin());
-		this->setStartToFirstDot();
-	};
-	/**
-	* Remove the last dot of the vector 
-	* Sets the endpoint to the last dot
-	**/
-	void removeLastDot(){
-		this->dots.pop_back();
-		this->setEndToLastDot();
-	};
-
-	/**
-	* Sets the fragmented lines of a discontinuous line.
-	* @param frag vector of dotted lines a discontinuous line consists of
-	**/
-	void setFragmentedLines(vector<DkLineDotted> frag){
-		this->fragmentedLines = frag;
-	};
-	/**
-	* Add a line to the fragmented lines of a discontinuous line
-	* @param frag fragmented line to add to the discontinuous line
-	**/
-	void addFragmentedLine(DkLineDotted frag){
-		this->fragmentedLines.push_back(frag);
-	};
-	/**
-	* Returns the frequency of the dots of a line.
-	* @return The frequency of the dots of a line
-	**/
-	float getFrequency() const {
-		return this->frequency;
-	};
-	/**
-	* Returns the skew of a line.
-	* @return The skew of a line
-	**/
-	float getSkew(){
-		if (this->skew == 0) this->setSkew();
-		return this->skew;
-	};
-	/**
-	* Returns the slope of a line defined as dy/dx.
-	* @return The slope value of the line.
-	**/
-	float getSlope(){
-		if (this->slope == 0)	this->setSlope();
-		return this->slope;
-	};
-	/**
-	* Returns the slope of a line defined as dy/dx.
-	* @return The slope value of the line.
-	**/
-	float getVerticalCompatibleSlope(){
-		if (this->slope == 0)	this->setSlope();
-		return this->slope > 1 ? 1/this->slope : this->slope;
-	};
-	/**
-	* Returns the coordinates of the dots of a line.
-	* @return Vector of coordinates of the dots of a line (centroids)
-	**/
-	vector<DkInterestPoint> getDots() const {return dots;};
-	/**
-	* Returns the size of the dots vector
-	* @return number of dots in the vector
-	**/
-	unsigned int numDots() const {return (unsigned int)dots.size();};
-	/**
-	* Returns the partial lines of a discontinuous line.
-	* @return Vector of dotted lines a discontinuous line consists of
-	**/
-	vector<DkLineDotted> getFragmentedLines() const {return fragmentedLines;};
-	/**
-	* Sets the start point of a line.
-	* @param start Vector holding the column value and row value of the start point of the line.
-	**/
-	void setStart(const DkVector startV){
-		this->start = startV;
-		this->slope = this->start.slope(this->end);
-	};
-	/**
-	* Sets the end point of a line.
-	* @param end Vector holding the column value and row value of the end point of the line.
-	**/
-	void setEnd(const DkVector endV){
-		this->end = endV;
-		this->slope = this->start.slope(this->end);
-	};
-	/**
-	* Sets the start point of a line to the first point of the dots vector.
-	**/
-	void setStartToFirstDot(){
-		if ((int) this->dots.size() > 0) 
-			this->setStart(this->dots.front().vec);
-	};
-	/**
-	* Sets the end point of a line to the last point of the dots vector.
-	**/
-	void setEndToLastDot(){
-		if ((int) this->dots.size() > 0) 
-			this->setEnd(this->dots.back().vec);
-	};
-	/**
-	* Determines whether the line is empty
-	**/
-	bool empty() {
-		return this->fragmentedLines.empty();
-	}
-	/**
-	* Determines whether the line is empty
-	**/
-	bool emptyFragmentedLine() {
-		return this->dots.empty();
-	}
-
-private:
-	float frequency;		/**< frequency of the dots of the line.*/ 
-	float skew;				/**< skew of the line in °. */
-
-	vector<DkInterestPoint> dots;	/**< vector of coordinates of the line's dots' centroids*/
-
-	vector<DkLineDotted> fragmentedLines; /**< vector of lines a discontinuous line consists of - if any*/
 
 };
 
@@ -3395,7 +3157,7 @@ public:
 
 	DkIntersectPoly() {};
 
-	DkIntersectPoly(vector<DkVector> vecA, vector<DkVector> vecB) {
+	DkIntersectPoly(std::vector<DkVector> vecA, std::vector<DkVector> vecB) {
 
 		this->vecA = vecA;
 		this->vecB = vecB;
@@ -3427,8 +3189,8 @@ public:
 		}
 
 		// compute edges
-		vector<DkVertex> ipA;
-		vector<DkVertex> ipB;
+		std::vector<DkVertex> ipA;
+		std::vector<DkVertex> ipB;
 		
 		getVertices(vecA, &ipA, 0);
 		getVertices(vecB, &ipB, 2);
@@ -3475,8 +3237,8 @@ public:
 
 private: 
 
-	vector<DkVector> vecA;
-	vector<DkVector> vecB;
+	std::vector<DkVector> vecA;
+	std::vector<DkVector> vecB;
 	int64 interArea;
 	DkVector maxRange;
 	DkVector minRange;
@@ -3484,7 +3246,7 @@ private:
 	float gamut;
 
 
-	void inness(vector<DkVertex> ipA, vector<DkVertex> ipB) {
+	void inness(std::vector<DkVertex> ipA, std::vector<DkVertex> ipB) {
 
 		int s = 0;
 		
@@ -3537,9 +3299,9 @@ private:
 		return (p.x < q.y && q.x < p.y);
 	};
 
-	void getVertices(const vector<DkVector> vec, vector<DkVertex> *ip, int noise) {
+	void getVertices(const std::vector<DkVector> vec, std::vector<DkVertex> *ip, int noise) {
 
-		vector<DkIPoint> vecTmp;
+		std::vector<DkIPoint> vecTmp;
 
 		// transform the coordinates and modify the least significant bits (that's fun)
 		for (int idx = 0; idx < (int)vec.size(); idx++) {
@@ -3568,7 +3330,7 @@ private:
 		}
 	};
 
-	void computeBoundingBox(vector<DkVector> vec, DkVector *minRange, DkVector *maxRange) {
+	void computeBoundingBox(std::vector<DkVector> vec, DkVector *minRange, DkVector *maxRange) {
 
 
 		for (unsigned int idx = 0; idx < vec.size(); idx++) {
