@@ -45,6 +45,7 @@ DkMSModule::DkMSModule(const std::wstring& folderName) {
 
 	this->folderName = folderName;
 	strictInput = true;
+	pseudoCol = false;
 }
 
 void DkMSModule::load() {
@@ -181,11 +182,36 @@ void DkMSModule::compute() {
 	
 	fgdImg = imgs.removeBackgroundBlobs(segSuImg);
 
-	// grab cut
-	DkGrabCut gb(imgs, pImg, fgdImg, false);
-	gb.compute();
+	if (!pseudoCol) {
+		// grab cut
+		DkGrabCut gb(imgs, pImg, fgdImg, false);
+		gb.compute();
 
-	segImg = gb.getSegImg();
+		segImg = gb.getSegImg();
+		colImg = gb.createColImg(imgs);
+	}
+	else {
+		
+		cv::Mat pImgC;
+		pImg.convertTo(pImgC, CV_8UC1, 255);
+		//DkIP::invertImg(pImgC);
+
+		cv::Mat img = DkGrabCut::createColImg(imgs);
+
+		cv::cvtColor(img, img, CV_RGB2Lab);
+		
+		std::vector<cv::Mat> cImg;
+		cv::split(img, cImg);
+		
+		if (!cImg.empty()) {
+			//cImg[1] = pImgC;
+			cv::addWeighted(cImg[1], 0.5, pImgC, 0.5, 0.0, cImg[1]);
+			//cv::addWeighted(cImg[0], 0.9, pImgC, 0.1, 0.0, cImg[0]);
+		}
+		cv::merge(cImg, img);
+		colImg = img;
+		cv::cvtColor(colImg, colImg, CV_Lab2RGB);
+	}
 
 	iout << "[DkMSModule] computed in " << dt << dkendl;
 }
@@ -193,6 +219,10 @@ void DkMSModule::compute() {
 DkMSData DkMSModule::getMSImages() const {
 
 	return imgs;
+}
+
+void DkMSModule::setPseudoColor(bool active) {
+	pseudoCol = active;
 }
 
 cv::Mat DkMSModule::getPredictedImage() const {
@@ -203,6 +233,10 @@ cv::Mat DkMSModule::getPredictedImage() const {
 cv::Mat DkMSModule::getSegImg() const {
 
 	return segImg;
+}
+
+cv::Mat DkMSModule::getColImg() const {
+	return colImg;
 }
 
 cv::Mat DkMSModule::getGT() const {

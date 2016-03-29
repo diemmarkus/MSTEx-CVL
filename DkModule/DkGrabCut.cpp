@@ -152,7 +152,7 @@ bool DkGrabCut::refineMask(const cv::Mat& maskImg, cv::Mat& pImg) const {
  * @param data  the raw data
  * @return cv::Mat the color image (nice visualization btw)
  **/ 
-cv::Mat DkGrabCut::createColImg(const DkMSData& data) const {
+cv::Mat DkGrabCut::createColImg(const DkMSData& data) {
 	
 	cv::Mat signal = data.getSignal();
 	cv::Mat meanImg(signal.rows, 1, CV_8UC1);

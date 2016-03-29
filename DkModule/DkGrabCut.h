@@ -40,6 +40,8 @@ public:
 	void compute();
 	cv::Mat getSegImg() const;
 
+	static cv::Mat createColImg(const DkMSData& data);
+
 	std::string toString() const;
 
 protected:
@@ -50,7 +52,6 @@ protected:
 	bool isVotingRT;
 
 	void checkInput() const {};		// dummy
-	cv::Mat createColImg(const DkMSData& data) const;
 	cv::Mat createMask(const cv::Mat& pImg, const cv::Mat& segImg) const;
 	cv::Mat maskToBwImg(const cv::Mat& mask) const;
 	bool refineMask(const cv::Mat& maskImg, cv::Mat& pImg) const;

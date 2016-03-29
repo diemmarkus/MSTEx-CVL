@@ -46,8 +46,11 @@ public:
 	void setImages(const std::vector<std::wstring>& imgPaths, const std::vector<cv::Mat>& msImgs);
 	void compute();
 
+	void setPseudoColor(bool active);
+
 	cv::Mat getPredictedImage() const;
 	cv::Mat getSegImg() const;
+	cv::Mat getColImg() const;
 	DkMSData getMSImages() const;
 	cv::Mat getGT() const;
 
@@ -61,8 +64,10 @@ protected:
 	cv::Mat segImg;		// result image
 	cv::Mat gtImg;		// optional
 	cv::Mat pImg;		// predicted image
+	cv::Mat colImg;		// visualized segmentation image
 
 	bool strictInput;
+	bool pseudoCol;
 
 	int getChannelNumber(const std::wstring& fileName) const;
 };
