@@ -131,10 +131,9 @@ macro(NMC_CREATE_TARGETS)
 		
 		message(STATUS "${PROJECT_NAME} will be installed to: ${NOMACS_PLUGIN_INSTALL_DIRECTORY}")
 		
-		install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${NOMACS_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PROJECT_NAME}/data/nomacs-x64/plugins/ CONFIGURATIONS Release)
-		install(FILES ${ADDITIONAL_DLLS} DESTINATION ${NOMACS_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PROJECT_NAME}/data/nomacs-x64/plugins/ CONFIGURATIONS Release)
-		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/package.xml DESTINATION ${NOMACS_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PROJECT_NAME}/meta CONFIGURATIONS Release)
-		
+		install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${NOMACS_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PLUGIN_ARCHITECTURE}.${PROJECT_NAME}/data/nomacs-${PLUGIN_ARCHITECTURE}/plugins/ CONFIGURATIONS Release)
+		install(FILES ${ADDITIONAL_DLLS} DESTINATION ${NOMACS_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PLUGIN_ARCHITECTURE}.${PROJECT_NAME}/data/nomacs-${PLUGIN_ARCHITECTURE}/plugins/ CONFIGURATIONS Release)
+		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/package.xml DESTINATION ${NOMACS_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PLUGIN_ARCHITECTURE}.${PROJECT_NAME}/meta CONFIGURATIONS Release)
 	else()
 		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${NOMACS_BUILD_DIRECTORY}/plugins/)
 		if(${NUM_ADDITONAL_DLLS} GREATER 0) 
@@ -201,14 +200,14 @@ macro(NMC_GENERATE_PACKAGE_XML)
 	
 	set(XML_CONTENT "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
 	set(XML_CONTENT "${XML_CONTENT}<Package>\n")
-	set(XML_CONTENT "${XML_CONTENT}\t<DisplayName>${PLUGIN_NAME}</DisplayName>\n")
+	set(XML_CONTENT "${XML_CONTENT}\t<DisplayName>${PLUGIN_NAME} [${PLUGIN_ARCHITECTURE}]</DisplayName>\n")
 	set(XML_CONTENT "${XML_CONTENT}\t<Description>${TAGLINE}</Description>\n")
 	set(XML_CONTENT "${XML_CONTENT}\t<Version>${PLUGIN_VERSION}</Version>\n")
 	set(XML_CONTENT "${XML_CONTENT}\t<ReleaseDate>${CURRENT_DATE}</ReleaseDate>\n")
-	set(XML_CONTENT "${XML_CONTENT}\t<Default>true</Default>\n")
+	set(XML_CONTENT "${XML_CONTENT}\t<Default>false</Default>\n")
 	set(XML_CONTENT "${XML_CONTENT}</Package>\n")
 	
-	file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/package.xml ${XML_CONTENT})
+	file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/package.xml ${XML_CONTENT})
 	
 endmacro(NMC_GENERATE_PACKAGE_XML)
 
