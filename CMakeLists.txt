@@ -35,7 +35,7 @@ endif ()
 NMC_POLICY()
 
 # ask for plugin to be built
-OPTION (ENABLE_PLUGIN "Compile nomacs Plugin" OFF)
+OPTION (ENABLE_PLUGIN "Compile as nomacs Plugin" OFF)
 
 NMC_FIND_OPENCV()
           
@@ -44,8 +44,6 @@ if (ENABLE_PLUGIN)
 	NMC_PREPARE_PLUGIN()
 
 	NMC_FINDQT()
-
-	NMC_EXIV_INCLUDES()
 
 	if(CMAKE_CL_64)
 		SET(PLUGIN_ARCHITECTURE "x64")
@@ -61,7 +59,7 @@ if (ENABLE_PLUGIN)
 	
 else(ENABLE_PLUGIN)
 
-	find_package(OpenCV REQUIRED highgui imgcodecs)
+	find_package(OpenCV REQUIRED highgui imgcodecs ml)
 	MAKE_ViennaMS_exe()
 
 endif (ENABLE_PLUGIN)		  
