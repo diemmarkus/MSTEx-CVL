@@ -1,0 +1,24 @@
+language: c++
+
+os:
+  - linux
+
+compiler:
+  - gcc
+  - clang
+
+sudo: required
+dist: trusty
+
+before_script:
+  # Linux dependencies
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -y --no-install-recommends debhelper cdbs
+  
+  - mkdir build
+  - cd build
+
+script:
+  - cmake $CMAKE_ARGS 
+  - make -j8
+  
