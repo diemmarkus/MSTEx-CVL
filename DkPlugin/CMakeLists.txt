@@ -57,6 +57,8 @@ target_link_libraries(${PROJECT_NAME} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} $
 add_dependencies(${PROJECT_NAME} ${DKCOREDLL_NAME} ${DKMODULEDLL_NAME})
 
 NMC_CREATE_TARGETS()
+NMC_GENERATE_USER_FILE()
+NMC_GENERATE_PACKAGE_XML(${PLUGIN_JSON})
 
 qt5_use_modules(${PROJECT_NAME} Widgets Gui Network LinguistTools PrintSupport Concurrent)
 

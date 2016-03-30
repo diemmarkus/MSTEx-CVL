@@ -55,8 +55,8 @@ macro(NMC_PREPARE_PLUGIN)
 				MESSAGE(FATAL_ERROR "You have to set the nomacs build directory")
 			ENDIF()
 		endif()
-	SET(NOMACS_PLUGIN_INSTALL_DIRECTORY ${CMAKE_SOURCE_DIR}/install CACHE PATH "Path to the plugin install directory for deploying")
-  
+		SET(NOMACS_PLUGIN_INSTALL_DIRECTORY ${CMAKE_SOURCE_DIR}/install CACHE PATH "Path to the plugin install directory for deploying")
+  		
 	endif(NOT NOMACS_VARS_ALREADY_SET)
  
 	if (CMAKE_BUILD_TYPE STREQUAL "debug" OR CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "DEBUG")
@@ -123,13 +123,18 @@ macro(NMC_CREATE_TARGETS)
 		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${NOMACS_BUILD_DIRECTORY}/$(CONFIGURATION)/plugins/)
 		if(${NUM_ADDITONAL_DLLS} GREATER 0) 
 			foreach(DLL ${ADDITIONAL_DLLS})
-				add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${DLL} ${NOMACS_BUILD_DIRECTORY}/$(CONFIGURATION)/)
+				add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND if 1==$<CONFIG:Debug> ${CMAKE_COMMAND} -E copy ${DLL} ${NOMACS_BUILD_DIRECTORY}/Debug/)
+				add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND if 1==$<CONFIG:Release> ${CMAKE_COMMAND} -E copy ${DLL} ${NOMACS_BUILD_DIRECTORY}/Release/)
+				add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND if 1==$<CONFIG:RelWithDebInfo> ${CMAKE_COMMAND} -E copy ${DLL} ${NOMACS_BUILD_DIRECTORY}/RelWithDebInfo/)
 			endforeach()
 		endif()		
 		
-		install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${RDM_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PROJECT_NAME}/data/nomacs-x64/plugins/ CONFIGURATIONS Release)
-		install(FILES ${ADDITIONAL_DLLS} DESTINATION ${RDM_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PROJECT_NAME}/data/nomacs-x64/plugins/ CONFIGURATIONS Release)
-		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/package.xml DESTINATION ${RDM_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PROJECT_NAME}/meta CONFIGURATIONS Release)
+		message(STATUS "${PROJECT_NAME} will be installed to: ${NOMACS_PLUGIN_INSTALL_DIRECTORY}")
+		
+		install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${NOMACS_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PROJECT_NAME}/data/nomacs-x64/plugins/ CONFIGURATIONS Release)
+		install(FILES ${ADDITIONAL_DLLS} DESTINATION ${NOMACS_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PROJECT_NAME}/data/nomacs-x64/plugins/ CONFIGURATIONS Release)
+		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/package.xml DESTINATION ${NOMACS_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PROJECT_NAME}/meta CONFIGURATIONS Release)
+		
 	else()
 		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${NOMACS_BUILD_DIRECTORY}/plugins/)
 		if(${NUM_ADDITONAL_DLLS} GREATER 0) 
@@ -207,10 +212,10 @@ macro(NMC_GENERATE_PACKAGE_XML)
 	
 endmacro(NMC_GENERATE_PACKAGE_XML)
 
-macro(RDM_GENERATE_USER_FILE)
+macro(NMC_GENERATE_USER_FILE)
 	if(MSVC) # create user file only when using Visual Studio
 		if(NOT EXISTS "${PROJECT_NAME}.vcxproj.user")
-			configure_file(../../cmake/project.vcxproj.user.in ${PROJECT_NAME}.vcxproj.user)
+			configure_file(../cmake/project.vcxproj.user.in ${PROJECT_NAME}.vcxproj.user)
 		endif()
 	endif(MSVC)
-endmacro(RDM_GENERATE_USER_FILE)
+endmacro(NMC_GENERATE_USER_FILE)
