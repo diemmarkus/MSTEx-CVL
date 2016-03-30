@@ -59,7 +59,7 @@ if (ENABLE_PLUGIN)
 		
 else(ENABLE_PLUGIN)
 
-	find_package(OpenCV REQUIRED highgui imgcodecs ml)
+	find_package(OpenCV REQUIRED highgui ml OPTIONAL_COMPONENTS imgcodecs)
 	MAKE_ViennaMS_exe()
 
 endif (ENABLE_PLUGIN)		  
