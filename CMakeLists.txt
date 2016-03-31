@@ -58,7 +58,7 @@ if (ENABLE_PLUGIN)
 	add_subdirectory(DkPlugin)
 		
 else(ENABLE_PLUGIN)
-	
+	find_package(OpenCV REQUIRED ml)	
 	MAKE_ViennaMS_exe()
 
 endif (ENABLE_PLUGIN)		  
