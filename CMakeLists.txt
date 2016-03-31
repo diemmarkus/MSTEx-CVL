@@ -58,8 +58,7 @@ if (ENABLE_PLUGIN)
 	add_subdirectory(DkPlugin)
 		
 else(ENABLE_PLUGIN)
-
-	find_package(OpenCV REQUIRED highgui ml OPTIONAL_COMPONENTS imgcodecs)
+	
 	MAKE_ViennaMS_exe()
 
 endif (ENABLE_PLUGIN)		  
