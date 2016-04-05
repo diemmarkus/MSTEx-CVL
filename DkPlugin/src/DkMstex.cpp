@@ -100,15 +100,6 @@ QImage DkMstexPlugin::image() const {
 	return QImage(":/Mstex/img/mstex.png");
 };
 
-/**
-* Returns plugin version for every ID
-* @param plugin ID
-**/
-QString DkMstexPlugin::version() const {
-
-	return PLUGIN_VERSION;
-};
-
 QList<QAction*> DkMstexPlugin::createActions(QWidget* parent) {
 
 	if (mActions.empty()) {

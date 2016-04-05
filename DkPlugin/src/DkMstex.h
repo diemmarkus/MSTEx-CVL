@@ -40,7 +40,6 @@ public:
 
 	QString id() const override;
 	QImage image() const override;
-	QString version() const override;
 
 	QList<QAction*> createActions(QWidget* parent) override;
 	QList<QAction*> pluginActions() const override;
