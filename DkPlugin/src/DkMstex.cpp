@@ -97,7 +97,7 @@ QString DkMstexPlugin::id() const {
 **/
 QImage DkMstexPlugin::image() const {
 
-	return QImage(":/MstexPlugin/img/your-image.png");
+	return QImage(":/Mstex/img/mstex.png");
 };
 
 /**
