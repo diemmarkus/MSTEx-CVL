@@ -48,7 +48,7 @@ DkMSModule::DkMSModule(const std::wstring& folderName) {
 	pseudoCol = false;
 }
 
-void DkMSModule::load() {
+bool DkMSModule::load() {
 
 	std::vector<std::wstring> files = indexFolder(folderName);
 
@@ -62,10 +62,10 @@ void DkMSModule::load() {
 		msImgs.push_back(DkIP::imread(fpStr));
 	}
 
-	setImages(files, msImgs);
+	return setImages(files, msImgs);
 }
 
-void DkMSModule::setImages(const std::vector<std::wstring>& imgPaths, const std::vector<cv::Mat>& msImgs) {
+bool DkMSModule::setImages(const std::vector<std::wstring>& imgPaths, const std::vector<cv::Mat>& msImgs) {
 
 	DkTimer dt;
 
@@ -103,7 +103,7 @@ void DkMSModule::setImages(const std::vector<std::wstring>& imgPaths, const std:
 			if (!sortedMsImages[chNum].empty()) {
 				std::string msg = "Image at channel  " + DkUtils::stringify(chNum) + " already exists!";
 				std::cout << msg << std::endl;
-				return;
+				return false;
 			}
 
 			sortedMsImages[chNum] = img;
@@ -121,23 +121,26 @@ void DkMSModule::setImages(const std::vector<std::wstring>& imgPaths, const std:
 
 	if (sortedMsImages.size() != 8) {
 
+		// is currently never hit because we resize to 8
 		std::string msg = "Wrong number of input channels: " + DkUtils::stringify(sortedMsImages.size()) + " [8 expected]";
 		std::cout << msg << std::endl;
-		return;
+		return false;
 	}
 
 	if (strictInput) {
+		
 		for (size_t idx = 0; idx < sortedMsImages.size(); idx++) {
 			if (sortedMsImages[idx].empty()) {
 				std::string msg = "Channel  " + DkUtils::stringify(idx+1) + " is empty! I need to abort sorry...";
 				std::cout << msg << std::endl;
-				return;
+				return false;
 			}
 		}
 	}
 	imgs = DkMSData(sortedMsImages);
 
 	iout << "images loaded in: " << dt << dkendl;
+	return true;
 }
 
 bool DkMSModule::saveImage(const std::string& imageName) const {
@@ -166,7 +169,7 @@ void DkMSModule::compute() {
 	segM.filterSegImg(20);
 	segSuImg = segM.getSegmented();
 	cv::Mat fgdImg = imgs.estimateFgd(segSuImg);
-
+	
 	iout << "image segmented in: " << dt << dkendl;
 
 	//// DkRandomTrees is an alternative to the ACE
@@ -282,7 +285,7 @@ std::vector<std::wstring> DkMSModule::indexFolder(const std::wstring& folderName
 	std::vector<std::wstring> fileNameList;
 	std::wstring fileName;
 
-	if( MyHandle != INVALID_HANDLE_VALUE) {
+	if (MyHandle != INVALID_HANDLE_VALUE) {
 
 		do {
 
@@ -290,6 +293,9 @@ std::vector<std::wstring> DkMSModule::indexFolder(const std::wstring& folderName
 			fileNameList.push_back(fileName);
 		} 
 		while(FindNextFileW(MyHandle, &findFileData) != 0);
+	}
+	else {
+		std::wcout << "[Warning] " << folderName << " is not accessible or does not exist" << std::endl;
 	}
 
 	FindClose(MyHandle);

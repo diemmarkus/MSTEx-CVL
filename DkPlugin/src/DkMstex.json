@@ -3,10 +3,10 @@
 	"AuthorName" 	: "Markus Diem, Fabian Hollaus",
 	"Company"		: "Computer Vision Lab, TU Wien",
 	"DateCreated" 	: "2015-03-29",
-	"DateModified"	: "2016-04-05",
+	"DateModified"	: "2016-04-06",
 	"Description"	: "The proposed approach incorporates three methods for MultiSpectral Text Extraction. First, a rough foreground estimation is performed by thresholding a cleaned channel. This rough foreground estimation is used in a second step to train an Adaptive Coherence Estimator (ACE). The ACE detects a spectral subspace which enhances ink while the contrast of other elements (e.g. stains) is reduced.  Finally we combine the cleaned channel with the mean and standard deviation images and perform a GrabCut. The GrabCut is guided by a mask which is based on the results of the ACE.",
 	"Tagline" 		: "Binarize Multi-Spectral images.",
 	"PluginId"		: "413dcf407afe4707b8b360dc0c461e0f",
-	"Version"		: "0.1.1",
+	"Version"		: "3.1.0",
 	"Dependencies"	: "libDkCore,libDkModule"
 }

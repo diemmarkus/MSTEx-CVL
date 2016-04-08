@@ -31,7 +31,7 @@ namespace nmp {
 class DkMstexPlugin : public QObject, nmc::DkPluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(nmc::DkPluginInterface)
-	Q_PLUGIN_METADATA(IID "com.nomacs.ImageLounge.DkMstexPlugin/3.0" FILE "DkMstex.json")
+	Q_PLUGIN_METADATA(IID "com.nomacs.ImageLounge.DkMstexPlugin/3.2" FILE "DkMstex.json")
 
 public:
 

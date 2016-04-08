@@ -30,7 +30,9 @@ int main(int argc, char *argv[]) {
 			std::string imageName(argv[2]);
 
 			DkMSModule module(folderNameW);
-			module.load();
+			if (!module.load())
+				return 1;
+
 			module.compute();
 			module.saveImage(imageName);
 		}

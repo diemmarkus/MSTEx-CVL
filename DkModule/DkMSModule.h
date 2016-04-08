@@ -40,10 +40,9 @@ class DK_MODULE_API DkMSModule {
 
 public:
 	DkMSModule(const std::wstring& folderName);
-
 	
-	void load();
-	void setImages(const std::vector<std::wstring>& imgPaths, const std::vector<cv::Mat>& msImgs);
+	bool load();
+	bool setImages(const std::vector<std::wstring>& imgPaths, const std::vector<cv::Mat>& msImgs);
 	void compute();
 
 	void setPseudoColor(bool active);
