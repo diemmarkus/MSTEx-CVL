@@ -72,77 +72,59 @@ endmacro(NMC_PREPARE_PLUGIN)
 
 # you can use this NMC_CREATE_TARGETS("myAdditionalDll1.dll" "myAdditionalDll2.dll")
 macro(NMC_CREATE_TARGETS)
-
 	set(ADDITIONAL_DLLS ${ARGN})
-		
 	list(LENGTH ADDITIONAL_DLLS NUM_ADDITONAL_DLLS) 
 	if( ${NUM_ADDITONAL_DLLS} GREATER 0) 
 		foreach(DLL ${ADDITIONAL_DLLS})
-			message(STATUS "extra_macro_args: ${DLL}")
-		endforeach()
+		message(STATUS "additional dependencies: ${DLL}")
+	endforeach()
 	endif()
-	
-	if(DEFINED GLOBAL_READ_BUILD)
-		message(STATUS "project name: ${NOMACS_PROJECT_NAME}")
-		add_dependencies(${PROJECT_NAME} ${NOMACS_PROJECT_NAME})
-	else()
-		# global build automatically puts the dll in the correct directory
-		if(MSVC) # copy files on Windows in the correct directory
-			# TODO copy all rdf opencv dlls to the nomacs target
-			
-			message(STATUS "opencv dlls: ${RDF_OPENCV_BINARIES}")
-			
-			set(BINS ${RDF_BINARIES} ${RDF_OPENCV_BINARIES})
-			foreach(CUR_BIN ${BINS})
-				string(REGEX MATCHALL ".*Debug.*" matches ${CUR_BIN})
-				if(matches)
-					file(COPY ${matches} DESTINATION ${NOMACS_BUILD_DIRECTORY}/Debug)
-					add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${matches} ${NOMACS_BUILD_DIRECTORY}/Debug)
-					add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${matches} ${NOMACS_BUILD_DIRECTORY}/RelWithDebInfo)
-				endif()
-				string(REGEX MATCHALL ".*Release.*" matches ${CUR_BIN})
-				if(matches)
-					add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${matches} ${NOMACS_BUILD_DIRECTORY}/Release)
-
-				endif()			
-			endforeach()
-		else()
-			foreach(CUR_BIN ${RDF_BINARIES})
-				add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CUR_BIN} ${NOMACS_BUILD_DIRECTORY}/)
-			endforeach()
-		endif(MSVC)
-	
-	endif()
-	
-	
-	if(MSVC)
-		file(GLOB RDM_AUTOMOC "${CMAKE_BINARY_DIR}/*_automoc.cpp")
-		source_group("Generated Files" FILES ${PLUGIN_RCC} ${RDM_QM} ${RDF_AUTOMOC})
-		
-		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${NOMACS_BUILD_DIRECTORY}/$(CONFIGURATION)/plugins/)
-		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${NOMACS_BUILD_DIRECTORY}/$(CONFIGURATION)/plugins/)
+ 
+ 
+	IF (MSVC)
 		if(${NUM_ADDITONAL_DLLS} GREATER 0) 
 			foreach(DLL ${ADDITIONAL_DLLS})
-				add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND if 1==$<CONFIG:Debug> ${CMAKE_COMMAND} -E copy ${DLL} ${NOMACS_BUILD_DIRECTORY}/Debug/)
-				add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND if 1==$<CONFIG:Release> ${CMAKE_COMMAND} -E copy ${DLL} ${NOMACS_BUILD_DIRECTORY}/Release/)
-				add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND if 1==$<CONFIG:RelWithDebInfo> ${CMAKE_COMMAND} -E copy ${DLL} ${NOMACS_BUILD_DIRECTORY}/RelWithDebInfo/)
-			endforeach()
-		endif()		
-		
-		message(STATUS "${PROJECT_NAME} will be installed to: ${NOMACS_PLUGIN_INSTALL_DIRECTORY}")
-		
-		install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${NOMACS_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PLUGIN_ARCHITECTURE}.${PROJECT_NAME}/data/nomacs-${PLUGIN_ARCHITECTURE}/plugins/ CONFIGURATIONS Release)
-		install(FILES ${ADDITIONAL_DLLS} DESTINATION ${NOMACS_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PLUGIN_ARCHITECTURE}.${PROJECT_NAME}/data/nomacs-${PLUGIN_ARCHITECTURE}/plugins/ CONFIGURATIONS Release)
-		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/package.xml DESTINATION ${NOMACS_PLUGIN_INSTALL_DIRECTORY}/packages/plugins.${PLUGIN_ARCHITECTURE}.${PROJECT_NAME}/meta CONFIGURATIONS Release)
-	else()
-		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${NOMACS_BUILD_DIRECTORY}/plugins/)
-		if(${NUM_ADDITONAL_DLLS} GREATER 0) 
-			foreach(DLL ${ADDITIONAL_DLLS})
-				add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${DLL} ${NOMACS_BUILD_DIRECTORY}/plugins/)
+				add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${DLL} ${NOMACS_BUILD_DIRECTORY}/$<CONFIGURATION>/plugins/)
 			endforeach()
 		endif()
-		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${NOMACS_BUILD_DIRECTORY}/plugins/)
+
+		
+		set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${NOMACS_BUILD_DIRECTORY}/Debug/plugins/)
+		set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${NOMACS_BUILD_DIRECTORY}/Release/plugins/)
+		set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${NOMACS_BUILD_DIRECTORY}/RelWithDebInfo/plugins/)
+		set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${NOMACS_BUILD_DIRECTORY}/MinSizeRel/plugins/)
+		
+		### DependencyCollector
+		set(DC_SCRIPT ${CMAKE_SOURCE_DIR}/cmake/DependencyCollector.py)
+		set(DC_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/DependencyCollector.ini)
+
+		GET_FILENAME_COMPONENT(VS_PATH ${CMAKE_LINKER} PATH)
+		if(CMAKE_CL_64)
+			SET(VS_PATH "${VS_PATH}/../../../Common7/IDE/Remote Debugger/x64")
+		else()
+			SET(VS_PATH "${VS_PATH}/../../Common7/IDE/Remote Debugger/x86")
+		endif()
+		SET(DC_PATHS_RELEASE C:/Windows/System32 ${CMAKE_BINARY_DIR}/Release ${OpenCV_DIR}/bin/Release ${QT_QMAKE_PATH} ${VS_PATH})
+		SET(DC_PATHS_DEBUG C:/Windows/System32 ${CMAKE_BINARY_DIR}/Debug ${OpenCV_DIR}/bin/Debug ${QT_QMAKE_PATH} ${VS_PATH})
+
+		configure_file(${CMAKE_SOURCE_DIR}/cmake/DependencyCollector.config.cmake.in ${DC_CONFIG})
+
+		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${DC_SCRIPT} --infile $<TARGET_FILE:${PROJECT_NAME}> --configfile ${DC_CONFIG} --configuration $<CONFIGURATION>)
+		### End of DependencyCollector
+		
+		message(STATUS "${PROJECT_NAME} \t will be installed to: ${NOMACS_INSTALL_DIRECTORY}")
+		
+		set(PACKAGE_DIR ${NOMACS_INSTALL_DIRECTORY}/packages/plugins.${PLUGIN_ARCHITECTURE}.${PROJECT_NAME})
+		set(PACKAGE_DATA_DIR ${PACKAGE_DIR}/data/nomacs-${PLUGIN_ARCHITECTURE}/plugins/)
+		install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${PACKAGE_DATA_DIR} CONFIGURATIONS Release)
+		install(FILES ${ADDITIONAL_DLLS} DESTINATION ${PACKAGE_DATA_DIR} CONFIGURATIONS Release)
+		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/package.xml DESTINATION ${PACKAGE_DIR}/meta CONFIGURATIONS Release)
+	
+	elseif(UNIX)
+		set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${NOMACS_BUILD_DIRECTORY}/plugins)
 		install(TARGETS ${PROJECT_NAME} RUNTIME LIBRARY DESTINATION lib/nomacs-plugins)
+		set_property(TARGET ${PROJECT_NAME} PROPERTY VERSION ${NOMACS_VERSION_MAJOR}.${NOMACS_VERSION_MINOR}.${NOMACS_VERSION_PATCH})
+		set_property(TARGET ${PROJECT_NAME} PROPERTY SOVERSION ${NOMACS_VERSION_MAJOR})
 	endif(MSVC)
 endmacro(NMC_CREATE_TARGETS)
 

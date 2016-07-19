@@ -62,11 +62,9 @@ protected:
 	QStringList mMenuNames;
 	QStringList mMenuStatusTips;
 
-
 	std::wstring qStringToStdWString(const QString &str) const;
 	QString stdWStringToQString(const std::wstring &str) const;
 	QImage applyMSImaging(const QSharedPointer<nmc::DkImageContainer> imgC, bool binarize = true) const;
-
 };
 
 };
