@@ -4157,8 +4157,8 @@ public:
 		return cv::imwrite(path, imgW);
 	}
 
-	static cv::Mat imread(const std::string& imgPath) {
-		return cv::imread(imgPath);
+	static cv::Mat imread(const std::string& imgPath, int flags = 1) {
+		return cv::imread(imgPath, flags);
 	}
 
 #else

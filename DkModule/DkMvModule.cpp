@@ -48,8 +48,9 @@ DkMVModule::DkMVModule(const std::wstring& folderName) {
 
 bool DkMVModule::load() {
 
-	std::vector<std::wstring> files = indexFolder(mFolderName);
+	DkTimer dt;
 
+	std::vector<std::wstring> files = indexFolder(mFolderName);
 	std::vector<cv::Mat> msImgs;
 
 	for (const std::wstring& cFile : files) {
@@ -57,23 +58,25 @@ bool DkMVModule::load() {
 		std::wstring filePath = mFolderName + L"\\" + cFile;
 		std::string fpStr(filePath.begin(), filePath.end());
 
-		msImgs.push_back(DkIP::imread(fpStr));
+		msImgs.push_back(DkIP::imread(fpStr, CV_LOAD_IMAGE_UNCHANGED));
 		
 		std::string fn(cFile.begin(), cFile.end());
-		mout << fn << " loaded..." << std::endl;
+		mout << fn << " loaded" << dkendl;
 	}
 
-	return setImages(files, msImgs);
+	bool ok = setImages(files, msImgs);
+	mout << "images loaded in: " << dt << "\n" << dkendl;
+	
+	return ok;
+
 }
 
 bool DkMVModule::setImages(const std::vector<std::wstring>& imgPaths, const std::vector<cv::Mat>& msImgs) {
 
-	DkTimer dt;
-
 	cv::Size lastSize;
 	std::vector<cv::Mat> cleanedImgs;
 
-	mout << "\nchecking input..." << std::endl;
+	mout << "\nchecking input..." << dkendl;
 
 	for (int idx = 0; idx < imgPaths.size(); idx++) {
 
@@ -84,20 +87,21 @@ bool DkMVModule::setImages(const std::vector<std::wstring>& imgPaths, const std:
 
 		cv::Mat img = msImgs[idx];
 
-		if (!img.empty() && img.channels() > 1)
-			cv::cvtColor(img, img, CV_RGB2GRAY);
-
 		// load mask ?!
 		std::string cf(cFile.begin(), cFile.end());
 		if (!img.empty() && cf.find("mask") != std::wstring::npos) {
 			mMaskImg = img;
-			mout << cf << " -> is the mask" << std::endl;
+
+			if (!img.empty() && img.channels() > 1)
+				cv::cvtColor(img, img, CV_RGB2GRAY);
+
+			mout << cf << " -> is the mask" << dkendl;
 		}
 		else if (!img.empty()) {
 			cleanedImgs.push_back(img);
 		}
 		else if (cFile.size() > 3) {	// > 3: ignore . and ..
-			mout << cf << " ignored" << std::endl;
+			mout << cf << " ignored" << dkendl;
 		}
 	}
 
@@ -117,7 +121,7 @@ bool DkMVModule::setImages(const std::vector<std::wstring>& imgPaths, const std:
 		if (img.rows != nR || img.cols != nC) {
 			remIdx.push_back(idx);
 			std::string fn(imgPaths[idx].begin(), imgPaths[idx].end());
-			mout << fn << " has illegal dimensions: " << nR << "x" << nC << " -> removing" << std::endl;
+			mout << "illegal dimensions: " << img.rows << "x" << img.cols << " -> removing" << dkendl;
 		}
 	}
 
@@ -130,20 +134,21 @@ bool DkMVModule::setImages(const std::vector<std::wstring>& imgPaths, const std:
 
 	mImgs = DkMSData(cleanedImgs);
 
-	mout << "The MSI image has " << cleanedImgs.size() << " channels" << std::endl;
-	mout << "images loaded in: " << dt << dkendl;
+	mout << "The MSI image has " << cleanedImgs.size() << " channels" << dkendl;
 	return true;
 }
 
 bool DkMVModule::saveImage(const std::string& imageName) const {
 
-	cv::Mat segImgInv = mPseudoImg.clone();
+	cv::Mat sImg = mPseudoImg.clone();
 	
 	bool ok = false;
-	if (!mPseudoImg.empty())
-		ok = DkIP::imwrite(imageName, segImgInv);
+	if (!mPseudoImg.empty()) {
+		sImg = DkIP::rotateImg(sImg, -CV_PI*0.5);	// we don't read the orientation flag correctely
+		ok = DkIP::imwrite(imageName, sImg);
+	}
 	else
-		mout << "Result image is empty - something went wrong when processing, sorry!" << std::endl;
+		mout << "Result image is empty - something went wrong when processing, sorry!" << dkendl;
 
 	if (!ok)
 		mout << "sorry, I could not write to: " << imageName << dkendl;
@@ -157,46 +162,19 @@ void DkMVModule::compute() {
 
 	if (mMaskImg.empty()) {
 
-		wout << "I cannot process the image - for the foreground mask is empty" << std::endl;
-		mout << "please provide a binary image named mask where ink pixels are stored as white" << std::endl;
-		wout << "aborting..." << std::endl;
+		wout << "I cannot process the image - for the foreground mask is empty" << dkendl;
+		mout << "please provide a binary image named mask where ink pixels are stored as white" << dkendl;
+		wout << "aborting..." << dkendl;
 		return;
 	}
 
 	cv::Mat fgdImg = mMaskImg;
 
-	iout << "image segmented in: " << dt << dkendl;
-
-	//// DkRandomTrees is an alternative to the ACE
-	//DkRandomTrees rt(mImgs, fgdImg);
-	//rt.compute();
-	//cv::Mat pImgRT = rt.getPredictedImage();
-	//pImg = pImgRT;
-	//DkIP::imwrite("pImg-RT.png", pImg);
-
 	DkAce ace(mImgs, fgdImg);
 	ace.compute();
 	mPImg = ace.getPredictedImage();
 
-	//fgdImg = mImgs.removeBackgroundBlobs(segSuImg);
-
-	cv::Mat pImgC;
-	mPseudoImg.convertTo(pImgC, CV_8UC1, 255);
-
-	cv::Mat img = DkGrabCut::createColImg(mImgs);
-	cv::cvtColor(img, img, CV_RGB2Lab);
-
-	std::vector<cv::Mat> cImg;
-	cv::split(img, cImg);
-
-	// add the predicted image
-	if (!cImg.empty()) {
-		cv::addWeighted(cImg[1], 0.5, pImgC, 0.5, 0.0, cImg[1]);
-	}
-
-	cv::merge(cImg, img);
-	mPseudoImg = img;
-	cv::cvtColor(mPseudoImg, mPseudoImg, CV_Lab2RGB);
+	mPseudoImg = mPImg;
 
 	iout << "[DkMVModule] computed in " << dt << dkendl;
 }
@@ -241,12 +219,12 @@ std::vector<std::wstring> DkMVModule::indexFolder(const std::wstring& folderName
 		} while (FindNextFileW(MyHandle, &findFileData) != 0);
 	}
 	else {
-		std::wcout << "[Warning] " << folderName << " is not accessible or does not exist" << std::endl;
+		std::wcout << "[Warning] " << folderName << " is not accessible or does not exist" << dkendl;
 	}
 
 	FindClose(MyHandle);
 
-	//std::wcout << fileNameList.size() << " files indexed in " << mFolderName << std::endl;
+	//std::wcout << fileNameList.size() << " files indexed in " << mFolderName << dkendl;
 
 	return fileNameList;
 }

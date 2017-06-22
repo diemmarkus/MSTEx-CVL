@@ -218,6 +218,9 @@ public:
 		case CV_8U:
 			info += "CV_8U";
 			break;
+		case CV_16U:
+			info += "CV_16U";
+			break;
 		case CV_32F:
 			info += "CV_32F";
 			break;

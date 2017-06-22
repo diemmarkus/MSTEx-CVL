@@ -51,4 +51,5 @@ protected:
 	cv::Mat getTargetSignature(const cv::Mat& data, const cv::Mat& fgdImg) const;
 	cv::Mat removeMean(const cv::Mat& data, cv::Mat& meanVec) const;
 	cv::Mat hyperAce(const cv::Mat& data, const cv::Mat& signature) const;
+	cv::Mat computeBlock(const cv::Mat& data64, const cv::Mat& icov, const cv::Mat& sig64) const;
 };

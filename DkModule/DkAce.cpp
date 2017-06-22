@@ -113,22 +113,25 @@ cv::Mat DkAce::hyperAce(const cv::Mat& data, const cv::Mat& signature) const {
 	signature.convertTo(sig64, CV_64FC1);
 	data.convertTo(data64, CV_64FC1);
 
+	int start = 0;
+	int end = 0;
+	cv::Mat rImg(data64.rows, 1, CV_64FC1);
+
 	// compute inverted covariance matrix
 	cv::Mat cov, icov, meanC;
-	cov = (data64.t()*data64)/(float)(data64.rows-1);
+	cov = (data64.t()*data64) / (float)(data64.rows - 1);
 	cv::invert(cov, icov, DECOMP_SVD);
 
-	// pre-compute
-	sig64 = sig64.t();
+	do {
+		// create chunks that are max 1M
+		end = std::min(start+(int)1e6, data64.rows);
 
-	// apply ACE - sorry I know it's hard to read, but this implementation is fast
-	double tmp = *(cv::Mat(sig64.t()*icov*sig64).ptr<double>());
-	cv::Mat icData = data64*icov*sig64;
-	cv::Mat om(data64.cols, 1, CV_64FC1, cv::Scalar(1));	// needed for sum
-	cv::Mat xInv = (data64*icov).mul(data64) * om;
-	
-	cv::Mat rImg = icData.mul(abs(icData));
-	rImg /= (tmp * xInv);
+		cv::Mat block = data64.rowRange(start, end);
+		block = computeBlock(block, icov, sig64);
+		block.copyTo(rImg.rowRange(start, end));
+
+		start = end;
+	} while (end < data64.rows);
 	
 	// crop to [0 1]
 	double* rPtr = rImg.ptr<double>();
@@ -144,6 +147,20 @@ cv::Mat DkAce::hyperAce(const cv::Mat& data, const cv::Mat& signature) const {
 	rImg.convertTo(rImg, CV_32FC1);
 
 	ioutc << "ACE computed in " << dt << dkendl;
+
+	return rImg;
+}
+
+cv::Mat DkAce::computeBlock(const cv::Mat & data64, const cv::Mat& icov, const cv::Mat & sig64) const {
+	
+	// apply ACE - sorry I know it's hard to read, but this implementation is fast
+	double tmp = *(cv::Mat(sig64*icov*sig64.t()).ptr<double>());
+	cv::Mat icData = data64*icov*sig64.t();
+	cv::Mat om(data64.cols, 1, CV_64FC1, cv::Scalar(1));	// needed for sum
+	cv::Mat xInv = (data64*icov).mul(data64) * om;
+
+	cv::Mat rImg = icData.mul(abs(icData));
+	rImg /= (tmp * xInv);
 
 	return rImg;
 }
@@ -165,7 +182,7 @@ cv::Mat DkAce::getTargetSignature(const cv::Mat& data, const cv::Mat& fgdImg) co
 
 	for (int rIdx = 0; rIdx < data.rows; rIdx++) {
 
-		if (labelPtr[rIdx] > 0) {		// TODO: check with labelPtr == 255
+		if (labelPtr[rIdx] == 255) {		// TODO: check with labelPtr == 255
 
 			const unsigned char* dataPtr = data.ptr<unsigned char>(rIdx);
 			sumPos++;
@@ -177,6 +194,8 @@ cv::Mat DkAce::getTargetSignature(const cv::Mat& data, const cv::Mat& fgdImg) co
 		}
 	}
 
+	//moutc << cv::sum(fgdImg == 255)[0] / 255.0 << " foreground pixels..." << std::endl;
+	//moutc << cv::sum(fgdImg > 0)[0] / 255.0 << " pixels that are != 0" << std::endl;
 	signature /= (float)sumPos;
 
 	return signature;

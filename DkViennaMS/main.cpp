@@ -16,7 +16,7 @@ std::string helpText();
 int main(int argc, char *argv[]) {
 
 	if (argc < 3 || argc > 4) {
-		std::cout << "Wrong number of input arguments: " << argc-1 << " (2 expected)" << std::endl;
+		std::cout << "Wrong number of input arguments: " << argc-1 << " (2-3 expected)" << std::endl;
 		std::cout << helpText();
 		return 1;
 	}
@@ -58,11 +58,16 @@ int main(int argc, char *argv[]) {
 			std::string imageName(argv[3]);
 
 			DkMVModule module(folderNameW);
+
 			if (!module.load())
 				return 1;
 
 			module.compute();
-			module.saveImage(imageName);
+			
+			if (module.saveImage(imageName)) {
+				std::string in(imageName.begin(), imageName.end());
+				std::cout << "pseudo color image written to " << in << std::endl;
+			}
 		}
 		else {
 			std::cout << "error: unknown command" << std::endl;

@@ -51,7 +51,19 @@ void DkMSData::fixInput(std::vector<cv::Mat>& imgs) const {
 		if (img.channels() > 1)
 			cv::cvtColor(img, img, CV_RGB2GRAY);
 
-		cv::normalize(img, img, 255.0f, 0.0f, NORM_MINMAX);
+		// convert to 8U
+		if (img.depth() != CV_8UC1) {
+			
+			// @MegaVision:
+			// They seem to use 12-13 out of 16 bits
+			// However, the images are underexposed 
+			// so we just use the first 10 bits (to reduce
+			// the information loss)
+			img.convertTo(img, CV_8U, 255/1024.0);	
+		}
+		else {
+			cv::normalize(img, img, 255, 0.0, NORM_MINMAX);
+		}
 	}
 }
 
