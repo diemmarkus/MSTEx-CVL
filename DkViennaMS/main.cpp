@@ -6,8 +6,9 @@
  *     Company:	Vienna University of Technology
  **************************************************/
 
-#include "DkMSModule.h"
-#include "DkRgbModule.h"
+#include "DkMSModule.h"		// MSTEx (ICDAR 2015)
+#include "DkRgbModule.h"	// RGB images
+#include "DkMvModule.h"		// MegaVision
 
 // definition
 std::string helpText();
@@ -20,7 +21,8 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	try {
+	// commented for debugging - uncomment!
+	//try {
 
 		if (argc == 3) {
 			std::cout << "MSI mode is active..." << std::endl;
@@ -36,7 +38,7 @@ int main(int argc, char *argv[]) {
 			module.compute();
 			module.saveImage(imageName);
 		}
-		else if (argc == 4) {
+		else if (argc == 4 && std::string(argv[1]) == "-rgb") {
 			std::cout << "RGB mode is active..." << std::endl;
 			std::string fileName(argv[2]);
 			std::replace(fileName.begin(), fileName.end(), '\\', '/');
@@ -48,16 +50,31 @@ int main(int argc, char *argv[]) {
 			module.compute();
 			module.saveImage(imageName);
 		}
+		else if (argc == 4 && std::string(argv[1]) == "-mv") {
+			std::cout << "MegaVision mode is active..." << std::endl;
+			std::string fileName(argv[2]);
+			std::replace(fileName.begin(), fileName.end(), '\\', '/');
+			std::wstring folderNameW(fileName.begin(), fileName.end());
+			std::string imageName(argv[3]);
+
+			DkMVModule module(folderNameW);
+			if (!module.load())
+				return 1;
+
+			module.compute();
+			module.saveImage(imageName);
+		}
 		else {
+			std::cout << "error: unknown command" << std::endl;
 			std::cout << "argc = " << argc << std::endl;
 			std::cout << helpText();
 		}
-	}
-	catch(cv::Exception cvex) {
-		printf("Error in function %s, in file %s: msg %s\n", cvex.func.c_str(), cvex.file.c_str(), cvex.err.c_str());
-		std::cout << helpText() << std::endl;
-		return 2;
-	}
+	//}
+	//catch(cv::Exception cvex) {
+	//	printf("Error in function %s, in file %s: msg %s\n", cvex.func.c_str(), cvex.file.c_str(), cvex.err.c_str());
+	//	std::cout << helpText() << std::endl;
+	//	return 2;
+	//}
 
 	return 0;
 

@@ -1,23 +1,14 @@
 # If you want to use prefix paths with cmake, copy and rename this file to CMakeUser.cmake
 # Do not add this file to GIT!
 
-# set your preferred Qt Library path
+# set your preferred library paths
 IF (CMAKE_CL_64)
-	SET(CMAKE_PREFIX_PATH "D:/Qt/qt-everywhere-opensource-src-5.5.1-x64/bin/")
+	SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "D:/Qt/qt-everywhere-opensource-src-5.8.0-x64/qtbase/bin/")
+	SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "D:/coding/3rd-party/OpenCV/build2015-x64")
+
 ELSE ()
-	SET(CMAKE_PREFIX_PATH "D:/Qt/qt-everywhere-opensource-src-5.5.1-x86/bin/")
+	SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "D:/Qt/qt-everywhere-opensource-src-5.7.0-x86/qtbase/bin/")
+	SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "D:/coding/3rd-party/OpenCV/build2015-x86")
 ENDIF ()
 
-# set your preferred OpenCV Library path
-IF (CMAKE_CL_64)
-	SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "C:/VSProjects/OpenCV3/build2015-x64")
-ELSE ()
-	SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "C:/VSProjects/OpenCV3/build2015-x86")
-ENDIF ()
 
-# set your preferred HUpnp path
-IF (CMAKE_CL_64)
-	SET(NOMACS_BUILD_DIRECTORY ${NOMACS_BUILD_DIRECTORY} "C:/VSProjects/nomacs/build2015-x64")
-ELSE ()
-	SET(NOMACS_BUILD_DIRECTORY ${NOMACS_BUILD_DIRECTORY} "C:/VSProjects/nomacs/build2015-x86")
-ENDIF ()
