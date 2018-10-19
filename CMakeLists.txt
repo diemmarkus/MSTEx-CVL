@@ -20,10 +20,10 @@ include("cmake/ViennaMS.cmake")
 set(VIENNAMS_VERSION 0.0.l)
 add_definitions(-DVIENNAMS_VERSION="${VIENNAMS_VERSION}")
 
-# # load paths from the user file if exists 
-# if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CMakeUser.cmake)
-	# include(${CMAKE_CURRENT_SOURCE_DIR}/CMakeUser.cmake)
-# endif()
+# load paths from the user file if exists 
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CMakeUser.cmake)
+	include(${CMAKE_CURRENT_SOURCE_DIR}/CMakeUser.cmake)
+endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "debug" OR CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "DEBUG")
     message(STATUS "A debug build. -DDEBUG is defined")
