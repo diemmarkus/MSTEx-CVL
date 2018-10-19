@@ -9,30 +9,11 @@ https://github.com/hollaus/MSTEx-CVL-matlab
 | Markus Diem    | diem@cvl.tuwien.ac.at   |
 | Fabian Hollaus | holl@cvl.tuwien.ac.at   |
 
-## Build ViennaMS (Windows)
+## Using ViennaMS
 
-### Dependencies
-
-- [CMake] (https://cmake.org/)
-- [OpenCV](https://github.com/TUWien/opencv) (>= 3.4)
-
-### Compile ViennaMS
-
-- copy `CMakeUserPathsGit.cmake` and rename it to `CMakeUserPaths.cmake`
-- add your library paths to the `${CMAKE_PREFIX_PATH}` in `CMakeUserPaths.cmake`
-- Open CMake GUI
-- set this folder to `where is the source code`
-- choose a build folder (i.e. `build2017-x64`)
-- Hit `Configure`then `Generate`
-- Open the Project
-- Compile the Solution
-
-### Using ViennaMS
-
-You will now find a `ViennaMS.exe` in your `build/Release` folder.
-Open a command line and type:
+- You can either build ViennMS (see below) or download the latest stable [release](https://github.com/diemmarkus/MSTEx-CVL/releases). 
+- Open a command line and dir to the folder that contains `ViennaMS.exe` then type:
 ````cmd
-> cd %your_path%/MSTEx-CVL/build2017-x64/Release
 > ViennaMS.exe C:/%your_path%/MSTEx-CVL/img/z35 C:/%your_path%/MSTEx-CVL/img/z35-bw.png
 
 MSI mode is active...
@@ -51,6 +32,23 @@ F8s.png loaded into channel 7
 ![input-image](./img/z35/F4s.png)
 ![output-image](./img/z35-bw.png)
 
+## Build ViennaMS (Windows)
+
+### Dependencies
+
+- [CMake] (https://cmake.org/)
+- [OpenCV](https://github.com/TUWien/opencv) (>= 3.4)
+
+### Build Steps
+
+- copy `CMakeUserPathsGit.cmake` and rename it to `CMakeUserPaths.cmake`
+- add your library paths to the `${CMAKE_PREFIX_PATH}` in `CMakeUserPaths.cmake`
+- Open CMake GUI
+- set this folder to `where is the source code`
+- choose a build folder (i.e. `build2017-x64`)
+- Hit `Configure`then `Generate`
+- Open the Project
+- Compile the Solution
 
 ## Abstract:
 The proposed approach incorporates three methods for MultiSpectral Text Extraction. First, a rough foreground estimation is performed by thresholding a cleaned channel using the Su et al. [1] binarization. In order to compute a cleaned channel, the background channel F8 (1100nm) is removed from a visible channel F2 (500 nm). This rough foreground estimation is used in a second step to train an Adaptive Coherence Estimator (ACE) proposed by Scharf and Whorter [2]. The ACE detects a spectral subspace which enhances ink while the contrast of other elements (e.g. stains) is reduced.  Finally we combine the cleaned channel with the mean and standard deviation images and perform a GrabCut [3]. The GrabCut is guided by a mask which is based on the results of the ACE. Our source code is available at https://github.com/diemmarkus/MSTEx-CVL.git
