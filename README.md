@@ -48,6 +48,9 @@ F8s.png loaded into channel 7
 
 ````
 
+![input-image](./img/z35/F4s.png)
+![output-image](./img/z35-bw.png)
+
 
 ## Abstract:
 The proposed approach incorporates three methods for MultiSpectral Text Extraction. First, a rough foreground estimation is performed by thresholding a cleaned channel using the Su et al. [1] binarization. In order to compute a cleaned channel, the background channel F8 (1100nm) is removed from a visible channel F2 (500 nm). This rough foreground estimation is used in a second step to train an Adaptive Coherence Estimator (ACE) proposed by Scharf and Whorter [2]. The ACE detects a spectral subspace which enhances ink while the contrast of other elements (e.g. stains) is reduced.  Finally we combine the cleaned channel with the mean and standard deviation images and perform a GrabCut [3]. The GrabCut is guided by a mask which is based on the results of the ACE. Our source code is available at https://github.com/diemmarkus/MSTEx-CVL.git
