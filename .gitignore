@@ -17,3 +17,5 @@ data
 install/repository*
 /.project
 CMakeUser.cmake
+Thumbs.db
+listing_FX.txt

@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// commented for debugging - uncomment!
-	//try {
+	try {
 
 		if (argc == 3) {
 			std::cout << "MSI mode is active..." << std::endl;
@@ -74,12 +74,12 @@ int main(int argc, char *argv[]) {
 			std::cout << "argc = " << argc << std::endl;
 			std::cout << helpText();
 		}
-	//}
-	//catch(cv::Exception cvex) {
-	//	printf("Error in function %s, in file %s: msg %s\n", cvex.func.c_str(), cvex.file.c_str(), cvex.err.c_str());
-	//	std::cout << helpText() << std::endl;
-	//	return 2;
-	//}
+	}
+	catch(cv::Exception cvex) {
+		printf("Error in function %s, in file %s: msg %s\n", cvex.func.c_str(), cvex.file.c_str(), cvex.err.c_str());
+		std::cout << helpText() << std::endl;
+		return 2;
+	}
 
 	return 0;
 
